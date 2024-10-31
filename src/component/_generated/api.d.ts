@@ -12,7 +12,6 @@ import type * as email_index from "../email/index.js";
 import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
 import type * as init from "../init.js";
 import type * as lib from "../lib.js";
-import type * as polar from "../polar.js";
 
 import type {
   ApiFromModules,
@@ -32,7 +31,6 @@ declare const fullApi: ApiFromModules<{
   "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;
   init: typeof init;
   lib: typeof lib;
-  polar: typeof polar;
 }>;
 export type Mounts = {
   lib: {

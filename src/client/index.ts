@@ -1,13 +1,14 @@
 import {
   Expand,
   FunctionReference,
+  GenericActionCtx,
   GenericDataModel,
   GenericMutationCtx,
   GenericQueryCtx,
+  httpActionGeneric,
   HttpRouter,
 } from "convex/server";
 import { GenericId } from "convex/values";
-import { api } from "../component/_generated/api";
 
 import {
   type WebhookSubscriptionCreatedPayload,
@@ -22,14 +23,15 @@ import {
 import { Webhook } from "standardwebhooks";
 import { internal } from "../component/_generated/api";
 import type { Doc } from "../component/_generated/dataModel";
-import { httpAction, type ActionCtx } from "../component/_generated/server";
 import {
   sendSubscriptionErrorEmail,
   sendSubscriptionSuccessEmail,
 } from "../component/email/templates/subscriptionEmail";
 
+import { api } from "../component/_generated/api.js";
+
 const handleUpdateSubscription = async (
-  ctx: ActionCtx,
+  ctx: GenericActionCtx<GenericDataModel>,
   user: Doc<"users">,
   subscription:
     | WebhookSubscriptionCreatedPayload
@@ -53,7 +55,7 @@ const handleUpdateSubscription = async (
 };
 
 const handleSubscriptionChange = async (
-  ctx: ActionCtx,
+  ctx: GenericActionCtx<GenericDataModel>,
   event: WebhookSubscriptionCreatedPayload | WebhookSubscriptionUpdatedPayload
 ) => {
   const user = await ctx.runMutation(internal.lib.getsertUser, {
@@ -82,7 +84,7 @@ const handleSubscriptionChange = async (
 };
 
 const handlePolarSubscriptionUpdatedError = async (
-  ctx: ActionCtx,
+  ctx: GenericActionCtx<GenericDataModel>,
   event: WebhookSubscriptionCreatedPayload | WebhookSubscriptionUpdatedPayload
 ) => {
   const subscription = event.data;
@@ -114,7 +116,7 @@ export class Polar {
     http.route({
       path: "/polar/message-status",
       method: "POST",
-      handler: httpAction(async (ctx, request) => {
+      handler: httpActionGeneric(async (ctx, request) => {
         if (!request.body) {
           return new Response(null, { status: 400 });
         }
