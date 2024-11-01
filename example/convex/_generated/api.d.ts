@@ -39,23 +39,55 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   polar: {
+    init: {
+      seedProducts: FunctionReference<
+        "action",
+        "internal",
+        { polarAccessToken: string; polarOrganizationId: string },
+        any
+      >;
+    };
     lib: {
+      deleteUserSubscription: FunctionReference<
+        "mutation",
+        "internal",
+        { userId: string },
+        any
+      >;
       getOnboardingCheckoutUrl: FunctionReference<
         "action",
         "internal",
         {
           polarAccessToken: string;
           successUrl: string;
-          userEmail: string;
+          userEmail?: string;
           userId: string;
         },
         any
       >;
+      getPlanByKey: FunctionReference<
+        "query",
+        "internal",
+        { key: "free" | "pro" },
+        any
+      >;
+      getProOnboardingCheckoutUrl: FunctionReference<
+        "action",
+        "internal",
+        {
+          interval: "month" | "year";
+          polarAccessToken: string;
+          successUrl: string;
+          userId: string;
+        },
+        any
+      >;
+      getUser: FunctionReference<"query", "internal", { userId: string }, any>;
       listPlans: FunctionReference<"query", "internal", {}, any>;
       setSubscriptionPending: FunctionReference<
         "mutation",
         "internal",
-        any,
+        { userId: string },
         any
       >;
     };

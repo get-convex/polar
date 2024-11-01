@@ -22,7 +22,6 @@ import {
   WebhookSubscriptionUpdatedPayload$inboundSchema as WebhookSubscriptionUpdatedPayloadSchema,
 } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload";
 import { Webhook } from "standardwebhooks";
-import { api, internal } from "../component/_generated/api";
 import type { Doc } from "../component/_generated/dataModel";
 import {
   sendSubscriptionErrorEmail,
@@ -30,6 +29,7 @@ import {
 } from "../component/email/templates/subscriptionEmail";
 
 const handleUpdateSubscription = async (
+  component: ComponentApi,
   ctx: GenericActionCtx<GenericDataModel>,
   user: Doc<"users">,
   subscription:
@@ -37,7 +37,7 @@ const handleUpdateSubscription = async (
     | WebhookSubscriptionUpdatedPayload
 ) => {
   const subscriptionItem = subscription.data;
-  await ctx.runMutation(internal.lib.replaceSubscription, {
+  await ctx.runMutation(component.lib.replaceSubscription, {
     localUserId: user._id,
     subscriptionPolarId: subscription.data.id,
     input: {
@@ -60,13 +60,13 @@ const handleSubscriptionChange = async (
 ) => {
   const userId = event.data.metadata.userId;
   const email = event.data.user.email;
-  const user = await ctx.runQuery(component.lib.getUser, {
-    userId,
+  const user = await ctx.runQuery(component.lib.getUserByLocalId, {
+    localUserId: userId,
   });
   if (!user) {
     throw new Error("User not found");
   }
-  await handleUpdateSubscription(ctx, user, event);
+  await handleUpdateSubscription(component, ctx, user, event);
 
   const freePlan = await ctx.runQuery(component.lib.getPlanByKey, {
     key: "free",
@@ -92,8 +92,8 @@ const handlePolarSubscriptionUpdatedError = async (
   const email = event.data.user.email;
   const subscription = event.data;
 
-  const user = await ctx.runQuery(api.lib.getUser, {
-    userId,
+  const user = await ctx.runQuery(component.lib.getUserByLocalId, {
+    localUserId: userId,
   });
   if (!user) throw new Error("User not found");
 
@@ -112,16 +112,35 @@ const handlePolarSubscriptionUpdatedError = async (
 };
 
 export class Polar {
-  constructor(public component: UseApi<typeof api>) {}
+  public readonly httpPath: string;
+
+  constructor(
+    public component: ComponentApi,
+    options: {
+      httpPath?: string;
+    } = {}
+  ) {
+    this.httpPath = options.httpPath ?? "/polar/events";
+  }
 
   async getUserSubscription(ctx: RunQueryCtx, userId: string) {
     const user = await ctx.runQuery(this.component.lib.getUser, { userId });
-    return user?.subscription;
+    return {
+      subscriptionIsPending: user?.subscriptionIsPending,
+      subscription: user?.subscription,
+    };
   }
 
   async deleteUserSubscription(ctx: RunMutationCtx, userId: string) {
     return ctx.runMutation(this.component.lib.deleteUserSubscription, {
       userId,
+    });
+  }
+
+  async seedProducts(ctx: RunActionCtx) {
+    return ctx.runAction(this.component.init.seedProducts, {
+      polarAccessToken: process.env.POLAR_ACCESS_TOKEN!,
+      polarOrganizationId: process.env.POLAR_ORGANIZATION_ID!,
     });
   }
 
@@ -141,18 +160,35 @@ export class Polar {
       successUrl,
       userId,
       userEmail,
+      polarAccessToken: process.env.POLAR_ACCESS_TOKEN!,
     });
+  }
+
+  async getProOnboardingCheckoutUrl(
+    ctx: RunActionCtx,
+    args: {
+      interval: "month" | "year";
+      polarAccessToken: string;
+      successUrl: string;
+      userId: string;
+    }
+  ) {
+    return ctx.runAction(this.component.lib.getProOnboardingCheckoutUrl, args);
   }
 
   async setSubscriptionPending(ctx: RunMutationCtx, userId: string) {
     return ctx.runMutation(this.component.lib.setSubscriptionPending, {
-      localUserId: userId,
+      userId,
     });
+  }
+
+  async listPlans(ctx: RunQueryCtx) {
+    return ctx.runQuery(this.component.lib.listPlans);
   }
 
   registerRoutes(http: HttpRouter) {
     http.route({
-      path: "/polar/message-status",
+      path: this.httpPath,
       method: "POST",
       handler: httpActionGeneric(async (ctx, request) => {
         if (!request.body) {
@@ -166,8 +202,10 @@ export class Polar {
           Object.fromEntries(request.headers.entries())
         ) as
           | WebhookSubscriptionCreatedPayload$Outbound
-          | WebhookSubscriptionUpdatedPayload$Outbound;
+          | WebhookSubscriptionUpdatedPayload$Outbound
+          | { type: string };
 
+        console.log("event", event);
         try {
           switch (event.type) {
             /**
@@ -212,6 +250,7 @@ export class Polar {
             }
           }
         }
+        return new Response("OK", { status: 200 });
       }),
     });
   }

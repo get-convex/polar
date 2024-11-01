@@ -1,15 +1,15 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import {
   action,
-  internalAction,
   internalMutation,
   mutation,
   query,
+  QueryCtx,
 } from "./_generated/server";
 import schema from "./schema";
-import { Id } from "./_generated/dataModel";
 
 const createCheckout = async ({
   polarAccessToken,
@@ -75,7 +75,31 @@ export const createUser = internalMutation({
   },
 });
 
-export const getUser = query({
+const getUser = async (ctx: QueryCtx, localUserId: Id<"users">) => {
+  const user = await ctx.db.get(localUserId);
+  if (!user) {
+    return null;
+  }
+  const { subscriptionPendingId, ...subscriptionUser } = user;
+  const subscription =
+    (await ctx.db
+      .query("subscriptions")
+      .withIndex("localUserId", (q) => q.eq("localUserId", user._id))
+      .unique()) || undefined;
+  const plan = subscription ? await ctx.db.get(subscription.planId) : undefined;
+  return {
+    ...subscriptionUser,
+    subscriptionIsPending: !!subscriptionPendingId,
+    ...(subscription && {
+      subscription: {
+        ...subscription,
+        plan,
+      },
+    }),
+  };
+};
+
+const getUserQuery = query({
   args: {
     userId: v.string(),
   },
@@ -87,26 +111,17 @@ export const getUser = query({
     if (!user) {
       return null;
     }
-    const subscription =
-      (await ctx.db
-        .query("subscriptions")
-        .withIndex("localUserId", (q) => q.eq("localUserId", user._id))
-        .unique()) || undefined;
-    const plan = subscription
-      ? await ctx.db.get(subscription.planId)
-      : undefined;
-    if (!plan) {
-      throw new Error("Plan not found");
-    }
-    return {
-      ...user,
-      subscription: {
-        ...subscription,
-        isPending: !!user.subscriptionPendingId,
-        plan,
-      },
-    };
+    return getUser(ctx, user._id);
   },
+});
+
+export { getUserQuery as getUser };
+
+export const getUserByLocalId = query({
+  args: {
+    localUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => getUser(ctx, args.localUserId),
 });
 
 export const deleteUserSubscription = mutation({
@@ -136,6 +151,7 @@ export const getOnboardingCheckoutUrl = action({
     successUrl: v.string(),
     userId: v.string(),
     userEmail: v.optional(v.string()),
+    polarAccessToken: v.string(),
   },
   handler: async (ctx, args) => {
     const user =
@@ -153,7 +169,7 @@ export const getOnboardingCheckoutUrl = action({
       throw new Error("Price not found");
     }
     const checkout = await createCheckout({
-      polarAccessToken: process.env.POLAR_ACCESS_TOKEN!,
+      polarAccessToken: args.polarAccessToken,
       customerEmail: args.userEmail,
       productPriceId: price.polarId,
       successUrl: args.successUrl,
@@ -163,13 +179,12 @@ export const getOnboardingCheckoutUrl = action({
   },
 });
 
-export const getProOnboardingCheckoutUrl = internalAction({
+export const getProOnboardingCheckoutUrl = action({
   args: {
     interval: schema.tables.subscriptions.validator.fields.interval,
     polarAccessToken: v.string(),
     successUrl: v.string(),
-    userId: v.id("users"),
-    userEmail: v.string(),
+    userId: v.string(),
   },
   handler: async (ctx, args) => {
     const product = await ctx.runQuery(api.lib.getPlanByKey, {
@@ -185,12 +200,15 @@ export const getProOnboardingCheckoutUrl = internalAction({
     const user = await ctx.runQuery(api.lib.getUser, {
       userId: args.userId,
     });
+    if (!user) {
+      throw new Error("User not found");
+    }
     const checkout = await createCheckout({
       polarAccessToken: args.polarAccessToken,
       productPriceId: price.polarId,
       successUrl: args.successUrl,
-      polarSubscriptionId: user?.subscription?.plan.polarProductId,
-      localUserId: args.userId,
+      polarSubscriptionId: user?.subscription?.polarId,
+      localUserId: user?._id,
     });
     return checkout.url;
   },
@@ -204,7 +222,7 @@ export const listPlans = query({
   },
 });
 
-export const replaceSubscription = internalMutation({
+export const replaceSubscription = mutation({
   args: {
     localUserId: v.id("users"),
     subscriptionPolarId: v.string(),
@@ -261,12 +279,12 @@ export const replaceSubscription = internalMutation({
 
 export const setSubscriptionPending = mutation({
   args: {
-    localUserId: v.id("users"),
+    userId: v.string(),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("userId", (q) => q.eq("userId", args.localUserId))
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
       .unique();
     if (!user) {
       throw new Error("User not found");
@@ -274,9 +292,9 @@ export const setSubscriptionPending = mutation({
     const scheduledFunctionId = await ctx.scheduler.runAfter(
       1000 * 120,
       internal.lib.unsetSubscriptionPending,
-      { localUserId: args.localUserId }
+      { localUserId: user._id }
     );
-    await ctx.db.patch(args.localUserId, {
+    await ctx.db.patch(user._id, {
       subscriptionPendingId: scheduledFunctionId,
     });
   },

@@ -1,8 +1,9 @@
 import { Polar } from "@polar-sh/sdk";
 import { asyncMap } from "convex-helpers";
 import { internal } from "./_generated/api";
-import { internalAction, internalMutation } from "./_generated/server";
+import { action, internalMutation } from "./_generated/server";
 import schema, { CURRENCIES, INTERVALS, PlanKey, PLANS } from "./schema";
+import { v } from "convex/values";
 
 const seedProducts = [
   {
@@ -45,18 +46,21 @@ export const insertSeedPlan = internalMutation({
   },
 });
 
-const seedProductsAction = internalAction({
-  args: {},
-  handler: async (ctx) => {
+const seedProductsAction = action({
+  args: {
+    polarAccessToken: v.string(),
+    polarOrganizationId: v.string(),
+  },
+  handler: async (ctx, args) => {
     /**
      * Stripe Products.
      */
     const polar = new Polar({
       server: "sandbox",
-      accessToken: process.env.POLAR_ACCESS_TOKEN,
+      accessToken: args.polarAccessToken,
     });
     const products = await polar.products.list({
-      organizationId: process.env.POLAR_ORGANIZATION_ID,
+      organizationId: args.polarOrganizationId,
       isArchived: false,
     });
     if (products?.result?.items?.length) {
@@ -67,7 +71,7 @@ const seedProductsAction = internalAction({
     await asyncMap(seedProducts, async (product) => {
       // Create Polar product.
       const polarProduct = await polar.products.create({
-        organizationId: process.env.POLAR_ORGANIZATION_ID,
+        organizationId: args.polarOrganizationId,
         name: product.name,
         description: product.description,
         prices: Object.entries(product.prices).map(([interval, amount]) => ({

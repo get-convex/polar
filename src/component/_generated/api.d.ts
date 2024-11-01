@@ -33,6 +33,14 @@ declare const fullApi: ApiFromModules<{
   lib: typeof lib;
 }>;
 export type Mounts = {
+  init: {
+    seedProducts: FunctionReference<
+      "action",
+      "public",
+      { polarAccessToken: string; polarOrganizationId: string },
+      any
+    >;
+  };
   lib: {
     deleteUserSubscription: FunctionReference<
       "mutation",
@@ -43,7 +51,12 @@ export type Mounts = {
     getOnboardingCheckoutUrl: FunctionReference<
       "action",
       "public",
-      { successUrl: string; userEmail?: string; userId: string },
+      {
+        polarAccessToken: string;
+        successUrl: string;
+        userEmail?: string;
+        userId: string;
+      },
       any
     >;
     getPlanByKey: FunctionReference<
@@ -52,12 +65,48 @@ export type Mounts = {
       { key: "free" | "pro" },
       any
     >;
+    getProOnboardingCheckoutUrl: FunctionReference<
+      "action",
+      "public",
+      {
+        interval: "month" | "year";
+        polarAccessToken: string;
+        successUrl: string;
+        userId: string;
+      },
+      any
+    >;
     getUser: FunctionReference<"query", "public", { userId: string }, any>;
+    getUserByLocalId: FunctionReference<
+      "query",
+      "public",
+      { localUserId: string },
+      any
+    >;
     listPlans: FunctionReference<"query", "public", {}, any>;
+    replaceSubscription: FunctionReference<
+      "mutation",
+      "public",
+      {
+        input: {
+          cancelAtPeriodEnd?: boolean;
+          currency: "usd" | "eur";
+          currentPeriodEnd?: number;
+          currentPeriodStart: number;
+          interval: "month" | "year";
+          priceId: string;
+          productId: string;
+          status: string;
+        };
+        localUserId: string;
+        subscriptionPolarId: string;
+      },
+      any
+    >;
     setSubscriptionPending: FunctionReference<
       "mutation",
       "public",
-      { localUserId: string },
+      { userId: string },
       any
     >;
   };
