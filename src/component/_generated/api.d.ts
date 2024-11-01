@@ -34,19 +34,32 @@ declare const fullApi: ApiFromModules<{
 }>;
 export type Mounts = {
   lib: {
+    deleteUserSubscription: FunctionReference<
+      "mutation",
+      "public",
+      { userId: string },
+      any
+    >;
     getOnboardingCheckoutUrl: FunctionReference<
       "action",
       "public",
-      {
-        polarAccessToken: string;
-        successUrl: string;
-        userEmail: string;
-        userId: string;
-      },
+      { successUrl: string; userEmail?: string; userId: string },
       any
     >;
+    getPlanByKey: FunctionReference<
+      "query",
+      "public",
+      { key: "free" | "pro" },
+      any
+    >;
+    getUser: FunctionReference<"query", "public", { userId: string }, any>;
     listPlans: FunctionReference<"query", "public", {}, any>;
-    setSubscriptionPending: FunctionReference<"mutation", "public", any, any>;
+    setSubscriptionPending: FunctionReference<
+      "mutation",
+      "public",
+      { localUserId: string },
+      any
+    >;
   };
 };
 // For now fullApiWithMounts is only fullApi which provides

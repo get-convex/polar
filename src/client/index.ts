@@ -9,6 +9,7 @@ import {
   HttpRouter,
 } from "convex/server";
 import { GenericId } from "convex/values";
+import { Mounts } from "../component/_generated/api";
 
 import {
   type WebhookSubscriptionCreatedPayload,
@@ -21,14 +22,12 @@ import {
   WebhookSubscriptionUpdatedPayload$inboundSchema as WebhookSubscriptionUpdatedPayloadSchema,
 } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload";
 import { Webhook } from "standardwebhooks";
-import { internal } from "../component/_generated/api";
+import { api, internal } from "../component/_generated/api";
 import type { Doc } from "../component/_generated/dataModel";
 import {
   sendSubscriptionErrorEmail,
   sendSubscriptionSuccessEmail,
 } from "../component/email/templates/subscriptionEmail";
-
-import { api } from "../component/_generated/api.js";
 
 const handleUpdateSubscription = async (
   ctx: GenericActionCtx<GenericDataModel>,
@@ -39,7 +38,7 @@ const handleUpdateSubscription = async (
 ) => {
   const subscriptionItem = subscription.data;
   await ctx.runMutation(internal.lib.replaceSubscription, {
-    userId: user._id,
+    localUserId: user._id,
     subscriptionPolarId: subscription.data.id,
     input: {
       productId: subscriptionItem.productId,
@@ -55,27 +54,28 @@ const handleUpdateSubscription = async (
 };
 
 const handleSubscriptionChange = async (
+  component: ComponentApi,
   ctx: GenericActionCtx<GenericDataModel>,
   event: WebhookSubscriptionCreatedPayload | WebhookSubscriptionUpdatedPayload
 ) => {
-  const user = await ctx.runMutation(internal.lib.getsertUser, {
-    polarId: event.data.userId,
-    email: event.data.user.email,
+  const userId = event.data.metadata.userId;
+  const email = event.data.user.email;
+  const user = await ctx.runQuery(component.lib.getUser, {
+    userId,
   });
-  if (!user?.email) {
+  if (!user) {
     throw new Error("User not found");
   }
-
   await handleUpdateSubscription(ctx, user, event);
 
-  const freePlan = await ctx.runQuery(internal.lib.getPlanByKey, {
+  const freePlan = await ctx.runQuery(component.lib.getPlanByKey, {
     key: "free",
   });
 
   // Only send email for paid plans
   if (event.data.productId !== freePlan?.polarProductId) {
     await sendSubscriptionSuccessEmail({
-      email: user.email,
+      email,
       subscriptionId: event.data.id,
     });
   }
@@ -84,25 +84,27 @@ const handleSubscriptionChange = async (
 };
 
 const handlePolarSubscriptionUpdatedError = async (
+  component: ComponentApi,
   ctx: GenericActionCtx<GenericDataModel>,
   event: WebhookSubscriptionCreatedPayload | WebhookSubscriptionUpdatedPayload
 ) => {
+  const userId = event.data.metadata.userId;
+  const email = event.data.user.email;
   const subscription = event.data;
 
-  const user = await ctx.runMutation(internal.lib.getsertUser, {
-    polarId: subscription.userId,
-    email: subscription.user.email,
+  const user = await ctx.runQuery(api.lib.getUser, {
+    userId,
   });
-  if (!user?.email) throw new Error("User not found");
+  if (!user) throw new Error("User not found");
 
-  const freePlan = await ctx.runQuery(internal.lib.getPlanByKey, {
+  const freePlan = await ctx.runQuery(component.lib.getPlanByKey, {
     key: "free",
   });
 
   // Only send email for paid plans
   if (event.data.productId !== freePlan?.polarProductId) {
     await sendSubscriptionErrorEmail({
-      email: user.email,
+      email,
       subscriptionId: subscription.id,
     });
   }
@@ -111,6 +113,42 @@ const handlePolarSubscriptionUpdatedError = async (
 
 export class Polar {
   constructor(public component: UseApi<typeof api>) {}
+
+  async getUserSubscription(ctx: RunQueryCtx, userId: string) {
+    const user = await ctx.runQuery(this.component.lib.getUser, { userId });
+    return user?.subscription;
+  }
+
+  async deleteUserSubscription(ctx: RunMutationCtx, userId: string) {
+    return ctx.runMutation(this.component.lib.deleteUserSubscription, {
+      userId,
+    });
+  }
+
+  async getOnboardingCheckoutUrl(
+    ctx: RunActionCtx,
+    {
+      successUrl,
+      userId,
+      userEmail,
+    }: {
+      successUrl: string;
+      userId: string;
+      userEmail?: string;
+    }
+  ) {
+    return ctx.runAction(this.component.lib.getOnboardingCheckoutUrl, {
+      successUrl,
+      userId,
+      userEmail,
+    });
+  }
+
+  async setSubscriptionPending(ctx: RunMutationCtx, userId: string) {
+    return ctx.runMutation(this.component.lib.setSubscriptionPending, {
+      localUserId: userId,
+    });
+  }
 
   registerRoutes(http: HttpRouter) {
     http.route({
@@ -137,6 +175,7 @@ export class Polar {
              */
             case "subscription.created": {
               return handleSubscriptionChange(
+                this.component,
                 ctx,
                 WebhookSubscriptionCreatedPayloadSchema.parse(event)
               );
@@ -148,6 +187,7 @@ export class Polar {
              */
             case "subscription.updated": {
               return handleSubscriptionChange(
+                this.component,
                 ctx,
                 WebhookSubscriptionUpdatedPayloadSchema.parse(event)
               );
@@ -157,6 +197,7 @@ export class Polar {
           switch (event.type) {
             case "subscription.created": {
               return handlePolarSubscriptionUpdatedError(
+                this.component,
                 ctx,
                 WebhookSubscriptionCreatedPayloadSchema.parse(event)
               );
@@ -164,6 +205,7 @@ export class Polar {
 
             case "subscription.updated": {
               return handlePolarSubscriptionUpdatedError(
+                this.component,
                 ctx,
                 WebhookSubscriptionUpdatedPayloadSchema.parse(event)
               );
@@ -215,6 +257,9 @@ type RunQueryCtx = {
 type RunMutationCtx = {
   runMutation: GenericMutationCtx<GenericDataModel>["runMutation"];
 };
+type RunActionCtx = {
+  runAction: GenericActionCtx<GenericDataModel>["runAction"];
+};
 
 export type OpaqueIds<T> =
   T extends GenericId<infer _T>
@@ -242,3 +287,5 @@ export type UseApi<API> = Expand<{
       >
     : UseApi<API[mod]>;
 }>;
+
+export type ComponentApi = UseApi<Mounts>;

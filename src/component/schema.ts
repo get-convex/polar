@@ -41,10 +41,9 @@ export type PlanKey = Infer<typeof planKeyValidator>;
 
 export default defineSchema({
   users: defineTable({
-    userId: v.optional(v.string()),
-    polarId: v.string(),
-    email: v.string(),
-    polarSubscriptionPendingId: v.optional(v.id("_scheduled_functions")),
+    userId: v.string(),
+    polarId: v.optional(v.string()),
+    subscriptionPendingId: v.optional(v.id("_scheduled_functions")),
   })
     .index("userId", ["userId"])
     .index("polarId", ["polarId"]),
@@ -70,8 +69,8 @@ export default defineSchema({
     currentPeriodStart: v.optional(v.number()),
     currentPeriodEnd: v.optional(v.number()),
     cancelAtPeriodEnd: v.optional(v.boolean()),
-    userId: v.id("users"),
+    localUserId: v.id("users"),
   })
-    .index("userId", ["userId"])
+    .index("localUserId", ["localUserId"])
     .index("polarId", ["polarId"]),
 });
