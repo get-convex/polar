@@ -1,4 +1,3 @@
-import { internalMutation, query, mutation } from "./_generated/server";
 import { components } from "./_generated/api";
 import { Polar } from "@convex-dev/polar";
 

@@ -48,6 +48,12 @@ export declare const components: {
       >;
     };
     lib: {
+      createUser: FunctionReference<
+        "mutation",
+        "internal",
+        { userId: string },
+        any
+      >;
       deleteUserSubscription: FunctionReference<
         "mutation",
         "internal",
@@ -82,8 +88,55 @@ export declare const components: {
         },
         any
       >;
-      getUser: FunctionReference<"query", "internal", { userId: string }, any>;
+      getUser: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        null | {
+          polarId?: string;
+          subscription?: {
+            cancelAtPeriodEnd?: boolean;
+            currency: "usd" | "eur";
+            currentPeriodEnd?: number;
+            currentPeriodStart?: number;
+            interval: "month" | "year";
+            localUserId: string;
+            planId: string;
+            polarId: string;
+            polarPriceId: string;
+            status: string;
+          };
+          subscriptionIsPending?: boolean;
+          subscriptionPendingId?: string;
+          userId: string;
+        }
+      >;
+      getUserByLocalId: FunctionReference<
+        "query",
+        "internal",
+        { localUserId: string },
+        any
+      >;
       listPlans: FunctionReference<"query", "internal", {}, any>;
+      replaceSubscription: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          input: {
+            cancelAtPeriodEnd?: boolean;
+            currency: "usd" | "eur";
+            currentPeriodEnd?: number;
+            currentPeriodStart: number;
+            interval: "month" | "year";
+            priceId: string;
+            productId: string;
+            status: string;
+          };
+          localUserId: string;
+          subscriptionPolarId: string;
+        },
+        any
+      >;
       setSubscriptionPending: FunctionReference<
         "mutation",
         "internal",

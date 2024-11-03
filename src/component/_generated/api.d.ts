@@ -12,6 +12,8 @@ import type * as email_index from "../email/index.js";
 import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
 import type * as init from "../init.js";
 import type * as lib from "../lib.js";
+import type * as util from "../util.js";
+import type * as webhook from "../webhook.js";
 
 import type {
   ApiFromModules,
@@ -31,6 +33,8 @@ declare const fullApi: ApiFromModules<{
   "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;
   init: typeof init;
   lib: typeof lib;
+  util: typeof util;
+  webhook: typeof webhook;
 }>;
 export type Mounts = {
   init: {
@@ -42,6 +46,12 @@ export type Mounts = {
     >;
   };
   lib: {
+    createUser: FunctionReference<
+      "mutation",
+      "public",
+      { userId: string },
+      any
+    >;
     deleteUserSubscription: FunctionReference<
       "mutation",
       "public",
@@ -76,7 +86,29 @@ export type Mounts = {
       },
       any
     >;
-    getUser: FunctionReference<"query", "public", { userId: string }, any>;
+    getUser: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      null | {
+        polarId?: string;
+        subscription?: {
+          cancelAtPeriodEnd?: boolean;
+          currency: "usd" | "eur";
+          currentPeriodEnd?: number;
+          currentPeriodStart?: number;
+          interval: "month" | "year";
+          localUserId: string;
+          planId: string;
+          polarId: string;
+          polarPriceId: string;
+          status: string;
+        };
+        subscriptionIsPending?: boolean;
+        subscriptionPendingId?: string;
+        userId: string;
+      }
+    >;
     getUserByLocalId: FunctionReference<
       "query",
       "public",

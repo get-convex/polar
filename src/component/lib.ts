@@ -59,7 +59,7 @@ export const getPlanByKey = query({
   },
 });
 
-export const createUser = internalMutation({
+export const createUser = mutation({
   args: {
     userId: v.string(),
   },
@@ -103,6 +103,14 @@ const getUserQuery = query({
   args: {
     userId: v.string(),
   },
+  returns: v.union(
+    v.null(),
+    v.object({
+      ...schema.tables.users.validator.fields,
+      subscriptionIsPending: v.optional(v.boolean()),
+      subscription: v.optional(schema.tables.subscriptions.validator),
+    })
+  ),
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
@@ -158,7 +166,7 @@ export const getOnboardingCheckoutUrl = action({
       (await ctx.runQuery(api.lib.getUser, {
         userId: args.userId,
       })) ||
-      (await ctx.runMutation(internal.lib.createUser, {
+      (await ctx.runMutation(api.lib.createUser, {
         userId: args.userId,
       }));
     const product = await ctx.runQuery(api.lib.getPlanByKey, {
