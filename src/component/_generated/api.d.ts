@@ -8,12 +8,8 @@
  * @module
  */
 
-import type * as email_index from "../email/index.js";
-import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
-import type * as init from "../init.js";
 import type * as lib from "../lib.js";
 import type * as util from "../util.js";
-import type * as webhook from "../webhook.js";
 
 import type {
   ApiFromModules,
@@ -29,116 +25,611 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "email/index": typeof email_index;
-  "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;
-  init: typeof init;
   lib: typeof lib;
   util: typeof util;
-  webhook: typeof webhook;
 }>;
 export type Mounts = {
-  init: {
-    seedProducts: FunctionReference<
+  lib: {
+    getBenefit: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        createdAt: string;
+        deletable: boolean;
+        description: string;
+        id: string;
+        modifiedAt: string | null;
+        organizationId: string;
+        properties: Record<string, any>;
+        selectable: boolean;
+        type?: string;
+      } | null
+    >;
+    getBenefitGrant: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        benefitId: string;
+        createdAt: string;
+        grantedAt: string | null;
+        id: string;
+        isGranted: boolean;
+        isRevoked: boolean;
+        modifiedAt: string | null;
+        orderId: string | null;
+        properties: Record<string, any>;
+        revokedAt: string | null;
+        subscriptionId: string | null;
+        userId: string;
+      } | null
+    >;
+    getOrder: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        amount: number;
+        billingReason: string;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        productId: string | null;
+        productPriceId: string;
+        subscriptionId: string | null;
+        taxAmount: number;
+        userId: string | null;
+      } | null
+    >;
+    getProduct: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        createdAt: string;
+        description: string | null;
+        id: string;
+        isArchived: boolean;
+        isRecurring: boolean;
+        medias: Array<{
+          checksumEtag: string | null;
+          checksumSha256Base64: string | null;
+          checksumSha256Hex: string | null;
+          createdAt: string;
+          id: string;
+          isUploaded: boolean;
+          lastModifiedAt: string | null;
+          mimeType: string;
+          name: string;
+          organizationId: string;
+          path: string;
+          publicUrl: string;
+          service?: string;
+          size: number;
+          sizeReadable: string;
+          storageVersion: string | null;
+          version: string | null;
+        }>;
+        modifiedAt: string | null;
+        name: string;
+        organizationId: string;
+        prices: Array<{
+          amountType?: string;
+          createdAt: string;
+          id: string;
+          isArchived: boolean;
+          modifiedAt: string | null;
+          priceAmount?: number;
+          priceCurrency?: string;
+          productId: string;
+          recurringInterval?: string;
+          type?: string;
+        }>;
+      } | null
+    >;
+    getSubscription: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        productId: string;
+        recurringInterval: string;
+        startedAt: string | null;
+        status: string;
+        userId: string;
+      } | null
+    >;
+    insertBenefit: FunctionReference<
+      "mutation",
+      "public",
+      {
+        benefit: {
+          createdAt: string;
+          deletable: boolean;
+          description: string;
+          id: string;
+          modifiedAt: string | null;
+          organizationId: string;
+          properties: Record<string, any>;
+          selectable: boolean;
+          type?: string;
+        };
+      },
+      any
+    >;
+    insertBenefitGrant: FunctionReference<
+      "mutation",
+      "public",
+      {
+        benefitGrant: {
+          benefitId: string;
+          createdAt: string;
+          grantedAt: string | null;
+          id: string;
+          isGranted: boolean;
+          isRevoked: boolean;
+          modifiedAt: string | null;
+          orderId: string | null;
+          properties: Record<string, any>;
+          revokedAt: string | null;
+          subscriptionId: string | null;
+          userId: string;
+        };
+      },
+      any
+    >;
+    insertOrder: FunctionReference<
+      "mutation",
+      "public",
+      {
+        order: {
+          amount: number;
+          billingReason: string;
+          checkoutId: string | null;
+          createdAt: string;
+          currency: string;
+          id: string;
+          metadata: Record<string, any>;
+          modifiedAt: string | null;
+          productId: string | null;
+          productPriceId: string;
+          subscriptionId: string | null;
+          taxAmount: number;
+          userId: string | null;
+        };
+      },
+      any
+    >;
+    insertProduct: FunctionReference<
+      "mutation",
+      "public",
+      {
+        product: {
+          createdAt: string;
+          description: string | null;
+          id: string;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
+          modifiedAt: string | null;
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: string;
+            type?: string;
+          }>;
+        };
+      },
+      any
+    >;
+    insertSubscription: FunctionReference<
+      "mutation",
+      "public",
+      {
+        subscription: {
+          amount: number | null;
+          cancelAtPeriodEnd: boolean;
+          checkoutId: string | null;
+          createdAt: string;
+          currency: string | null;
+          currentPeriodEnd: string | null;
+          currentPeriodStart: string;
+          endedAt: string | null;
+          id: string;
+          metadata: Record<string, any>;
+          modifiedAt: string | null;
+          priceId: string;
+          productId: string;
+          recurringInterval: string;
+          startedAt: string | null;
+          status: string;
+          userId: string;
+        };
+      },
+      any
+    >;
+    listBenefits: FunctionReference<
+      "query",
+      "public",
+      any,
+      Array<{
+        createdAt: string;
+        deletable: boolean;
+        description: string;
+        id: string;
+        modifiedAt: string | null;
+        organizationId: string;
+        properties: Record<string, any>;
+        selectable: boolean;
+        type?: string;
+      }>
+    >;
+    listPlans: FunctionReference<
+      "query",
+      "public",
+      { includeArchived: boolean },
+      Array<{
+        _creationTime: number;
+        _id: string;
+        createdAt: string;
+        description: string | null;
+        id: string;
+        isArchived: boolean;
+        isRecurring: boolean;
+        medias: Array<{
+          checksumEtag: string | null;
+          checksumSha256Base64: string | null;
+          checksumSha256Hex: string | null;
+          createdAt: string;
+          id: string;
+          isUploaded: boolean;
+          lastModifiedAt: string | null;
+          mimeType: string;
+          name: string;
+          organizationId: string;
+          path: string;
+          publicUrl: string;
+          service?: string;
+          size: number;
+          sizeReadable: string;
+          storageVersion: string | null;
+          version: string | null;
+        }>;
+        modifiedAt: string | null;
+        name: string;
+        organizationId: string;
+        prices: Array<{
+          amountType?: string;
+          createdAt: string;
+          id: string;
+          isArchived: boolean;
+          modifiedAt: string | null;
+          priceAmount?: number;
+          priceCurrency?: string;
+          productId: string;
+          recurringInterval?: string;
+          type?: string;
+        }>;
+      }>
+    >;
+    listUserBenefitGrants: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      Array<{
+        benefitId: string;
+        createdAt: string;
+        grantedAt: string | null;
+        id: string;
+        isGranted: boolean;
+        isRevoked: boolean;
+        modifiedAt: string | null;
+        orderId: string | null;
+        properties: Record<string, any>;
+        revokedAt: string | null;
+        subscriptionId: string | null;
+        userId: string;
+      }>
+    >;
+    listUserSubscriptions: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      Array<{
+        _creationTime: number;
+        _id: string;
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        product?: {
+          _creationTime: number;
+          _id: string;
+          createdAt: string;
+          description: string | null;
+          id: string;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
+          modifiedAt: string | null;
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: string;
+            type?: string;
+          }>;
+        };
+        productId: string;
+        recurringInterval: string;
+        startedAt: string | null;
+        status: string;
+        userId: string;
+      }>
+    >;
+    pullProducts: FunctionReference<
       "action",
       "public",
       { polarAccessToken: string; polarOrganizationId: string },
       any
     >;
-  };
-  lib: {
-    createUser: FunctionReference<
+    updateBenefit: FunctionReference<
       "mutation",
       "public",
-      { userId: string },
-      any
-    >;
-    deleteUserSubscription: FunctionReference<
-      "mutation",
-      "public",
-      { userId: string },
-      any
-    >;
-    getOnboardingCheckoutUrl: FunctionReference<
-      "action",
-      "public",
       {
-        polarAccessToken: string;
-        successUrl: string;
-        userEmail?: string;
-        userId: string;
-      },
-      any
-    >;
-    getPlanByKey: FunctionReference<
-      "query",
-      "public",
-      { key: "free" | "pro" },
-      any
-    >;
-    getProOnboardingCheckoutUrl: FunctionReference<
-      "action",
-      "public",
-      {
-        interval: "month" | "year";
-        polarAccessToken: string;
-        successUrl: string;
-        userId: string;
-      },
-      any
-    >;
-    getUser: FunctionReference<
-      "query",
-      "public",
-      { userId: string },
-      null | {
-        polarId?: string;
-        subscription?: {
-          cancelAtPeriodEnd?: boolean;
-          currency: "usd" | "eur";
-          currentPeriodEnd?: number;
-          currentPeriodStart?: number;
-          interval: "month" | "year";
-          localUserId: string;
-          planId: string;
-          polarId: string;
-          polarPriceId: string;
-          status: string;
+        benefit: {
+          createdAt: string;
+          deletable: boolean;
+          description: string;
+          id: string;
+          modifiedAt: string | null;
+          organizationId: string;
+          properties: Record<string, any>;
+          selectable: boolean;
+          type?: string;
         };
-        subscriptionIsPending?: boolean;
-        subscriptionPendingId?: string;
-        userId: string;
-      }
-    >;
-    getUserByLocalId: FunctionReference<
-      "query",
-      "public",
-      { localUserId: string },
+      },
       any
     >;
-    listPlans: FunctionReference<"query", "public", {}, any>;
-    replaceSubscription: FunctionReference<
+    updateBenefitGrant: FunctionReference<
       "mutation",
       "public",
       {
-        input: {
-          cancelAtPeriodEnd?: boolean;
-          currency: "usd" | "eur";
-          currentPeriodEnd?: number;
-          currentPeriodStart: number;
-          interval: "month" | "year";
+        benefitGrant: {
+          benefitId: string;
+          createdAt: string;
+          grantedAt: string | null;
+          id: string;
+          isGranted: boolean;
+          isRevoked: boolean;
+          modifiedAt: string | null;
+          orderId: string | null;
+          properties: Record<string, any>;
+          revokedAt: string | null;
+          subscriptionId: string | null;
+          userId: string;
+        };
+      },
+      any
+    >;
+    updateOrder: FunctionReference<
+      "mutation",
+      "public",
+      {
+        order: {
+          amount: number;
+          billingReason: string;
+          checkoutId: string | null;
+          createdAt: string;
+          currency: string;
+          id: string;
+          metadata: Record<string, any>;
+          modifiedAt: string | null;
+          productId: string | null;
+          productPriceId: string;
+          subscriptionId: string | null;
+          taxAmount: number;
+          userId: string | null;
+        };
+      },
+      any
+    >;
+    updateProduct: FunctionReference<
+      "mutation",
+      "public",
+      {
+        product: {
+          createdAt: string;
+          description: string | null;
+          id: string;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
+          modifiedAt: string | null;
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: string;
+            type?: string;
+          }>;
+        };
+      },
+      any
+    >;
+    updateProducts: FunctionReference<
+      "mutation",
+      "public",
+      {
+        polarAccessToken: string;
+        products: Array<{
+          createdAt: string;
+          description: string | null;
+          id: string;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
+          modifiedAt: string | null;
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: string;
+            type?: string;
+          }>;
+        }>;
+      },
+      any
+    >;
+    updateSubscription: FunctionReference<
+      "mutation",
+      "public",
+      {
+        subscription: {
+          amount: number | null;
+          cancelAtPeriodEnd: boolean;
+          checkoutId: string | null;
+          createdAt: string;
+          currency: string | null;
+          currentPeriodEnd: string | null;
+          currentPeriodStart: string;
+          endedAt: string | null;
+          id: string;
+          metadata: Record<string, any>;
+          modifiedAt: string | null;
           priceId: string;
           productId: string;
+          recurringInterval: string;
+          startedAt: string | null;
           status: string;
+          userId: string;
         };
-        localUserId: string;
-        subscriptionPolarId: string;
       },
-      any
-    >;
-    setSubscriptionPending: FunctionReference<
-      "mutation",
-      "public",
-      { userId: string },
       any
     >;
   };
