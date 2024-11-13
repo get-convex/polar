@@ -56,19 +56,6 @@ export type EventHandler = FunctionReference<
 export class Polar {
   constructor(public component: ComponentApi) {}
 
-  async listUserSubscriptions(ctx: RunQueryCtx, userId: string) {
-    return ctx.runQuery(this.component.lib.listUserSubscriptions, {
-      userId,
-    });
-  }
-
-  async listProducts(
-    ctx: RunQueryCtx,
-    { includeArchived = false }: { includeArchived?: boolean } = {}
-  ) {
-    return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
-  }
-
   registerRoutes(
     http: HttpRouter,
     {

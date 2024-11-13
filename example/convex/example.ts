@@ -5,23 +5,25 @@ import { query, internalMutation } from "./_generated/server";
 import { components } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
-const polarComponent = new Polar(components.polar);
+const polar = new Polar(components.polar);
 
 export const listProducts = query({
   args: {},
   handler: async (ctx) => {
-    return polarComponent.listProducts(ctx, {
+    return ctx.runQuery(polar.component.lib.listProducts, {
       includeArchived: false,
     });
   },
 });
 
-export const getUserSubscriptions = query({
+export const listUserSubscriptions = query({
   args: {
     userId: v.string(),
   },
   handler: async (ctx, args) => {
-    return polarComponent.listUserSubscriptions(ctx, args.userId);
+    return ctx.runQuery(polar.component.lib.listUserSubscriptions, {
+      userId: args.userId,
+    });
   },
 });
 
