@@ -68,7 +68,7 @@
   },
   "peerDependencies": {
     "convex": "^1.17.0",
-    "@polar-sh/sdk": "^0.13.5"
+    "@polar-sh/sdk": "~0.16.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

@@ -1,13 +1,17 @@
 import {
-  Benefit$inboundSchema,
-  BenefitGrant$inboundSchema,
-  Product$inboundSchema,
-  Subscription$inboundSchema,
+  WebhookBenefitCreatedPayload$inboundSchema,
+  WebhookBenefitGrantCreatedPayload$inboundSchema,
+  WebhookBenefitGrantUpdatedPayload$inboundSchema,
+  WebhookBenefitUpdatedPayload$inboundSchema,
+  WebhookOrderCreatedPayload$inboundSchema,
+  WebhookProductCreatedPayload$inboundSchema,
+  WebhookProductUpdatedPayload$inboundSchema,
+  WebhookSubscriptionCreatedPayload$inboundSchema,
+  WebhookSubscriptionUpdatedPayload$inboundSchema,
   type WebhookBenefitCreatedPayload$Outbound,
   type WebhookBenefitGrantCreatedPayload$Outbound,
   type WebhookBenefitGrantUpdatedPayload$Outbound,
   type WebhookBenefitUpdatedPayload$Outbound,
-  WebhookOrderCreatedPayload$inboundSchema,
   type WebhookOrderCreatedPayload$Outbound,
   type WebhookProductCreatedPayload$Outbound,
   type WebhookProductUpdatedPayload$Outbound,
@@ -50,19 +54,7 @@ export type EventHandler = FunctionReference<
 >;
 
 export class Polar {
-  public readonly httpPath: string;
-  public eventCallback?: EventHandler;
-
-  constructor(
-    public component: ComponentApi,
-    options: {
-      httpPath?: string;
-      eventCallback?: EventHandler;
-    } = {}
-  ) {
-    this.eventCallback = options?.eventCallback;
-    this.httpPath = options.httpPath ?? "/polar/events";
-  }
+  constructor(public component: ComponentApi) {}
 
   async listUserSubscriptions(ctx: RunQueryCtx, userId: string) {
     return ctx.runQuery(this.component.lib.listUserSubscriptions, {
@@ -77,9 +69,15 @@ export class Polar {
     return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
   }
 
-  registerRoutes(http: HttpRouter) {
+  registerRoutes(
+    http: HttpRouter,
+    {
+      path = "/polar/events",
+      eventCallback,
+    }: { eventCallback?: EventHandler; path?: string } = {}
+  ) {
     http.route({
-      path: this.httpPath,
+      path,
       method: "POST",
       handler: httpActionGeneric(async (ctx, request) => {
         if (!request.body) {
@@ -104,47 +102,58 @@ export class Polar {
           }
           case "subscription.created":
           case "subscription.updated": {
+            const schema =
+              payload.type === "subscription.created"
+                ? WebhookSubscriptionCreatedPayload$inboundSchema
+                : WebhookSubscriptionUpdatedPayload$inboundSchema;
             await ctx.runMutation(this.component.lib.updateSubscription, {
               subscription: convertToDatabaseSubscription(
-                Subscription$inboundSchema.parse(payload.data)
+                schema.parse(payload).data
               ),
             });
             break;
           }
           case "product.created":
           case "product.updated": {
+            const schema =
+              payload.type === "product.created"
+                ? WebhookProductCreatedPayload$inboundSchema
+                : WebhookProductUpdatedPayload$inboundSchema;
             await ctx.runMutation(this.component.lib.updateProduct, {
-              product: convertToDatabaseProduct(
-                Product$inboundSchema.parse(payload.data)
-              ),
+              product: convertToDatabaseProduct(schema.parse(payload).data),
             });
             break;
           }
           case "benefit.created":
           case "benefit.updated": {
+            const schema =
+              payload.type === "benefit.created"
+                ? WebhookBenefitCreatedPayload$inboundSchema
+                : WebhookBenefitUpdatedPayload$inboundSchema;
             await ctx.runMutation(this.component.lib.updateBenefit, {
-              benefit: convertToDatabaseBenefit(
-                Benefit$inboundSchema.parse(payload.data)
-              ),
+              benefit: convertToDatabaseBenefit(schema.parse(payload).data),
             });
             break;
           }
           case "benefit_grant.created":
           case "benefit_grant.updated": {
+            const schema =
+              payload.type === "benefit_grant.created"
+                ? WebhookBenefitGrantCreatedPayload$inboundSchema
+                : WebhookBenefitGrantUpdatedPayload$inboundSchema;
             await ctx.runMutation(this.component.lib.updateBenefitGrant, {
               benefitGrant: convertToDatabaseBenefitGrant(
-                BenefitGrant$inboundSchema.parse(payload.data)
+                schema.parse(payload).data
               ),
             });
             break;
           }
         }
 
-        if (this.eventCallback) {
-          await ctx.runMutation(
-            await createFunctionHandle(this.eventCallback),
-            { payload }
-          );
+        if (eventCallback) {
+          await ctx.runMutation(await createFunctionHandle(eventCallback), {
+            payload,
+          });
         }
         return new Response("OK", { status: 200 });
       }),

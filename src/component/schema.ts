@@ -12,12 +12,6 @@ export const intervalValidator = v.union(
 
 export default defineSchema(
   {
-    users: defineTable({
-      id: v.string(),
-      userId: v.string(),
-    })
-      .index("id", ["id"])
-      .index("userId", ["userId"]),
     benefits: defineTable({
       id: v.string(),
       createdAt: v.string(),
