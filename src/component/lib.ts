@@ -1,10 +1,7 @@
-import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
-import { action, mutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
-import { convertToDatabaseProduct } from "./util";
 
 export const getSubscription = query({
   args: {
@@ -85,7 +82,7 @@ export const listUserSubscriptions = query({
   },
 });
 
-export const listPlans = query({
+export const listProducts = query({
   args: {
     includeArchived: v.boolean(),
   },
@@ -107,15 +104,6 @@ export const listPlans = query({
   },
 });
 
-export const insertOrder = mutation({
-  args: {
-    order: schema.tables.orders.validator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("orders", args.order);
-  },
-});
-
 export const updateOrder = mutation({
   args: {
     order: schema.tables.orders.validator,
@@ -127,16 +115,9 @@ export const updateOrder = mutation({
       .unique();
     if (existingOrder) {
       await ctx.db.patch(existingOrder._id, args.order);
+      return;
     }
-  },
-});
-
-export const insertSubscription = mutation({
-  args: {
-    subscription: schema.tables.subscriptions.validator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("subscriptions", args.subscription);
+    await ctx.db.insert("orders", args.order);
   },
 });
 
@@ -151,16 +132,9 @@ export const updateSubscription = mutation({
       .unique();
     if (existingSubscription) {
       await ctx.db.patch(existingSubscription._id, args.subscription);
+      return;
     }
-  },
-});
-
-export const insertProduct = mutation({
-  args: {
-    product: schema.tables.products.validator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("products", args.product);
+    await ctx.db.insert("subscriptions", args.subscription);
   },
 });
 
@@ -175,65 +149,9 @@ export const updateProduct = mutation({
       .unique();
     if (existingProduct) {
       await ctx.db.patch(existingProduct._id, args.product);
+      return;
     }
-  },
-});
-
-export const updateProducts = mutation({
-  args: {
-    polarAccessToken: v.string(),
-    products: v.array(schema.tables.products.validator),
-  },
-  handler: async (ctx, args) => {
-    await asyncMap(args.products, async (product) => {
-      console.log(product);
-      const existingProduct = await ctx.db
-        .query("products")
-        .withIndex("id", (q) => q.eq("id", product.id))
-        .unique();
-      if (existingProduct) {
-        await ctx.db.patch(existingProduct._id, product);
-        return;
-      }
-      await ctx.db.insert("products", product);
-    });
-  },
-});
-
-export const pullProducts = action({
-  args: {
-    polarAccessToken: v.string(),
-    polarOrganizationId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const polar = new Polar({
-      server: "sandbox",
-      accessToken: args.polarAccessToken,
-    });
-    let page = 1;
-    let maxPage;
-    do {
-      const products = await polar.products.list({
-        page,
-        limit: 10,
-        organizationId: args.polarOrganizationId,
-      });
-      page = page + 1;
-      maxPage = products.result.pagination.maxPage;
-      await ctx.runMutation(api.lib.updateProducts, {
-        polarAccessToken: args.polarAccessToken,
-        products: products.result.items.map(convertToDatabaseProduct),
-      });
-    } while (maxPage >= page);
-  },
-});
-
-export const insertBenefit = mutation({
-  args: {
-    benefit: schema.tables.benefits.validator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("benefits", args.benefit);
+    await ctx.db.insert("products", args.product);
   },
 });
 
@@ -248,7 +166,9 @@ export const updateBenefit = mutation({
       .unique();
     if (existingBenefit) {
       await ctx.db.patch(existingBenefit._id, args.benefit);
+      return;
     }
+    await ctx.db.insert("benefits", args.benefit);
   },
 });
 
@@ -272,15 +192,6 @@ export const listBenefits = query({
   },
 });
 
-export const insertBenefitGrant = mutation({
-  args: {
-    benefitGrant: schema.tables.benefitGrants.validator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("benefitGrants", args.benefitGrant);
-  },
-});
-
 export const updateBenefitGrant = mutation({
   args: {
     benefitGrant: schema.tables.benefitGrants.validator,
@@ -292,7 +203,9 @@ export const updateBenefitGrant = mutation({
       .unique();
     if (existingBenefitGrant) {
       await ctx.db.patch(existingBenefitGrant._id, args.benefitGrant);
+      return;
     }
+    await ctx.db.insert("benefitGrants", args.benefitGrant);
   },
 });
 

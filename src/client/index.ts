@@ -28,7 +28,6 @@ import {
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
   type ComponentApi,
-  type RunActionCtx,
   type RunQueryCtx,
 } from "../component/util";
 
@@ -75,14 +74,7 @@ export class Polar {
     ctx: RunQueryCtx,
     { includeArchived = false }: { includeArchived?: boolean } = {}
   ) {
-    return ctx.runQuery(this.component.lib.listPlans, { includeArchived });
-  }
-
-  async pullProducts(ctx: RunActionCtx) {
-    return ctx.runAction(this.component.lib.pullProducts, {
-      polarAccessToken: process.env.POLAR_ACCESS_TOKEN!,
-      polarOrganizationId: process.env.POLAR_ORGANIZATION_ID!,
-    });
+    return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
   }
 
   registerRoutes(http: HttpRouter) {
@@ -103,21 +95,14 @@ export class Polar {
 
         switch (payload.type) {
           case "order.created": {
-            await ctx.runMutation(this.component.lib.insertOrder, {
+            await ctx.runMutation(this.component.lib.updateOrder, {
               order: convertToDatabaseOrder(
                 WebhookOrderCreatedPayload$inboundSchema.parse(payload).data
               ),
             });
             break;
           }
-          case "subscription.created": {
-            await ctx.runMutation(this.component.lib.insertSubscription, {
-              subscription: convertToDatabaseSubscription(
-                Subscription$inboundSchema.parse(payload.data)
-              ),
-            });
-            break;
-          }
+          case "subscription.created":
           case "subscription.updated": {
             await ctx.runMutation(this.component.lib.updateSubscription, {
               subscription: convertToDatabaseSubscription(
@@ -126,14 +111,7 @@ export class Polar {
             });
             break;
           }
-          case "product.created": {
-            await ctx.runMutation(this.component.lib.insertProduct, {
-              product: convertToDatabaseProduct(
-                Product$inboundSchema.parse(payload.data)
-              ),
-            });
-            break;
-          }
+          case "product.created":
           case "product.updated": {
             await ctx.runMutation(this.component.lib.updateProduct, {
               product: convertToDatabaseProduct(
@@ -142,14 +120,7 @@ export class Polar {
             });
             break;
           }
-          case "benefit.created": {
-            await ctx.runMutation(this.component.lib.insertBenefit, {
-              benefit: convertToDatabaseBenefit(
-                Benefit$inboundSchema.parse(payload.data)
-              ),
-            });
-            break;
-          }
+          case "benefit.created":
           case "benefit.updated": {
             await ctx.runMutation(this.component.lib.updateBenefit, {
               benefit: convertToDatabaseBenefit(
@@ -158,14 +129,7 @@ export class Polar {
             });
             break;
           }
-          case "benefit_grant.created": {
-            await ctx.runMutation(this.component.lib.insertBenefitGrant, {
-              benefitGrant: convertToDatabaseBenefitGrant(
-                BenefitGrant$inboundSchema.parse(payload.data)
-              ),
-            });
-            break;
-          }
+          case "benefit_grant.created":
           case "benefit_grant.updated": {
             await ctx.runMutation(this.component.lib.updateBenefitGrant, {
               benefitGrant: convertToDatabaseBenefitGrant(
