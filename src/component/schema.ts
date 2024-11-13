@@ -1,15 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const INTERVALS = {
-  MONTH: "month",
-  YEAR: "year",
-} as const;
-export const intervalValidator = v.union(
-  v.literal(INTERVALS.MONTH),
-  v.literal(INTERVALS.YEAR)
-);
-
 export default defineSchema(
   {
     benefits: defineTable({
