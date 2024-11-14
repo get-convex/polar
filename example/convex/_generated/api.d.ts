@@ -180,7 +180,7 @@ export declare const components: {
       listBenefits: FunctionReference<
         "query",
         "internal",
-        any,
+        {},
         Array<{
           _creationTime: number;
           _id: string;
@@ -283,7 +283,7 @@ export declare const components: {
           metadata: Record<string, any>;
           modifiedAt: string | null;
           priceId: string;
-          product?: {
+          product: {
             _creationTime: number;
             _id: string;
             createdAt: string;
@@ -325,7 +325,7 @@ export declare const components: {
               recurringInterval?: string;
               type?: string;
             }>;
-          };
+          } | null;
           productId: string;
           recurringInterval: string;
           startedAt: string | null;

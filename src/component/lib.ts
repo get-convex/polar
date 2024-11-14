@@ -72,12 +72,13 @@ export const listUserSubscriptions = query({
       ...schema.tables.subscriptions.validator.fields,
       _id: v.id("subscriptions"),
       _creationTime: v.number(),
-      product: v.optional(
+      product: v.union(
         v.object({
           ...schema.tables.products.validator.fields,
           _id: v.id("products"),
           _creationTime: v.number(),
-        })
+        }),
+        v.null()
       ),
     })
   ),
@@ -92,15 +93,12 @@ export const listUserSubscriptions = query({
           ? (await ctx.db
               .query("products")
               .withIndex("id", (q) => q.eq("id", subscription.productId))
-              .unique()) || undefined
-          : undefined;
-        if (product) {
-          return {
-            ...subscription,
-            product,
-          };
-        }
-        return subscription;
+              .unique()) || null
+          : null;
+        return {
+          ...subscription,
+          product,
+        };
       }
     );
   },
@@ -217,6 +215,7 @@ export const getBenefit = query({
 });
 
 export const listBenefits = query({
+  args: {},
   returns: v.array(
     v.object({
       ...schema.tables.benefits.validator.fields,
@@ -224,7 +223,7 @@ export const listBenefits = query({
       _creationTime: v.number(),
     })
   ),
-  handler: async (ctx, _args) => {
+  handler: async (ctx) => {
     return ctx.db.query("benefits").collect();
   },
 });

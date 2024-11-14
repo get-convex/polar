@@ -61,6 +61,30 @@ export class Polar {
   ) {
     return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
   }
+  listUserSubscriptions(ctx: RunQueryCtx, { userId }: { userId: string }) {
+    return ctx.runQuery(this.component.lib.listUserSubscriptions, { userId });
+  }
+  getSubscription(ctx: RunQueryCtx, { id }: { id: string }) {
+    return ctx.runQuery(this.component.lib.getSubscription, { id });
+  }
+  getOrder(ctx: RunQueryCtx, { id }: { id: string }) {
+    return ctx.runQuery(this.component.lib.getOrder, { id });
+  }
+  getBenefit(ctx: RunQueryCtx, { id }: { id: string }) {
+    return ctx.runQuery(this.component.lib.getBenefit, { id });
+  }
+  getBenefitGrant(ctx: RunQueryCtx, { id }: { id: string }) {
+    return ctx.runQuery(this.component.lib.getBenefitGrant, { id });
+  }
+  getProduct(ctx: RunQueryCtx, { id }: { id: string }) {
+    return ctx.runQuery(this.component.lib.getProduct, { id });
+  }
+  listBenefits(ctx: RunQueryCtx) {
+    return ctx.runQuery(this.component.lib.listBenefits);
+  }
+  listUserBenefitGrants(ctx: RunQueryCtx, { userId }: { userId: string }) {
+    return ctx.runQuery(this.component.lib.listUserBenefitGrants, { userId });
+  }
   registerRoutes(
     http: HttpRouter,
     {

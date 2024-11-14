@@ -214,9 +214,7 @@ export const listUserBenefitGrants = query({
     userId: v.string(),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.listUserBenefitGrants, {
-      userId: args.userId,
-    });
+    return polar.listUserBenefitGrants(ctx, { userId: args.userId });
   },
 });
 ```
@@ -229,7 +227,7 @@ export const getSubscription = query({
     id: v.id("subscriptions"),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.getSubscription, { id: args.id });
+    return polar.getSubscription(ctx, { id: args.id });
   },
 });
 
@@ -238,7 +236,7 @@ export const getOrder = query({
     id: v.id("orders"),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.getOrder, { id: args.id });
+    return polar.getOrder(ctx, { id: args.id });
   },
 });
 
@@ -247,7 +245,7 @@ export const getProduct = query({
     id: v.id("products"),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.getProduct, { id: args.id });
+    return polar.getProduct(ctx, { id: args.id });
   },
 });
 
@@ -256,7 +254,7 @@ export const getBenefit = query({
     id: v.id("benefits"),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.getBenefit, { id: args.id });
+    return polar.getBenefit(ctx, { id: args.id });
   },
 });
 
@@ -265,7 +263,7 @@ export const getBenefitGrant = query({
     id: v.id("benefitGrants"),
   },
   handler: async (ctx, args) => {
-    return ctx.runQuery(polar.component.lib.getBenefitGrant, { id: args.id });
+    return polar.getBenefitGrant(ctx, { id: args.id });
   },
 });
 ```

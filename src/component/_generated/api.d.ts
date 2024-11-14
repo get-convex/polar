@@ -168,7 +168,7 @@ export type Mounts = {
     listBenefits: FunctionReference<
       "query",
       "public",
-      any,
+      {},
       Array<{
         _creationTime: number;
         _id: string;
@@ -271,7 +271,7 @@ export type Mounts = {
         metadata: Record<string, any>;
         modifiedAt: string | null;
         priceId: string;
-        product?: {
+        product: {
           _creationTime: number;
           _id: string;
           createdAt: string;
@@ -313,7 +313,7 @@ export type Mounts = {
             recurringInterval?: string;
             type?: string;
           }>;
-        };
+        } | null;
         productId: string;
         recurringInterval: string;
         startedAt: string | null;
