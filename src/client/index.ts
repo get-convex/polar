@@ -1,22 +1,22 @@
 import {
-  WebhookBenefitCreatedPayload$inboundSchema,
-  WebhookBenefitGrantCreatedPayload$inboundSchema,
-  WebhookBenefitGrantUpdatedPayload$inboundSchema,
-  WebhookBenefitUpdatedPayload$inboundSchema,
-  WebhookOrderCreatedPayload$inboundSchema,
-  WebhookProductCreatedPayload$inboundSchema,
-  WebhookProductUpdatedPayload$inboundSchema,
-  WebhookSubscriptionCreatedPayload$inboundSchema,
-  WebhookSubscriptionUpdatedPayload$inboundSchema,
   type WebhookBenefitCreatedPayload$Outbound,
+  WebhookBenefitCreatedPayload$inboundSchema,
   type WebhookBenefitGrantCreatedPayload$Outbound,
+  WebhookBenefitGrantCreatedPayload$inboundSchema,
   type WebhookBenefitGrantUpdatedPayload$Outbound,
+  WebhookBenefitGrantUpdatedPayload$inboundSchema,
   type WebhookBenefitUpdatedPayload$Outbound,
+  WebhookBenefitUpdatedPayload$inboundSchema,
   type WebhookOrderCreatedPayload$Outbound,
+  WebhookOrderCreatedPayload$inboundSchema,
   type WebhookProductCreatedPayload$Outbound,
+  WebhookProductCreatedPayload$inboundSchema,
   type WebhookProductUpdatedPayload$Outbound,
+  WebhookProductUpdatedPayload$inboundSchema,
   type WebhookSubscriptionCreatedPayload$Outbound,
+  WebhookSubscriptionCreatedPayload$inboundSchema,
   type WebhookSubscriptionUpdatedPayload$Outbound,
+  WebhookSubscriptionUpdatedPayload$inboundSchema,
 } from "@polar-sh/sdk/models/components";
 import {
   type FunctionReference,
@@ -26,13 +26,13 @@ import {
 } from "convex/server";
 import { Webhook } from "standardwebhooks";
 import {
+  type ComponentApi,
   convertToDatabaseBenefit,
   convertToDatabaseBenefitGrant,
   convertToDatabaseOrder,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
-  type ComponentApi,
-  type RunQueryCtx,
+  RunQueryCtx,
 } from "../component/util";
 
 export type EventType = (
@@ -55,7 +55,12 @@ export type EventHandler = FunctionReference<
 
 export class Polar {
   constructor(public component: ComponentApi) {}
-
+  listProducts(
+    ctx: RunQueryCtx,
+    { includeArchived }: { includeArchived: boolean }
+  ) {
+    return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
+  }
   registerRoutes(
     http: HttpRouter,
     {

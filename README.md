@@ -194,6 +194,18 @@ export const listUserSubscriptions = query({
 
 ```
 
+To list all products, use `listProducts`:
+
+```ts
+export const listProducts = query({
+  args: {},
+  handler: async (ctx) => {
+    return polar.listProducts(ctx, { includeArchived: false });
+  },
+});
+```
+
+
 List user benefit grants:
 
 ```ts
@@ -204,19 +216,6 @@ export const listUserBenefitGrants = query({
   handler: async (ctx, args) => {
     return ctx.runQuery(polar.component.lib.listUserBenefitGrants, {
       userId: args.userId,
-    });
-  },
-});
-```
-
-To list all products, use `listProducts`:
-
-```ts
-export const listProducts = query({
-  args: {},
-  handler: async (ctx) => {
-    return ctx.runQuery(polar.component.lib.listProducts, {
-      includeArchived: false,
     });
   },
 });

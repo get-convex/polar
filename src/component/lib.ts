@@ -7,7 +7,14 @@ export const getSubscription = query({
   args: {
     id: v.id("subscriptions"),
   },
-  returns: v.union(schema.tables.subscriptions.validator, v.null()),
+  returns: v.union(
+    v.object({
+      ...schema.tables.subscriptions.validator.fields,
+      _id: v.id("subscriptions"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("subscriptions")
@@ -20,7 +27,14 @@ export const getOrder = query({
   args: {
     id: v.id("orders"),
   },
-  returns: v.union(schema.tables.orders.validator, v.null()),
+  returns: v.union(
+    v.object({
+      ...schema.tables.orders.validator.fields,
+      _id: v.id("orders"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("orders")
@@ -33,7 +47,14 @@ export const getProduct = query({
   args: {
     id: v.id("products"),
   },
-  returns: v.union(schema.tables.products.validator, v.null()),
+  returns: v.union(
+    v.object({
+      ...schema.tables.products.validator.fields,
+      _id: v.id("products"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("products")
@@ -73,10 +94,13 @@ export const listUserSubscriptions = query({
               .withIndex("id", (q) => q.eq("id", subscription.productId))
               .unique()) || undefined
           : undefined;
-        return {
-          ...subscription,
-          product,
-        };
+        if (product) {
+          return {
+            ...subscription,
+            product,
+          };
+        }
+        return subscription;
       }
     );
   },
@@ -176,7 +200,14 @@ export const getBenefit = query({
   args: {
     id: v.id("benefits"),
   },
-  returns: v.union(schema.tables.benefits.validator, v.null()),
+  returns: v.union(
+    v.object({
+      ...schema.tables.benefits.validator.fields,
+      _id: v.id("benefits"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("benefits")
@@ -186,7 +217,13 @@ export const getBenefit = query({
 });
 
 export const listBenefits = query({
-  returns: v.array(schema.tables.benefits.validator),
+  returns: v.array(
+    v.object({
+      ...schema.tables.benefits.validator.fields,
+      _id: v.id("benefits"),
+      _creationTime: v.number(),
+    })
+  ),
   handler: async (ctx, _args) => {
     return ctx.db.query("benefits").collect();
   },
@@ -213,7 +250,14 @@ export const getBenefitGrant = query({
   args: {
     id: v.id("benefitGrants"),
   },
-  returns: v.union(schema.tables.benefitGrants.validator, v.null()),
+  returns: v.union(
+    v.object({
+      ...schema.tables.benefitGrants.validator.fields,
+      _id: v.id("benefitGrants"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("benefitGrants")
@@ -226,7 +270,13 @@ export const listUserBenefitGrants = query({
   args: {
     userId: v.string(),
   },
-  returns: v.array(schema.tables.benefitGrants.validator),
+  returns: v.array(
+    v.object({
+      ...schema.tables.benefitGrants.validator.fields,
+      _id: v.id("benefitGrants"),
+      _creationTime: v.number(),
+    })
+  ),
   handler: async (ctx, args) => {
     return ctx.db
       .query("benefitGrants")

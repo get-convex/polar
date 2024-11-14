@@ -35,6 +35,8 @@ export type Mounts = {
       "public",
       { id: string },
       {
+        _creationTime: number;
+        _id: string;
         createdAt: string;
         deletable: boolean;
         description: string;
@@ -51,6 +53,8 @@ export type Mounts = {
       "public",
       { id: string },
       {
+        _creationTime: number;
+        _id: string;
         benefitId: string;
         createdAt: string;
         grantedAt: string | null;
@@ -70,6 +74,8 @@ export type Mounts = {
       "public",
       { id: string },
       {
+        _creationTime: number;
+        _id: string;
         amount: number;
         billingReason: string;
         checkoutId: string | null;
@@ -90,6 +96,8 @@ export type Mounts = {
       "public",
       { id: string },
       {
+        _creationTime: number;
+        _id: string;
         createdAt: string;
         description: string | null;
         id: string;
@@ -136,6 +144,8 @@ export type Mounts = {
       "public",
       { id: string },
       {
+        _creationTime: number;
+        _id: string;
         amount: number | null;
         cancelAtPeriodEnd: boolean;
         checkoutId: string | null;
@@ -160,6 +170,8 @@ export type Mounts = {
       "public",
       any,
       Array<{
+        _creationTime: number;
+        _id: string;
         createdAt: string;
         deletable: boolean;
         description: string;
@@ -224,6 +236,8 @@ export type Mounts = {
       "public",
       { userId: string },
       Array<{
+        _creationTime: number;
+        _id: string;
         benefitId: string;
         createdAt: string;
         grantedAt: string | null;

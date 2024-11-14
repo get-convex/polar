@@ -1,19 +1,19 @@
-import { GenericQueryCtx, WithoutSystemFields } from "convex/server";
-import { Expand, FunctionReference } from "convex/server";
+import type { GenericQueryCtx, WithoutSystemFields } from "convex/server";
+import type { Expand, FunctionReference } from "convex/server";
 
-import { GenericMutationCtx } from "convex/server";
-import { GenericDataModel } from "convex/server";
-import { GenericActionCtx } from "convex/server";
-import { GenericId } from "convex/values";
-import { Mounts } from "./_generated/api";
-import {
+import type {
   Benefit,
   BenefitGrant,
   Order,
   Product,
   Subscription,
 } from "@polar-sh/sdk/models/components";
-import { Doc } from "./_generated/dataModel";
+import type { GenericMutationCtx } from "convex/server";
+import type { GenericDataModel } from "convex/server";
+import type { GenericActionCtx } from "convex/server";
+import type { GenericId } from "convex/values";
+import type { api } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
 
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
@@ -25,14 +25,13 @@ export type RunActionCtx = {
   runAction: GenericActionCtx<GenericDataModel>["runAction"];
 };
 
-export type OpaqueIds<T> =
-  T extends GenericId<infer _T>
-    ? string
-    : T extends (infer U)[]
-      ? OpaqueIds<U>[]
-      : T extends object
-        ? { [K in keyof T]: OpaqueIds<T[K]> }
-        : T;
+export type OpaqueIds<T> = T extends GenericId<infer _T>
+  ? string
+  : T extends (infer U)[]
+    ? OpaqueIds<U>[]
+    : T extends object
+      ? { [K in keyof T]: OpaqueIds<T[K]> }
+      : T;
 
 export type UseApi<API> = Expand<{
   [mod in keyof API]: API[mod] extends FunctionReference<
@@ -52,10 +51,10 @@ export type UseApi<API> = Expand<{
     : UseApi<API[mod]>;
 }>;
 
-export type ComponentApi = UseApi<Mounts>;
+export type ComponentApi = UseApi<typeof api>;
 
 export const convertToDatabaseOrder = (
-  order: Order
+  order: Order,
 ): WithoutSystemFields<Doc<"orders">> => {
   return {
     id: order.id,
@@ -75,7 +74,7 @@ export const convertToDatabaseOrder = (
 };
 
 export const convertToDatabaseSubscription = (
-  subscription: Subscription
+  subscription: Subscription,
 ): WithoutSystemFields<Doc<"subscriptions">> => {
   return {
     id: subscription.id,
@@ -99,7 +98,7 @@ export const convertToDatabaseSubscription = (
 };
 
 export const convertToDatabaseProduct = (
-  product: Product
+  product: Product,
 ): WithoutSystemFields<Doc<"products">> => {
   return {
     id: product.id,
@@ -154,7 +153,7 @@ export const convertToDatabaseProduct = (
 };
 
 export const convertToDatabaseBenefit = (
-  benefit: Benefit
+  benefit: Benefit,
 ): WithoutSystemFields<Doc<"benefits">> => {
   return {
     id: benefit.id,
@@ -170,7 +169,7 @@ export const convertToDatabaseBenefit = (
 };
 
 export const convertToDatabaseBenefitGrant = (
-  benefitGrant: BenefitGrant
+  benefitGrant: BenefitGrant,
 ): WithoutSystemFields<Doc<"benefitGrants">> => {
   return {
     id: benefitGrant.id,
