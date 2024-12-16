@@ -2,8 +2,6 @@
 
 [![npm version](https://badge.fury.io/js/@convex-dev%2Fpolar.svg)](https://badge.fury.io/js/@convex-dev%2Fpolar)
 
-**Note: Convex Components are currently in beta.**
-
 <!-- START: Include on https://convex.dev/components -->
 
 Keep your Polar subscriptions and other data synced to your Convex database.
