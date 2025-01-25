@@ -42,66 +42,80 @@ export declare const internal: FilterApi<
 export declare const components: {
   polar: {
     lib: {
-      getBenefit: FunctionReference<
-        "query",
+      createProduct: FunctionReference<
+        "mutation",
         "internal",
-        { id: string },
         {
-          _creationTime: number;
-          _id: string;
-          createdAt: string;
-          deletable: boolean;
-          description: string;
-          id: string;
-          modifiedAt: string | null;
-          organizationId: string;
-          properties: Record<string, any>;
-          selectable: boolean;
-          type?: string;
-        } | null
+          product: {
+            createdAt: string;
+            description: string | null;
+            id: string;
+            isArchived: boolean;
+            isRecurring: boolean;
+            medias: Array<{
+              checksumEtag: string | null;
+              checksumSha256Base64: string | null;
+              checksumSha256Hex: string | null;
+              createdAt: string;
+              id: string;
+              isUploaded: boolean;
+              lastModifiedAt: string | null;
+              mimeType: string;
+              name: string;
+              organizationId: string;
+              path: string;
+              publicUrl: string;
+              service?: string;
+              size: number;
+              sizeReadable: string;
+              storageVersion: string | null;
+              version: string | null;
+            }>;
+            modifiedAt: string | null;
+            name: string;
+            organizationId: string;
+            prices: Array<{
+              amountType?: string;
+              createdAt: string;
+              id: string;
+              isArchived: boolean;
+              modifiedAt: string | null;
+              priceAmount?: number;
+              priceCurrency?: string;
+              productId: string;
+              recurringInterval?: string;
+              type?: string;
+            }>;
+          };
+        },
+        any
       >;
-      getBenefitGrant: FunctionReference<
-        "query",
+      createSubscription: FunctionReference<
+        "mutation",
         "internal",
-        { id: string },
         {
-          _creationTime: number;
-          _id: string;
-          benefitId: string;
-          createdAt: string;
-          grantedAt: string | null;
-          id: string;
-          isGranted: boolean;
-          isRevoked: boolean;
-          modifiedAt: string | null;
-          orderId: string | null;
-          properties: Record<string, any>;
-          revokedAt: string | null;
-          subscriptionId: string | null;
-          userId: string;
-        } | null
-      >;
-      getOrder: FunctionReference<
-        "query",
-        "internal",
-        { id: string },
-        {
-          _creationTime: number;
-          _id: string;
-          amount: number;
-          billingReason: string;
-          checkoutId: string | null;
-          createdAt: string;
-          currency: string;
-          id: string;
-          metadata: Record<string, any>;
-          modifiedAt: string | null;
-          productId: string | null;
-          productPriceId: string;
-          subscriptionId: string | null;
-          taxAmount: number;
-          userId: string | null;
-        } | null
+          callback?: string;
+          subscription: {
+            amount: number | null;
+            cancelAtPeriodEnd: boolean;
+            checkoutId: string | null;
+            createdAt: string;
+            currency: string | null;
+            currentPeriodEnd: string | null;
+            currentPeriodStart: string;
+            endedAt: string | null;
+            id: string;
+            metadata: Record<string, any>;
+            modifiedAt: string | null;
+            priceId: string;
+            productId: string;
+            recurringInterval: string;
+            startedAt: string | null;
+            status: string;
+            userId: string;
+          };
+        },
+        any
       >;
       getProduct: FunctionReference<
         "query",
@@ -177,24 +191,6 @@ export declare const components: {
           userId: string;
         } | null
       >;
-      listBenefits: FunctionReference<
-        "query",
-        "internal",
-        {},
-        Array<{
-          _creationTime: number;
-          _id: string;
-          createdAt: string;
-          deletable: boolean;
-          description: string;
-          id: string;
-          modifiedAt: string | null;
-          organizationId: string;
-          properties: Record<string, any>;
-          selectable: boolean;
-          type?: string;
-        }>
-      >;
       listProducts: FunctionReference<
         "query",
         "internal",
@@ -241,27 +237,6 @@ export declare const components: {
             recurringInterval?: string;
             type?: string;
           }>;
-        }>
-      >;
-      listUserBenefitGrants: FunctionReference<
-        "query",
-        "internal",
-        { userId: string },
-        Array<{
-          _creationTime: number;
-          _id: string;
-          benefitId: string;
-          createdAt: string;
-          grantedAt: string | null;
-          id: string;
-          isGranted: boolean;
-          isRevoked: boolean;
-          modifiedAt: string | null;
-          orderId: string | null;
-          properties: Record<string, any>;
-          revokedAt: string | null;
-          subscriptionId: string | null;
-          userId: string;
         }>
       >;
       listUserSubscriptions: FunctionReference<
@@ -332,67 +307,6 @@ export declare const components: {
           status: string;
           userId: string;
         }>
-      >;
-      updateBenefit: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          benefit: {
-            createdAt: string;
-            deletable: boolean;
-            description: string;
-            id: string;
-            modifiedAt: string | null;
-            organizationId: string;
-            properties: Record<string, any>;
-            selectable: boolean;
-            type?: string;
-          };
-        },
-        any
-      >;
-      updateBenefitGrant: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          benefitGrant: {
-            benefitId: string;
-            createdAt: string;
-            grantedAt: string | null;
-            id: string;
-            isGranted: boolean;
-            isRevoked: boolean;
-            modifiedAt: string | null;
-            orderId: string | null;
-            properties: Record<string, any>;
-            revokedAt: string | null;
-            subscriptionId: string | null;
-            userId: string;
-          };
-        },
-        any
-      >;
-      updateOrder: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          order: {
-            amount: number;
-            billingReason: string;
-            checkoutId: string | null;
-            createdAt: string;
-            currency: string;
-            id: string;
-            metadata: Record<string, any>;
-            modifiedAt: string | null;
-            productId: string | null;
-            productPriceId: string;
-            subscriptionId: string | null;
-            taxAmount: number;
-            userId: string | null;
-          };
-        },
-        any
       >;
       updateProduct: FunctionReference<
         "mutation",

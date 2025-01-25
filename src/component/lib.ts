@@ -1,7 +1,9 @@
-import { v } from "convex/values";
+import { v, VString } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
+import { FunctionHandle, WithoutSystemFields } from "convex/server";
+import { Doc } from "./_generated/dataModel";
 
 export const getSubscription = query({
   args: {
@@ -18,26 +20,6 @@ export const getSubscription = query({
   handler: async (ctx, args) => {
     return ctx.db
       .query("subscriptions")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const getOrder = query({
-  args: {
-    id: v.id("orders"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.orders.validator.fields,
-      _id: v.id("orders"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("orders")
       .withIndex("id", (q) => q.eq("id", args.id))
       .unique();
   },
@@ -126,20 +108,21 @@ export const listProducts = query({
   },
 });
 
-export const updateOrder = mutation({
+type Subscription = WithoutSystemFields<Doc<"subscriptions">>;
+const subscriptionCallbackValidator = v.string() as VString<
+  FunctionHandle<"mutation", { subscription: Subscription }>
+>;
+
+export const createSubscription = mutation({
   args: {
-    order: schema.tables.orders.validator,
+    subscription: schema.tables.subscriptions.validator,
+    callback: v.optional(subscriptionCallbackValidator),
   },
   handler: async (ctx, args) => {
-    const existingOrder = await ctx.db
-      .query("orders")
-      .withIndex("id", (q) => q.eq("id", args.order.id))
-      .unique();
-    if (existingOrder) {
-      await ctx.db.patch(existingOrder._id, args.order);
-      return;
+    await ctx.db.insert("subscriptions", args.subscription);
+    if (args.callback) {
+      await ctx.runMutation(args.callback, { subscription: args.subscription });
     }
-    await ctx.db.insert("orders", args.order);
   },
 });
 
@@ -152,11 +135,19 @@ export const updateSubscription = mutation({
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
       .unique();
-    if (existingSubscription) {
-      await ctx.db.patch(existingSubscription._id, args.subscription);
-      return;
+    if (!existingSubscription) {
+      throw new Error(`Subscription not found: ${args.subscription.id}`);
     }
-    await ctx.db.insert("subscriptions", args.subscription);
+    await ctx.db.patch(existingSubscription._id, args.subscription);
+  },
+});
+
+export const createProduct = mutation({
+  args: {
+    product: schema.tables.products.validator,
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("products", args.product);
   },
 });
 
@@ -169,117 +160,9 @@ export const updateProduct = mutation({
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.product.id))
       .unique();
-    if (existingProduct) {
-      await ctx.db.patch(existingProduct._id, args.product);
-      return;
+    if (!existingProduct) {
+      throw new Error(`Product not found: ${args.product.id}`);
     }
-    await ctx.db.insert("products", args.product);
-  },
-});
-
-export const updateBenefit = mutation({
-  args: {
-    benefit: schema.tables.benefits.validator,
-  },
-  handler: async (ctx, args) => {
-    const existingBenefit = await ctx.db
-      .query("benefits")
-      .withIndex("id", (q) => q.eq("id", args.benefit.id))
-      .unique();
-    if (existingBenefit) {
-      await ctx.db.patch(existingBenefit._id, args.benefit);
-      return;
-    }
-    await ctx.db.insert("benefits", args.benefit);
-  },
-});
-
-export const getBenefit = query({
-  args: {
-    id: v.id("benefits"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.benefits.validator.fields,
-      _id: v.id("benefits"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("benefits")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const listBenefits = query({
-  args: {},
-  returns: v.array(
-    v.object({
-      ...schema.tables.benefits.validator.fields,
-      _id: v.id("benefits"),
-      _creationTime: v.number(),
-    })
-  ),
-  handler: async (ctx) => {
-    return ctx.db.query("benefits").collect();
-  },
-});
-
-export const updateBenefitGrant = mutation({
-  args: {
-    benefitGrant: schema.tables.benefitGrants.validator,
-  },
-  handler: async (ctx, args) => {
-    const existingBenefitGrant = await ctx.db
-      .query("benefitGrants")
-      .withIndex("id", (q) => q.eq("id", args.benefitGrant.id))
-      .unique();
-    if (existingBenefitGrant) {
-      await ctx.db.patch(existingBenefitGrant._id, args.benefitGrant);
-      return;
-    }
-    await ctx.db.insert("benefitGrants", args.benefitGrant);
-  },
-});
-
-export const getBenefitGrant = query({
-  args: {
-    id: v.id("benefitGrants"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.benefitGrants.validator.fields,
-      _id: v.id("benefitGrants"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("benefitGrants")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const listUserBenefitGrants = query({
-  args: {
-    userId: v.string(),
-  },
-  returns: v.array(
-    v.object({
-      ...schema.tables.benefitGrants.validator.fields,
-      _id: v.id("benefitGrants"),
-      _creationTime: v.number(),
-    })
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("benefitGrants")
-      .withIndex("userId", (q) => q.eq("userId", args.userId))
-      .collect();
+    await ctx.db.patch(existingProduct._id, args.product);
   },
 });

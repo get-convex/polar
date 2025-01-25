@@ -67,8 +67,8 @@
     }
   },
   "peerDependencies": {
-    "convex": "^1.17.0",
-    "@polar-sh/sdk": "~0.16.0"
+    "@polar-sh/sdk": "^0.20.2",
+    "convex": "^1.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
@@ -86,6 +86,7 @@
   "types": "./dist/commonjs/client/index.d.ts",
   "module": "./dist/esm/client/index.js",
   "dependencies": {
+    "buffer": "^6.0.3",
     "convex-helpers": "^0.1.63",
     "standardwebhooks": "^1.0.0"
   }

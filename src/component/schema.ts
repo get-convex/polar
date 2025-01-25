@@ -3,50 +3,6 @@ import { v } from "convex/values";
 
 export default defineSchema(
   {
-    benefits: defineTable({
-      id: v.string(),
-      createdAt: v.string(),
-      modifiedAt: v.union(v.string(), v.null()),
-      organizationId: v.string(),
-      type: v.optional(v.string()),
-      description: v.string(),
-      selectable: v.boolean(),
-      deletable: v.boolean(),
-      properties: v.record(v.string(), v.any()),
-    }).index("id", ["id"]),
-    benefitGrants: defineTable({
-      id: v.string(),
-      createdAt: v.string(),
-      modifiedAt: v.union(v.string(), v.null()),
-      userId: v.string(),
-      benefitId: v.string(),
-      properties: v.record(v.string(), v.any()),
-      isGranted: v.boolean(),
-      isRevoked: v.boolean(),
-      subscriptionId: v.union(v.string(), v.null()),
-      orderId: v.union(v.string(), v.null()),
-      grantedAt: v.union(v.string(), v.null()),
-      revokedAt: v.union(v.string(), v.null()),
-    })
-      .index("id", ["id"])
-      .index("userId", ["userId"]),
-    orders: defineTable({
-      id: v.string(),
-      createdAt: v.string(),
-      modifiedAt: v.union(v.string(), v.null()),
-      userId: v.union(v.string(), v.null()),
-      productId: v.union(v.string(), v.null()),
-      productPriceId: v.string(),
-      subscriptionId: v.union(v.string(), v.null()),
-      checkoutId: v.union(v.string(), v.null()),
-      metadata: v.record(v.string(), v.any()),
-      amount: v.number(),
-      taxAmount: v.number(),
-      currency: v.string(),
-      billingReason: v.string(),
-    })
-      .index("id", ["id"])
-      .index("userId", ["userId"]),
     products: defineTable({
       id: v.string(),
       createdAt: v.string(),

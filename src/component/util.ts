@@ -1,13 +1,12 @@
-import type { GenericQueryCtx, WithoutSystemFields } from "convex/server";
+import type {
+  FunctionHandle,
+  FunctionType,
+  GenericQueryCtx,
+  WithoutSystemFields,
+} from "convex/server";
 import type { Expand, FunctionReference } from "convex/server";
 
-import type {
-  Benefit,
-  BenefitGrant,
-  Order,
-  Product,
-  Subscription,
-} from "@polar-sh/sdk/models/components";
+import type { Product, Subscription } from "@polar-sh/sdk/models/components";
 import type { GenericMutationCtx } from "convex/server";
 import type { GenericDataModel } from "convex/server";
 import type { GenericActionCtx } from "convex/server";
@@ -25,13 +24,16 @@ export type RunActionCtx = {
   runAction: GenericActionCtx<GenericDataModel>["runAction"];
 };
 
-export type OpaqueIds<T> = T extends GenericId<infer _T>
-  ? string
-  : T extends (infer U)[]
-    ? OpaqueIds<U>[]
-    : T extends object
-      ? { [K in keyof T]: OpaqueIds<T[K]> }
-      : T;
+export type OpaqueIds<T> =
+  T extends GenericId<infer _T>
+    ? string
+    : T extends FunctionHandle<FunctionType>
+      ? string
+      : T extends (infer U)[]
+        ? OpaqueIds<U>[]
+        : T extends object
+          ? { [K in keyof T]: OpaqueIds<T[K]> }
+          : T;
 
 export type UseApi<API> = Expand<{
   [mod in keyof API]: API[mod] extends FunctionReference<
@@ -53,28 +55,8 @@ export type UseApi<API> = Expand<{
 
 export type ComponentApi = UseApi<typeof api>;
 
-export const convertToDatabaseOrder = (
-  order: Order,
-): WithoutSystemFields<Doc<"orders">> => {
-  return {
-    id: order.id,
-    userId: order.userId,
-    productId: order.productId,
-    productPriceId: order.productPriceId,
-    subscriptionId: order.subscriptionId,
-    checkoutId: order.checkoutId,
-    createdAt: order.createdAt.toISOString(),
-    modifiedAt: order.modifiedAt?.toISOString() ?? null,
-    metadata: order.metadata,
-    amount: order.amount,
-    taxAmount: order.taxAmount,
-    currency: order.currency,
-    billingReason: order.billingReason,
-  };
-};
-
 export const convertToDatabaseSubscription = (
-  subscription: Subscription,
+  subscription: Subscription
 ): WithoutSystemFields<Doc<"subscriptions">> => {
   return {
     id: subscription.id,
@@ -98,7 +80,7 @@ export const convertToDatabaseSubscription = (
 };
 
 export const convertToDatabaseProduct = (
-  product: Product,
+  product: Product
 ): WithoutSystemFields<Doc<"products">> => {
   return {
     id: product.id,
@@ -149,40 +131,5 @@ export const convertToDatabaseProduct = (
       sizeReadable: media.sizeReadable,
       publicUrl: media.publicUrl,
     })),
-  };
-};
-
-export const convertToDatabaseBenefit = (
-  benefit: Benefit,
-): WithoutSystemFields<Doc<"benefits">> => {
-  return {
-    id: benefit.id,
-    organizationId: benefit.organizationId,
-    description: benefit.description,
-    selectable: benefit.selectable,
-    deletable: benefit.deletable,
-    properties: benefit.properties,
-    createdAt: benefit.createdAt.toISOString(),
-    modifiedAt: benefit.modifiedAt?.toISOString() ?? null,
-    type: benefit.type,
-  };
-};
-
-export const convertToDatabaseBenefitGrant = (
-  benefitGrant: BenefitGrant,
-): WithoutSystemFields<Doc<"benefitGrants">> => {
-  return {
-    id: benefitGrant.id,
-    userId: benefitGrant.userId,
-    benefitId: benefitGrant.benefitId,
-    properties: benefitGrant.properties,
-    isGranted: benefitGrant.isGranted,
-    isRevoked: benefitGrant.isRevoked,
-    subscriptionId: benefitGrant.subscriptionId,
-    orderId: benefitGrant.orderId,
-    createdAt: benefitGrant.createdAt.toISOString(),
-    modifiedAt: benefitGrant.modifiedAt?.toISOString() ?? null,
-    grantedAt: benefitGrant.grantedAt?.toISOString() ?? null,
-    revokedAt: benefitGrant.revokedAt?.toISOString() ?? null,
   };
 };
