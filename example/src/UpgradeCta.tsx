@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { CheckoutLink } from "@convex-dev/polar/react";
+import { CheckoutLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
 
 export function UpgradeCTA() {
