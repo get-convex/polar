@@ -10,6 +10,7 @@
 
 import type * as example from "../example.js";
 import type * as http from "../http.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -27,6 +28,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   example: typeof example;
   http: typeof http;
+  seed: typeof seed;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
@@ -116,6 +118,17 @@ export declare const components: {
           };
         },
         any
+      >;
+      getCustomerByUserId: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        {
+          _creationTime: number;
+          _id: string;
+          id: string;
+          userId: string;
+        } | null
       >;
       getProduct: FunctionReference<
         "query",
@@ -381,6 +394,12 @@ export declare const components: {
           };
         },
         any
+      >;
+      upsertCustomer: FunctionReference<
+        "mutation",
+        "internal",
+        { customerId: string; userId: string },
+        string
       >;
     };
   };

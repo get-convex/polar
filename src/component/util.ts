@@ -1,18 +1,19 @@
 import type {
   FunctionHandle,
   FunctionType,
-  GenericQueryCtx,
   WithoutSystemFields,
+  Expand,
+  FunctionReference,
+  GenericMutationCtx,
+  GenericActionCtx,
+  GenericQueryCtx,
+  GenericDataModel,
 } from "convex/server";
-import type { Expand, FunctionReference } from "convex/server";
-
-import type { Product, Subscription } from "@polar-sh/sdk/models/components";
-import type { GenericMutationCtx } from "convex/server";
-import type { GenericDataModel } from "convex/server";
-import type { GenericActionCtx } from "convex/server";
-import type { GenericId } from "convex/values";
+import { GenericId } from "convex/values";
 import type { api } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
+import { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
+import { Product } from "@polar-sh/sdk/models/components/product.js";
 
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
@@ -56,13 +57,14 @@ export type UseApi<API> = Expand<{
 export type ComponentApi = UseApi<typeof api>;
 
 export const convertToDatabaseSubscription = (
+  userId: string,
   subscription: Subscription
 ): WithoutSystemFields<Doc<"subscriptions">> => {
   return {
     id: subscription.id,
+    userId,
     createdAt: subscription.createdAt.toISOString(),
     modifiedAt: subscription.modifiedAt?.toISOString() ?? null,
-    userId: subscription.userId,
     productId: subscription.productId,
     priceId: subscription.priceId,
     checkoutId: subscription.checkoutId,

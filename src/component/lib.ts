@@ -5,6 +5,52 @@ import { asyncMap } from "convex-helpers";
 import { FunctionHandle, WithoutSystemFields } from "convex/server";
 import { Doc } from "./_generated/dataModel";
 
+export const getCustomerByUserId = query({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      ...schema.tables.customers.validator.fields,
+      _id: v.id("customers"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+  },
+});
+
+export const upsertCustomer = mutation({
+  args: {
+    userId: v.string(),
+    customerId: v.string(),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      const customerId = await ctx.db.insert("customers", {
+        id: args.customerId,
+        userId: args.userId,
+      });
+      const newCustomer = await ctx.db.get(customerId);
+      if (!newCustomer) {
+        throw new Error("Failed to create customer");
+      }
+      return newCustomer.id;
+    }
+    return customer.id;
+  },
+});
+
 export const getSubscription = query({
   args: {
     id: v.id("subscriptions"),

@@ -105,6 +105,12 @@ export type Mounts = {
       },
       any
     >;
+    getCustomerByUserId: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      { _creationTime: number; _id: string; id: string; userId: string } | null
+    >;
     getProduct: FunctionReference<
       "query",
       "public",
@@ -369,6 +375,12 @@ export type Mounts = {
         };
       },
       any
+    >;
+    upsertCustomer: FunctionReference<
+      "mutation",
+      "public",
+      { customerId: string; userId: string },
+      string
     >;
   };
 };
