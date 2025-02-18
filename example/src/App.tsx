@@ -89,7 +89,12 @@ export default function TodoList() {
               </li>
             ))}
           </ul>
-          {!user?.isPremiumPlus && <UpgradeCTA />}
+          {!user?.isPremiumPlus && (
+            <UpgradeCTA
+              isPremium={user?.isPremium ?? false}
+              isPremiumPlus={user?.isPremiumPlus ?? false}
+            />
+          )}
         </div>
       </div>
     </main>
