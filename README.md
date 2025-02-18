@@ -28,10 +28,8 @@ export const listUserSubscriptions = query({
 
 Create a Polar account and get the following credentials:
 
-- **Access Token**
-  - Go to your Polar account settings and generate a new access token.
-- **Organization ID**
-  - This is the ID of your organization in Polar, also located in settings.
+- **Organization Token**
+  - Go to your Polar organization settings and generate a new access token.
 - **Webhook Secret**
   - Go to your Polar account settings and generate a new webhook secret.
   - You'll need your webhook url, which will be your Convex deployment's HTTP
@@ -77,8 +75,7 @@ export default app;
 Set your API credentials:
 
 ```sh
-npx convex env set POLAR_ACCESS_TOKEN=xxxxx
-npx convex env set POLAR_ORGANIZATION_ID=xxxxx
+npx convex env set POLAR_ORGANIZATION_TOKEN=xxxxx
 npx convex env set POLAR_WEBHOOK_SECRET=xxxxx
 
 # Optional: can be sandbox or production (default: production)
@@ -104,7 +101,7 @@ export const getCheckoutUrl = action({
     const user = await ctx.runQuery(api.users.getUser);
     const polar = new Polar({
       server: "sandbox",
-      accessToken: env.POLAR_ACCESS_TOKEN,
+      accessToken: env.POLAR_ORGANIZATION_TOKEN,
     });
     const result = await polar.checkouts.custom.create({
       productPriceId: priceId,

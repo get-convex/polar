@@ -1,8 +1,8 @@
 import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
-import { QueryCtx, action, mutation, query } from "./_generated/server";
+import { QueryCtx, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { DataModel, Doc, Id } from "./_generated/dataModel";
+import { DataModel, Id } from "./_generated/dataModel";
 import { PREMIUM_PLAN_NAME, PREMIUM_PLUS_PLAN_NAME } from "./seed";
 
 export const polar = new Polar<DataModel>(components.polar);
@@ -10,7 +10,15 @@ export const polar = new Polar<DataModel>(components.polar);
 export const MAX_FREE_TODOS = 5;
 export const MAX_PREMIUM_TODOS = 10;
 
-export const { generateCheckoutLink } = polar.checkoutApi();
+export const { generateCheckoutLink } = polar.checkoutApi({
+  getUserInfo: async (ctx) => {
+    const user = await ctx.runQuery(api.example.getCurrentUser);
+    return {
+      userId: user._id,
+      email: user.email,
+    };
+  },
+});
 
 // In a real app you'll set up authentication, we just use a
 // fake user for the example.
@@ -22,6 +30,9 @@ const currentUser = async (ctx: QueryCtx) => {
   const subscriptions = await polar.listUserSubscriptions(ctx, {
     userId: user._id,
   });
+  // In a real app you would have product ids from your Polar products,
+  // probably in environment variables, rather than comparing to hardcoded
+  // product names.
   const isPremiumPlus = subscriptions.some(
     (subscription) => subscription.product?.name === PREMIUM_PLUS_PLAN_NAME
   );
@@ -42,6 +53,7 @@ const currentUser = async (ctx: QueryCtx) => {
   };
 };
 
+// Query that returns our pseudo user.
 export const getCurrentUser = query({
   handler: async (ctx) => {
     return currentUser(ctx);

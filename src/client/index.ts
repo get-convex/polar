@@ -57,7 +57,9 @@ export class Polar<DataModel extends GenericDataModel> {
     } = {}
   ) {
     this.polar = new PolarSdk({
-      accessToken: process.env["POLAR_ACCESS_TOKEN"] ?? "",
+      accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
+      server:
+        (process.env["POLAR_SERVER"] as "sandbox" | "production") ?? "sandbox",
     });
     this.onScheduleCreated = options.onScheduleCreated;
   }
@@ -114,22 +116,26 @@ export class Polar<DataModel extends GenericDataModel> {
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
-  checkoutApi() {
+  checkoutApi(opts: {
+    getUserInfo: (ctx: RunQueryCtx) => Promise<{
+      userId: string;
+      email: string;
+    }>;
+  }) {
     return {
       generateCheckoutLink: actionGeneric({
         args: {
           productId: v.string(),
-          userId: v.string(),
-          email: v.string(),
         },
         returns: v.object({
           url: v.string(),
         }),
         handler: async (ctx, args) => {
+          const { userId, email } = await opts.getUserInfo(ctx);
           const { url } = await this.polar.checkoutLinks.create({
             productId: args.productId,
             metadata: {
-              userId: args.userId,
+              userId,
             },
           });
           return {

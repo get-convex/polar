@@ -10,9 +10,7 @@ export function UpgradeCTA() {
       <p className="mb-4">Get unlimited todos, priority support, and more!</p>
       <CheckoutLink
         polarApi={api.example}
-        productId="123"
-        userId="456"
-        email="test@test.com"
+        productId="2d368710-520b-49b0-ba7b-9c2d60d7b1c2"
       >
         <Button
           variant="secondary"
