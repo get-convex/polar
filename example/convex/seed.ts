@@ -55,13 +55,19 @@ const seed = internalAction({
       polar.products.create({
         name: PREMIUM_PLAN_NAME,
         description: "All the things for one low monthly price.",
+        recurringInterval: "month",
         prices: [
           {
-            recurringInterval: "month",
             priceAmount: 1000,
           },
+        ],
+      }),
+      polar.products.create({
+        name: PREMIUM_PLAN_NAME,
+        description: "All the things for one low annual price.",
+        recurringInterval: "year",
+        prices: [
           {
-            recurringInterval: "year",
             priceAmount: 10000,
           },
         ],
@@ -69,13 +75,19 @@ const seed = internalAction({
       polar.products.create({
         name: PREMIUM_PLUS_PLAN_NAME,
         description: "All the things for one low monthly price.",
+        recurringInterval: "month",
         prices: [
           {
-            recurringInterval: "month",
             priceAmount: 2000,
           },
+        ],
+      }),
+      polar.products.create({
+        name: PREMIUM_PLUS_PLAN_NAME,
+        description: "All the things for one low annual price.",
+        recurringInterval: "year",
+        prices: [
           {
-            recurringInterval: "year",
             priceAmount: 20000,
           },
         ],

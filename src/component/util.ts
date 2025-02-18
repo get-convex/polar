@@ -101,7 +101,9 @@ export const convertToDatabaseProduct = (
       createdAt: price.createdAt.toISOString(),
       modifiedAt: price.modifiedAt?.toISOString() ?? null,
       recurringInterval:
-        price.type === "recurring" ? price.recurringInterval : undefined,
+        price.type === "recurring"
+          ? price.recurringInterval ?? undefined
+          : undefined,
       priceAmount: price.amountType === "fixed" ? price.priceAmount : undefined,
       priceCurrency:
         price.amountType === "fixed" || price.amountType === "custom"

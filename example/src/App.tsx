@@ -23,7 +23,7 @@ export default function TodoList() {
     if (todo) {
       if (isAtMaxTodos) {
         alert(
-          "You've reached the maximum number of todos for the free plan. Please upgrade to add more!"
+          "You've reached the maximum number of todos for your current plan. Please upgrade to add more!"
         );
         return;
       }
@@ -52,7 +52,8 @@ export default function TodoList() {
             <div className="flex items-center text-yellow-600 dark:text-yellow-400 mb-4">
               <AlertCircle className="mr-2" />
               <span>
-                You've reached the limit for free todos. Upgrade to add more!
+                You've reached the limit for your current plan. Upgrade to add
+                more!
               </span>
             </div>
           )}

@@ -21,6 +21,7 @@ export const CheckoutLink = <DataModel extends GenericDataModel>({
     PolarEmbedCheckout.init();
     void generateCheckoutLink({
       productId,
+      origin: window.location.origin,
     }).then(({ url }) => setCheckoutLink(url));
   }, []);
 

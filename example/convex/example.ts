@@ -7,15 +7,14 @@ import { PREMIUM_PLAN_NAME, PREMIUM_PLUS_PLAN_NAME } from "./seed";
 
 export const polar = new Polar<DataModel>(components.polar);
 
-export const MAX_FREE_TODOS = 5;
-export const MAX_PREMIUM_TODOS = 10;
+export const MAX_FREE_TODOS = 3;
+export const MAX_PREMIUM_TODOS = 6;
 
 export const { generateCheckoutLink } = polar.checkoutApi({
   getUserInfo: async (ctx) => {
     const user = await ctx.runQuery(api.example.getCurrentUser);
     return {
       userId: user._id,
-      email: user.email,
     };
   },
 });

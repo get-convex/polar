@@ -28,7 +28,7 @@ import { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/we
 import {
   validateEvent,
   WebhookVerificationError,
-} from "@polar-sh/sdk/webhooks/index.js";
+} from "@polar-sh/sdk/webhooks";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -119,21 +119,24 @@ export class Polar<DataModel extends GenericDataModel> {
   checkoutApi(opts: {
     getUserInfo: (ctx: RunQueryCtx) => Promise<{
       userId: string;
-      email: string;
+      email?: string;
     }>;
   }) {
     return {
       generateCheckoutLink: actionGeneric({
         args: {
           productId: v.string(),
+          origin: v.string(),
         },
         returns: v.object({
           url: v.string(),
         }),
         handler: async (ctx, args) => {
           const { userId, email } = await opts.getUserInfo(ctx);
-          const { url } = await this.polar.checkoutLinks.create({
+          const { url } = await this.polar.checkouts.create({
             productId: args.productId,
+            embedOrigin: args.origin,
+            customerEmail: email,
             metadata: {
               userId,
             },
