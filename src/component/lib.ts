@@ -111,12 +111,18 @@ export const listUserSubscriptions = query({
     })
   ),
   handler: async (ctx, args) => {
-    return asyncMap(
+    const subscriptions = await asyncMap(
       ctx.db
         .query("subscriptions")
         .withIndex("userId", (q) => q.eq("userId", args.userId))
         .collect(),
       async (subscription) => {
+        if (
+          subscription.endedAt &&
+          subscription.endedAt <= new Date().toISOString()
+        ) {
+          return;
+        }
         const product = subscription.productId
           ? (await ctx.db
               .query("products")
@@ -128,6 +134,9 @@ export const listUserSubscriptions = query({
           product,
         };
       }
+    );
+    return subscriptions.flatMap((subscription) =>
+      subscription ? [subscription] : []
     );
   },
 });
