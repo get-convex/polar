@@ -89,7 +89,7 @@ export default function TodoList() {
               </li>
             ))}
           </ul>
-          {!user?.isPremium && <UpgradeCTA />}
+          {!user?.isPremiumPlus && <UpgradeCTA />}
         </div>
       </div>
     </main>
