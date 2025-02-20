@@ -104,6 +104,7 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerId: string;
             endedAt: string | null;
             id: string;
             metadata: Record<string, any>;
@@ -113,7 +114,6 @@ export declare const components: {
             recurringInterval: string;
             startedAt: string | null;
             status: string;
-            userId: string;
           };
         },
         any
@@ -191,6 +191,7 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
@@ -200,7 +201,6 @@ export declare const components: {
           recurringInterval: string;
           startedAt: string | null;
           status: string;
-          userId: string;
         } | null
       >;
       insertCustomer: FunctionReference<
@@ -271,6 +271,7 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
@@ -323,7 +324,6 @@ export declare const components: {
           recurringInterval: string;
           startedAt: string | null;
           status: string;
-          userId: string;
         }>
       >;
       updateProduct: FunctionReference<
@@ -386,6 +386,7 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerId: string;
             endedAt: string | null;
             id: string;
             metadata: Record<string, any>;
@@ -395,7 +396,6 @@ export declare const components: {
             recurringInterval: string;
             startedAt: string | null;
             status: string;
-            userId: string;
           };
         },
         any

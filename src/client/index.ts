@@ -192,20 +192,16 @@ export class Polar<DataModel extends GenericDataModel> {
           );
           switch (event.type) {
             case "subscription.created": {
+              console.log(event.data.metadata);
               await ctx.runMutation(this.component.lib.createSubscription, {
-                subscription: convertToDatabaseSubscription(
-                  event.data.metadata.userId as string,
-                  event.data
-                ),
+                subscription: convertToDatabaseSubscription(event.data),
               });
               break;
             }
             case "subscription.updated": {
+              console.log(event.data.metadata);
               await ctx.runMutation(this.component.lib.updateSubscription, {
-                subscription: convertToDatabaseSubscription(
-                  event.data.metadata.userId as string,
-                  event.data
-                ),
+                subscription: convertToDatabaseSubscription(event.data),
               });
               break;
             }

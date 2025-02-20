@@ -58,6 +58,7 @@ export default defineSchema(
       .index("isArchived", ["isArchived"]),
     subscriptions: defineTable({
       id: v.string(),
+      customerId: v.string(),
       createdAt: v.string(),
       modifiedAt: v.union(v.string(), v.null()),
       amount: v.union(v.number(), v.null()),
@@ -69,15 +70,14 @@ export default defineSchema(
       cancelAtPeriodEnd: v.boolean(),
       startedAt: v.union(v.string(), v.null()),
       endedAt: v.union(v.string(), v.null()),
-      userId: v.string(),
       productId: v.string(),
       priceId: v.string(),
       checkoutId: v.union(v.string(), v.null()),
       metadata: v.record(v.string(), v.any()),
     })
       .index("id", ["id"])
-      .index("userId", ["userId"])
-      .index("userId_status", ["userId", "status"]),
+      .index("customerId", ["customerId"])
+      .index("customerId_status", ["customerId", "status"]),
   },
   {
     schemaValidation: true,

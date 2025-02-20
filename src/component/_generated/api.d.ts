@@ -90,6 +90,7 @@ export type Mounts = {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
@@ -99,7 +100,6 @@ export type Mounts = {
           recurringInterval: string;
           startedAt: string | null;
           status: string;
-          userId: string;
         };
       },
       any
@@ -172,6 +172,7 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerId: string;
         endedAt: string | null;
         id: string;
         metadata: Record<string, any>;
@@ -181,7 +182,6 @@ export type Mounts = {
         recurringInterval: string;
         startedAt: string | null;
         status: string;
-        userId: string;
       } | null
     >;
     insertCustomer: FunctionReference<
@@ -252,6 +252,7 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerId: string;
         endedAt: string | null;
         id: string;
         metadata: Record<string, any>;
@@ -304,7 +305,6 @@ export type Mounts = {
         recurringInterval: string;
         startedAt: string | null;
         status: string;
-        userId: string;
       }>
     >;
     updateProduct: FunctionReference<
@@ -367,6 +367,7 @@ export type Mounts = {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
@@ -376,7 +377,6 @@ export type Mounts = {
           recurringInterval: string;
           startedAt: string | null;
           status: string;
-          userId: string;
         };
       },
       any

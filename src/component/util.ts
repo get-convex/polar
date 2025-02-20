@@ -57,12 +57,11 @@ export type UseApi<API> = Expand<{
 export type ComponentApi = UseApi<typeof api>;
 
 export const convertToDatabaseSubscription = (
-  userId: string,
   subscription: Subscription
 ): WithoutSystemFields<Doc<"subscriptions">> => {
   return {
     id: subscription.id,
-    userId,
+    customerId: subscription.customerId,
     createdAt: subscription.createdAt.toISOString(),
     modifiedAt: subscription.modifiedAt?.toISOString() ?? null,
     productId: subscription.productId,

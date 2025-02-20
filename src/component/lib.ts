@@ -123,10 +123,17 @@ export const listUserSubscriptions = query({
     })
   ),
   handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return [];
+    }
     const subscriptions = await asyncMap(
       ctx.db
         .query("subscriptions")
-        .withIndex("userId", (q) => q.eq("userId", args.userId))
+        .withIndex("customerId", (q) => q.eq("customerId", customer.id))
         .collect(),
       async (subscription) => {
         if (
