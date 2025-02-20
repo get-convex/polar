@@ -144,8 +144,8 @@ export function UpgradeCTA({
           </div>
           {isPremium && (
             <Button
-              variant="outline"
-              className="w-full text-indigo-700 dark:text-indigo-300"
+              variant="ghost"
+              className="w-full text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
               asChild
             >
               <a href="#">
@@ -255,8 +255,8 @@ export function UpgradeCTA({
           </div>
           {isPremiumPlus && (
             <Button
-              variant="outline"
-              className="w-full text-purple-700 dark:text-purple-300"
+              variant="ghost"
+              className="w-full text-gray-600 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-300"
               asChild
             >
               <a href="#">
