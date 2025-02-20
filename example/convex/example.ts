@@ -11,10 +11,15 @@ export const MAX_FREE_TODOS = 3;
 export const MAX_PREMIUM_TODOS = 6;
 
 export const { generateCheckoutLink } = polar.checkoutApi({
+  products: {
+    premium: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
+    premiumPlus: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
+  },
   getUserInfo: async (ctx) => {
     const user = await ctx.runQuery(api.example.getCurrentUser);
     return {
       userId: user._id,
+      email: user.email,
     };
   },
 });

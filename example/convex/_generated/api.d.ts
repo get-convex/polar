@@ -96,7 +96,6 @@ export declare const components: {
         "mutation",
         "internal",
         {
-          callback?: string;
           subscription: {
             amount: number | null;
             cancelAtPeriodEnd: boolean;
@@ -203,6 +202,12 @@ export declare const components: {
           status: string;
           userId: string;
         } | null
+      >;
+      insertCustomer: FunctionReference<
+        "mutation",
+        "internal",
+        { id: string; userId: string },
+        string
       >;
       listProducts: FunctionReference<
         "query",

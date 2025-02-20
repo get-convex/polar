@@ -1,9 +1,7 @@
-import { v, VString } from "convex/values";
+import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
-import { FunctionHandle, WithoutSystemFields } from "convex/server";
-import { Doc } from "./_generated/dataModel";
 
 export const getCustomerByUserId = query({
   args: {
@@ -22,6 +20,20 @@ export const getCustomerByUserId = query({
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
       .unique();
+  },
+});
+
+export const insertCustomer = mutation({
+  args: {
+    id: v.string(),
+    userId: v.string(),
+  },
+  returns: v.id("customers"),
+  handler: async (ctx, args) => {
+    return ctx.db.insert("customers", {
+      id: args.id,
+      userId: args.userId,
+    });
   },
 });
 
@@ -163,21 +175,12 @@ export const listProducts = query({
   },
 });
 
-type Subscription = WithoutSystemFields<Doc<"subscriptions">>;
-const subscriptionCallbackValidator = v.string() as VString<
-  FunctionHandle<"mutation", { subscription: Subscription }>
->;
-
 export const createSubscription = mutation({
   args: {
     subscription: schema.tables.subscriptions.validator,
-    callback: v.optional(subscriptionCallbackValidator),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("subscriptions", args.subscription);
-    if (args.callback) {
-      await ctx.runMutation(args.callback, { subscription: args.subscription });
-    }
   },
 });
 

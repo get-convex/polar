@@ -58,6 +58,7 @@ const seed = internalAction({
         recurringInterval: "month",
         prices: [
           {
+            amountType: "fixed",
             priceAmount: 1000,
           },
         ],
@@ -68,6 +69,7 @@ const seed = internalAction({
         recurringInterval: "year",
         prices: [
           {
+            amountType: "fixed",
             priceAmount: 10000,
           },
         ],
@@ -78,6 +80,7 @@ const seed = internalAction({
         recurringInterval: "month",
         prices: [
           {
+            amountType: "fixed",
             priceAmount: 2000,
           },
         ],
@@ -88,6 +91,7 @@ const seed = internalAction({
         recurringInterval: "year",
         prices: [
           {
+            amountType: "fixed",
             priceAmount: 20000,
           },
         ],

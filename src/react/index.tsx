@@ -6,12 +6,12 @@ import { useAction } from "convex/react";
 
 export const CheckoutLink = <DataModel extends GenericDataModel>({
   polarApi,
-  productId,
+  productKey,
   children,
   className,
 }: PropsWithChildren<{
   polarApi: CheckoutApi<DataModel>;
-  productId: string;
+  productKey: string;
   className?: string;
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
@@ -20,7 +20,7 @@ export const CheckoutLink = <DataModel extends GenericDataModel>({
   useEffect(() => {
     PolarEmbedCheckout.init();
     void generateCheckoutLink({
-      productId,
+      productKey,
       origin: window.location.origin,
     }).then(({ url }) => setCheckoutLink(url));
   }, []);
@@ -30,7 +30,7 @@ export const CheckoutLink = <DataModel extends GenericDataModel>({
       className={className}
       href={checkoutLink}
       data-polar-checkout
-      //data-polar-checkout-theme="light"
+      data-polar-checkout-theme="dark"
     >
       {children}
     </a>

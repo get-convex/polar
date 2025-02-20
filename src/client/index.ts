@@ -2,13 +2,11 @@ import "./polyfill";
 import {
   ApiFromModules,
   FunctionReference,
-  GenericActionCtx,
   GenericDataModel,
   type HttpRouter,
-  WithoutSystemFields,
   actionGeneric,
-  createFunctionHandle,
   httpActionGeneric,
+  GenericActionCtx,
 } from "convex/server";
 import {
   type ComponentApi,
@@ -18,17 +16,18 @@ import {
   RunQueryCtx,
 } from "../component/util";
 import { Polar as PolarSdk } from "@polar-sh/sdk";
-import { Doc } from "../component/_generated/dataModel";
 import { Infer, v } from "convex/values";
 import schema from "../component/schema";
 import { WebhookSubscriptionCreatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptioncreatedpayload.js";
 import { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload.js";
 import { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
 import { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
+import { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
 import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
+import { EmptyObject } from "convex-helpers";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -45,14 +44,14 @@ export type CheckoutApi<DataModel extends GenericDataModel> = ApiFromModules<{
 
 export class Polar<DataModel extends GenericDataModel> {
   private polar: PolarSdk;
-  public onScheduleCreated?: SubscriptionHandler;
   constructor(
     public component: ComponentApi,
-    options: {
-      onScheduleCreated?: FunctionReference<
-        "mutation",
+    private options: {
+      getUserInfo?: FunctionReference<
+        "query",
         "internal",
-        { subscription: WithoutSystemFields<Doc<"subscriptions">> }
+        EmptyObject,
+        { userId: string; email?: string }
       >;
     } = {}
   ) {
@@ -61,41 +60,48 @@ export class Polar<DataModel extends GenericDataModel> {
       server:
         (process.env["POLAR_SERVER"] as "sandbox" | "production") ?? "sandbox",
     });
-    this.onScheduleCreated = options.onScheduleCreated;
   }
   getCustomerByUserId(ctx: RunQueryCtx, userId: string) {
     return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
   }
-  /*
   async createCheckoutSession(
     ctx: GenericActionCtx<DataModel>,
     {
       productId,
       userId,
       email,
-    }: { productId: string; userId: string; email: string }
-  ) {
-    const customer =
-      (await ctx.runQuery(this.component.lib.getCustomerByUserId, {
+      origin,
+    }: { productId: string; userId: string; email: string; origin: string }
+  ): Promise<Checkout> {
+    const dbCustomer = await ctx.runQuery(
+      this.component.lib.getCustomerByUserId,
+      {
         userId,
-      })) ||
-      (await this.polar.customers.create({
-        email,
-        metadata: {
-          userId,
-        },
-      }));
-    const customerId = customer?.id;
-    if (!customerId) {
-      throw new Error("Customer not found");
+      }
+    );
+    const customerId =
+      dbCustomer?.id ||
+      (
+        await this.polar.customers.create({
+          email,
+          metadata: {
+            userId,
+          },
+        })
+      ).id;
+    if (!dbCustomer) {
+      await ctx.runMutation(this.component.lib.insertCustomer, {
+        id: customerId,
+        userId,
+      });
     }
-    return this.polar.checkouts.custom.create({
+    return this.polar.checkouts.create({
       allowDiscountCodes: true,
-      productId,
+      products: [productId],
       customerId,
+      embedOrigin: origin,
     });
   }
-    */
   listProducts(
     ctx: RunQueryCtx,
     { includeArchived }: { includeArchived: boolean }
@@ -117,15 +123,16 @@ export class Polar<DataModel extends GenericDataModel> {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
   checkoutApi(opts: {
+    products: Record<string, string>;
     getUserInfo: (ctx: RunQueryCtx) => Promise<{
       userId: string;
-      email?: string;
+      email: string;
     }>;
   }) {
     return {
       generateCheckoutLink: actionGeneric({
         args: {
-          productId: v.string(),
+          productKey: v.string(),
           origin: v.string(),
         },
         returns: v.object({
@@ -133,17 +140,13 @@ export class Polar<DataModel extends GenericDataModel> {
         }),
         handler: async (ctx, args) => {
           const { userId, email } = await opts.getUserInfo(ctx);
-          const { url } = await this.polar.checkouts.create({
-            productId: args.productId,
-            embedOrigin: args.origin,
-            customerEmail: email,
-            metadata: {
-              userId,
-            },
+          const { url } = await this.createCheckoutSession(ctx, {
+            productId: opts.products?.[args.productKey],
+            userId,
+            email,
+            origin: args.origin,
           });
-          return {
-            url,
-          };
+          return { url };
         },
       }),
     };
@@ -194,9 +197,6 @@ export class Polar<DataModel extends GenericDataModel> {
                   event.data.metadata.userId as string,
                   event.data
                 ),
-                callback:
-                  this.onScheduleCreated &&
-                  (await createFunctionHandle(this.onScheduleCreated)),
               });
               break;
             }

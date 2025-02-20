@@ -82,7 +82,6 @@ export type Mounts = {
       "mutation",
       "public",
       {
-        callback?: string;
         subscription: {
           amount: number | null;
           cancelAtPeriodEnd: boolean;
@@ -184,6 +183,12 @@ export type Mounts = {
         status: string;
         userId: string;
       } | null
+    >;
+    insertCustomer: FunctionReference<
+      "mutation",
+      "public",
+      { id: string; userId: string },
+      string
     >;
     listProducts: FunctionReference<
       "query",

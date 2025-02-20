@@ -74,10 +74,7 @@ export function UpgradeCTA({
             </li>
           </ul>
           {!isPremium && !isPremiumPlus && (
-            <CheckoutLink
-              polarApi={api.example}
-              productId="2d368710-520b-49b0-ba7b-9c2d60d7b1c2"
-            >
+            <CheckoutLink polarApi={api.example} productKey="premium">
               <Button
                 variant="secondary"
                 className="w-full bg-white text-indigo-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-gray-700"
@@ -142,10 +139,7 @@ export function UpgradeCTA({
             </li>
           </ul>
           {!isPremiumPlus && (
-            <CheckoutLink
-              polarApi={api.example}
-              productId="premium-plus-product-id"
-            >
+            <CheckoutLink polarApi={api.example} productKey="premiumPlus">
               <Button
                 variant="secondary"
                 className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
