@@ -78,6 +78,18 @@ export function UpgradeCTA({
               </li>
             </ul>
           </div>
+          {(isPremium || isPremiumPlus) && (
+            <Button
+              variant="ghost"
+              className="w-full mt-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              asChild
+            >
+              <a href="#">
+                Downgrade to Free{" "}
+                <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
+              </a>
+            </Button>
+          )}
         </div>
 
         <div
@@ -150,6 +162,18 @@ export function UpgradeCTA({
               <CustomerPortalLink polarApi={api.example}>
                 Manage Subscription <Settings className="ml-2 h-4 w-4" />
               </CustomerPortalLink>
+            </Button>
+          )}
+          {isPremiumPlus && (
+            <Button
+              variant="ghost"
+              className="w-full mt-2 text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
+              asChild
+            >
+              <a href="#">
+                Downgrade to Premium{" "}
+                <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
+              </a>
             </Button>
           )}
           {!isPremium && !isPremiumPlus && (
