@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Star } from "lucide-react";
+import { ArrowRight, Check, Star, Settings } from "lucide-react";
 import { CheckoutLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
 
@@ -142,6 +142,17 @@ export function UpgradeCTA({
               </li>
             </ul>
           </div>
+          {isPremium && (
+            <Button
+              variant="outline"
+              className="w-full text-indigo-700 dark:text-indigo-300"
+              asChild
+            >
+              <a href="#">
+                Manage Subscription <Settings className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          )}
           {!isPremium && !isPremiumPlus && (
             <CheckoutLink polarApi={api.example} productKey="premium">
               <Button
@@ -162,7 +173,7 @@ export function UpgradeCTA({
             isPremiumPlus
               ? "from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 ring-2 ring-purple-300 dark:ring-purple-700"
               : "from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-900"
-          } text-white p-6 rounded-lg shadow-xl ring-2 ring-purple-300 dark:ring-purple-700`}
+          } text-white p-6 rounded-lg shadow-xl`}
         >
           {isPremiumPlus ? (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
@@ -242,6 +253,17 @@ export function UpgradeCTA({
               </li>
             </ul>
           </div>
+          {isPremiumPlus && (
+            <Button
+              variant="outline"
+              className="w-full text-purple-700 dark:text-purple-300"
+              asChild
+            >
+              <a href="#">
+                Manage Subscription <Settings className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          )}
           {!isPremiumPlus && (
             <CheckoutLink polarApi={api.example} productKey="premiumPlus">
               <Button
