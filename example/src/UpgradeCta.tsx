@@ -12,7 +12,72 @@ export function UpgradeCTA({
 }) {
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div
+          className={`relative bg-gradient-to-br ${
+            !isPremium && !isPremiumPlus
+              ? "from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 ring-2 ring-gray-300 dark:ring-gray-700"
+              : "from-gray-600 to-gray-700 dark:from-gray-800 dark:to-gray-900"
+          } p-6 rounded-lg shadow-md`}
+        >
+          {!isPremium && !isPremiumPlus && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+              <Star className="w-3 h-3" /> Current Plan
+            </div>
+          )}
+          <h2
+            className={`text-xl font-semibold mb-4 ${
+              !isPremium && !isPremiumPlus
+                ? "text-gray-700 dark:text-gray-300"
+                : "text-white"
+            }`}
+          >
+            Free
+          </h2>
+          <ul className="space-y-3 mb-6">
+            <li
+              className={`flex items-center ${
+                !isPremium && !isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check className="w-4 h-4 mr-2 flex-shrink-0" />
+              Up to 3 todos
+            </li>
+            <li
+              className={`flex items-center ${
+                !isPremium && !isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check className="w-4 h-4 mr-2 flex-shrink-0" />
+              So many ads, omg
+            </li>
+            <li
+              className={`flex items-center ${
+                !isPremium && !isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check className="w-4 h-4 mr-2 flex-shrink-0" />
+              "Community support" (tweet at randos)
+            </li>
+            <li
+              className={`flex items-center ${
+                !isPremium && !isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check className="w-4 h-4 mr-2 flex-shrink-0" />
+              Todo Inc. totally owns your data
+            </li>
+          </ul>
+        </div>
+
         <div
           className={`relative bg-gradient-to-br ${
             isPremium
@@ -125,16 +190,46 @@ export function UpgradeCTA({
               />
               All the todos you can todo
             </li>
-            <li className="flex items-center">
-              <Check className="w-4 h-4 mr-2 flex-shrink-0 text-purple-200" />
+            <li
+              className={`flex items-center ${
+                isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check
+                className={`w-4 h-4 mr-2 flex-shrink-0 ${
+                  isPremiumPlus ? "" : "text-purple-200"
+                }`}
+              />
               24/7 support (3-5 day response time 🙌)
             </li>
-            <li className="flex items-center">
-              <Check className="w-4 h-4 mr-2 flex-shrink-0 text-purple-200" />
+            <li
+              className={`flex items-center ${
+                isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check
+                className={`w-4 h-4 mr-2 flex-shrink-0 ${
+                  isPremiumPlus ? "" : "text-purple-200"
+                }`}
+              />
               Todo Inc. will steal less of your data**
             </li>
-            <li className="flex items-center">
-              <Check className="w-4 h-4 mr-2 flex-shrink-0 text-purple-200" />
+            <li
+              className={`flex items-center ${
+                isPremiumPlus
+                  ? "text-gray-700 dark:text-gray-300"
+                  : "text-white"
+              }`}
+            >
+              <Check
+                className={`w-4 h-4 mr-2 flex-shrink-0 ${
+                  isPremiumPlus ? "" : "text-purple-200"
+                }`}
+              />
               Advanced analytics (for us)
             </li>
           </ul>
