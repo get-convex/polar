@@ -192,8 +192,27 @@ export class Polar<DataModel extends GenericDataModel> {
           );
           switch (event.type) {
             case "subscription.created": {
+              const newSubscription = convertToDatabaseSubscription(event.data);
+
+              const existingSubscriptions = await ctx.runQuery(
+                this.component.lib.listCustomerSubscriptions,
+                { customerId: newSubscription.customerId }
+              );
+
+              for (const subscription of existingSubscriptions) {
+                if (
+                  subscription.id !== newSubscription.id &&
+                  subscription.status === "active" &&
+                  !subscription.cancelAtPeriodEnd
+                ) {
+                  await this.polar.subscriptions.revoke({
+                    id: subscription.id,
+                  });
+                }
+              }
+
               await ctx.runMutation(this.component.lib.createSubscription, {
-                subscription: convertToDatabaseSubscription(event.data),
+                subscription: newSubscription,
               });
               break;
             }

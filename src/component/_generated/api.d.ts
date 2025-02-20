@@ -190,6 +190,32 @@ export type Mounts = {
       { id: string; userId: string },
       string
     >;
+    listCustomerSubscriptions: FunctionReference<
+      "query",
+      "public",
+      { customerId: string },
+      Array<{
+        _creationTime: number;
+        _id: string;
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        customerId: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        productId: string;
+        recurringInterval: string;
+        startedAt: string | null;
+        status: string;
+      }>
+    >;
     listProducts: FunctionReference<
       "query",
       "public",

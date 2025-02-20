@@ -231,3 +231,22 @@ export const updateProduct = mutation({
     await ctx.db.patch(existingProduct._id, args.product);
   },
 });
+
+export const listCustomerSubscriptions = query({
+  args: {
+    customerId: v.string(),
+  },
+  returns: v.array(
+    v.object({
+      ...schema.tables.subscriptions.validator.fields,
+      _id: v.id("subscriptions"),
+      _creationTime: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("subscriptions")
+      .withIndex("customerId", (q) => q.eq("customerId", args.customerId))
+      .collect();
+  },
+});
