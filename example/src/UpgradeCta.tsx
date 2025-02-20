@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Star, Settings } from "lucide-react";
-import { CheckoutLink } from "../../src/react";
+import { CheckoutLink, CustomerPortalLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
 
 export function UpgradeCTA({
@@ -147,23 +147,24 @@ export function UpgradeCTA({
               className="w-full text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
               asChild
             >
-              <a href="#">
+              <CustomerPortalLink polarApi={api.example}>
                 Manage Subscription <Settings className="ml-2 h-4 w-4" />
-              </a>
+              </CustomerPortalLink>
             </Button>
           )}
           {!isPremium && !isPremiumPlus && (
-            <CheckoutLink polarApi={api.example} productKey="premium">
-              <Button
-                variant="secondary"
-                className="w-full bg-white text-indigo-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-gray-700"
-              >
+            <Button
+              variant="secondary"
+              className="w-full bg-white text-indigo-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-gray-700"
+              asChild
+            >
+              <CheckoutLink polarApi={api.example} productKey="premium">
                 Upgrade to Premium{" "}
                 <div className="ml-2">
                   <ArrowRight size={16} />
                 </div>
-              </Button>
-            </CheckoutLink>
+              </CheckoutLink>
+            </Button>
           )}
         </div>
 
@@ -258,23 +259,24 @@ export function UpgradeCTA({
               className="w-full text-gray-600 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-300"
               asChild
             >
-              <a href="#">
+              <CustomerPortalLink polarApi={api.example}>
                 Manage Subscription <Settings className="ml-2 h-4 w-4" />
-              </a>
+              </CustomerPortalLink>
             </Button>
           )}
           {!isPremiumPlus && (
-            <CheckoutLink polarApi={api.example} productKey="premiumPlus">
-              <Button
-                variant="secondary"
-                className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
-              >
+            <Button
+              variant="secondary"
+              className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
+              asChild
+            >
+              <CheckoutLink polarApi={api.example} productKey="premiumPlus">
                 Upgrade to Premium Plus{" "}
                 <div className="ml-2">
                   <ArrowRight size={16} />
                 </div>
-              </Button>
-            </CheckoutLink>
+              </CheckoutLink>
+            </Button>
           )}
         </div>
       </div>

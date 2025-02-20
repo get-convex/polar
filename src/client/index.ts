@@ -23,6 +23,7 @@ import { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/componen
 import { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
 import { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
 import { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
+import { CustomerSession } from "@polar-sh/sdk/models/components/customersession.js";
 import {
   validateEvent,
   WebhookVerificationError,
@@ -122,6 +123,14 @@ export class Polar<DataModel extends GenericDataModel> {
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
+  createCustomerPortalSession(
+    ctx: GenericActionCtx<DataModel>,
+    { customerId }: { customerId: string }
+  ): Promise<CustomerSession> {
+    return this.polar.customerSessions.create({
+      customerId,
+    });
+  }
   checkoutApi(opts: {
     products: Record<string, string>;
     getUserInfo: (ctx: RunQueryCtx) => Promise<{
@@ -147,6 +156,27 @@ export class Polar<DataModel extends GenericDataModel> {
             origin: args.origin,
           });
           return { url };
+        },
+      }),
+      generateCustomerPortalUrl: actionGeneric({
+        args: {},
+        returns: v.union(v.object({ url: v.string() }), v.null()),
+        handler: async (ctx) => {
+          const { userId } = await opts.getUserInfo(ctx);
+          const customer = await ctx.runQuery(
+            this.component.lib.getCustomerByUserId,
+            { userId }
+          );
+
+          if (!customer) {
+            return null;
+          }
+
+          const session = await this.createCustomerPortalSession(ctx, {
+            customerId: customer.id,
+          });
+
+          return { url: session.customerPortalUrl };
         },
       }),
     };

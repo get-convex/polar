@@ -4,6 +4,38 @@ import { CheckoutApi } from "../client";
 import { GenericDataModel } from "convex/server";
 import { useAction } from "convex/react";
 
+export const CustomerPortalLink = <DataModel extends GenericDataModel>({
+  polarApi,
+  children,
+  className,
+}: PropsWithChildren<{
+  polarApi: CheckoutApi<DataModel>;
+  className?: string;
+}>) => {
+  const generateCustomerPortalUrl = useAction(
+    polarApi.generateCustomerPortalUrl
+  );
+  const [portalUrl, setPortalUrl] = useState<string>();
+
+  useEffect(() => {
+    void generateCustomerPortalUrl({}).then((result) => {
+      if (result) {
+        setPortalUrl(result.url);
+      }
+    });
+  }, []);
+
+  if (!portalUrl) {
+    return null;
+  }
+
+  return (
+    <a className={className} href={portalUrl} target="_blank">
+      {children}
+    </a>
+  );
+};
+
 export const CheckoutLink = <DataModel extends GenericDataModel>({
   polarApi,
   productKey,
