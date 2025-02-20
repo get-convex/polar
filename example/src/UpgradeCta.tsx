@@ -144,7 +144,10 @@ export function UpgradeCTA({
                 variant="secondary"
                 className="w-full bg-white text-indigo-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-gray-700"
               >
-                Upgrade to Premium <ArrowRight className="ml-2 h-4 w-4" />
+                Upgrade to Premium{" "}
+                <div className="ml-2">
+                  <ArrowRight size={16} />
+                </div>
               </Button>
             </CheckoutLink>
           )}
@@ -239,7 +242,10 @@ export function UpgradeCTA({
                 variant="secondary"
                 className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
               >
-                Upgrade to Premium Plus <ArrowRight className="ml-2 h-4 w-4" />
+                Upgrade to Premium Plus{" "}
+                <div className="ml-2">
+                  <ArrowRight size={16} />
+                </div>
               </Button>
             </CheckoutLink>
           )}
