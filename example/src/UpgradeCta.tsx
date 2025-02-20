@@ -83,18 +83,17 @@ export function UpgradeCTA({
         <div
           className={`relative flex flex-col bg-gradient-to-br ${
             isPremium
-              ? "from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 ring-2 ring-indigo-300 dark:ring-indigo-700"
+              ? "from-gray-100 to-white dark:from-gray-800 dark:to-gray-900"
               : "from-indigo-600 to-purple-600 dark:from-indigo-900 dark:to-purple-900"
+          } ${
+            isPremium && !isPremiumPlus
+              ? "ring-2 ring-indigo-300 dark:ring-indigo-700"
+              : ""
           } text-white p-6 rounded-lg shadow-md`}
         >
-          {isPremium && (
+          {isPremium && !isPremiumPlus && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
               <Star className="w-3 h-3" /> Current Plan
-            </div>
-          )}
-          {isPremiumPlus && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-3 py-1 rounded-full text-sm font-medium">
-              Included in Premium Plus
             </div>
           )}
           <div className="flex-1">
@@ -142,7 +141,7 @@ export function UpgradeCTA({
               </li>
             </ul>
           </div>
-          {isPremium && (
+          {isPremium && !isPremiumPlus && (
             <Button
               variant="ghost"
               className="w-full text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
