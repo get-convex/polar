@@ -9,7 +9,7 @@ export const CustomerPortalLink = <DataModel extends GenericDataModel>({
   children,
   className,
 }: PropsWithChildren<{
-  polarApi: CheckoutApi<DataModel>;
+  polarApi: Pick<CheckoutApi<DataModel>, "generateCustomerPortalUrl">;
   className?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
@@ -41,10 +41,12 @@ export const CheckoutLink = <DataModel extends GenericDataModel>({
   productKey,
   children,
   className,
+  theme = "dark",
 }: PropsWithChildren<{
-  polarApi: CheckoutApi<DataModel>;
+  polarApi: Pick<CheckoutApi<DataModel>, "generateCheckoutLink">;
   productKey: string;
   className?: string;
+  theme?: "dark" | "light";
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
   const [checkoutLink, setCheckoutLink] = useState<string>();
@@ -62,7 +64,7 @@ export const CheckoutLink = <DataModel extends GenericDataModel>({
       className={className}
       href={checkoutLink}
       data-polar-checkout
-      data-polar-checkout-theme="dark"
+      data-polar-checkout-theme={theme}
     >
       {children}
     </a>

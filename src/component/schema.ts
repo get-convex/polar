@@ -77,7 +77,8 @@ export default defineSchema(
     })
       .index("id", ["id"])
       .index("customerId", ["customerId"])
-      .index("customerId_status", ["customerId", "status"]),
+      .index("customerId_status", ["customerId", "status"])
+      .index("customerId_endedAt", ["customerId", "endedAt"]),
   },
   {
     schemaValidation: true,

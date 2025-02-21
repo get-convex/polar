@@ -103,6 +103,55 @@ export const getProduct = query({
   },
 });
 
+// For apps that have 0 or 1 active subscription per user.
+export const getCurrentSubscription = query({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      ...schema.tables.subscriptions.validator.fields,
+      _id: v.id("subscriptions"),
+      _creationTime: v.number(),
+      product: v.object({
+        ...schema.tables.products.validator.fields,
+        _id: v.id("products"),
+        _creationTime: v.number(),
+      }),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return null;
+    }
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("customerId_endedAt", (q) =>
+        q.eq("customerId", customer.id).eq("endedAt", null)
+      )
+      .unique();
+    if (!subscription) {
+      return null;
+    }
+    const product = await ctx.db
+      .query("products")
+      .withIndex("id", (q) => q.eq("id", subscription.productId))
+      .unique();
+    if (!product) {
+      throw new Error(`Product not found: ${subscription.productId}`);
+    }
+    return {
+      ...subscription,
+      product,
+    };
+  },
+});
+
 export const listUserSubscriptions = query({
   args: {
     userId: v.string(),

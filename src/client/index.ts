@@ -23,12 +23,10 @@ import { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/componen
 import { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
 import { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
 import { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
-import { CustomerSession } from "@polar-sh/sdk/models/components/customersession.js";
 import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
-import { EmptyObject } from "convex-helpers";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -47,14 +45,14 @@ export class Polar<DataModel extends GenericDataModel> {
   private polar: PolarSdk;
   constructor(
     public component: ComponentApi,
-    private options: {
-      getUserInfo?: FunctionReference<
-        "query",
-        "internal",
-        EmptyObject,
-        { userId: string; email?: string }
-      >;
-    } = {}
+    private config: {
+      products: Record<string, string>;
+
+      getUserInfo: (ctx: RunQueryCtx) => Promise<{
+        userId: string;
+        email: string;
+      }>;
+    }
   ) {
     this.polar = new PolarSdk({
       accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
@@ -103,41 +101,95 @@ export class Polar<DataModel extends GenericDataModel> {
       embedOrigin: origin,
     });
   }
+  async createCustomerPortalSession(
+    ctx: GenericActionCtx<DataModel>,
+    { userId }: { userId: string }
+  ) {
+    const customer = await ctx.runQuery(
+      this.component.lib.getCustomerByUserId,
+      { userId }
+    );
+
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    const session = await this.polar.customerSessions.create({
+      customerId: customer.id,
+    });
+
+    return { url: session.customerPortalUrl };
+  }
   listProducts(
     ctx: RunQueryCtx,
     { includeArchived }: { includeArchived: boolean }
   ) {
     return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
   }
-  listUserSubscriptions(ctx: RunQueryCtx, { userId }: { userId: string }) {
-    return ctx.runQuery(this.component.lib.listUserSubscriptions, { userId });
-  }
-  getSubscription(
-    ctx: RunQueryCtx,
-    { subscriptionId }: { subscriptionId: string }
-  ) {
-    return ctx.runQuery(this.component.lib.getSubscription, {
-      id: subscriptionId,
+  getCurrentSubscription(ctx: RunQueryCtx, { userId }: { userId: string }) {
+    return ctx.runQuery(this.component.lib.getCurrentSubscription, {
+      userId,
     });
   }
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
-  createCustomerPortalSession(
+  async changeSubscription(
     ctx: GenericActionCtx<DataModel>,
-    { customerId }: { customerId: string }
-  ): Promise<CustomerSession> {
-    return this.polar.customerSessions.create({
-      customerId,
+    { productId }: { productId: string }
+  ) {
+    const { userId } = await this.config.getUserInfo(ctx);
+    const subscription = await this.getCurrentSubscription(ctx, { userId });
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+    if (subscription.productId === productId) {
+      throw new Error("Subscription already on this product");
+    }
+    await this.polar.subscriptions.update({
+      id: subscription.id,
+      subscriptionUpdate: {
+        productId,
+      },
     });
   }
-  checkoutApi(opts: {
-    products: Record<string, string>;
-    getUserInfo: (ctx: RunQueryCtx) => Promise<{
-      userId: string;
-      email: string;
-    }>;
-  }) {
+  async cancelSubscription(ctx: GenericActionCtx<DataModel>) {
+    const { userId } = await this.config.getUserInfo(ctx);
+    const subscription = await this.getCurrentSubscription(ctx, { userId });
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+    if (subscription.status !== "active") {
+      throw new Error("Subscription is not active");
+    }
+    await this.polar.subscriptions.update({
+      id: subscription.id,
+      subscriptionUpdate: {
+        cancelAtPeriodEnd: true,
+      },
+    });
+  }
+  api() {
+    return {
+      changeCurrentSubscription: actionGeneric({
+        args: {
+          productId: v.string(),
+        },
+        handler: async (ctx, args) => {
+          await this.changeSubscription(ctx, {
+            productId: args.productId,
+          });
+        },
+      }),
+      cancelCurrentSubscription: actionGeneric({
+        args: {},
+        handler: async (ctx) => {
+          await this.cancelSubscription(ctx);
+        },
+      }),
+    };
+  }
+  checkoutApi() {
     return {
       generateCheckoutLink: actionGeneric({
         args: {
@@ -148,9 +200,9 @@ export class Polar<DataModel extends GenericDataModel> {
           url: v.string(),
         }),
         handler: async (ctx, args) => {
-          const { userId, email } = await opts.getUserInfo(ctx);
+          const { userId, email } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCheckoutSession(ctx, {
-            productId: opts.products?.[args.productKey],
+            productId: this.config.products?.[args.productKey],
             userId,
             email,
             origin: args.origin,
@@ -160,23 +212,13 @@ export class Polar<DataModel extends GenericDataModel> {
       }),
       generateCustomerPortalUrl: actionGeneric({
         args: {},
-        returns: v.union(v.object({ url: v.string() }), v.null()),
+        returns: v.object({ url: v.string() }),
         handler: async (ctx) => {
-          const { userId } = await opts.getUserInfo(ctx);
-          const customer = await ctx.runQuery(
-            this.component.lib.getCustomerByUserId,
-            { userId }
-          );
-
-          if (!customer) {
-            return null;
-          }
-
-          const session = await this.createCustomerPortalSession(ctx, {
-            customerId: customer.id,
+          const { userId } = await this.config.getUserInfo(ctx);
+          const { url } = await this.createCustomerPortalSession(ctx, {
+            userId,
           });
-
-          return { url: session.customerPortalUrl };
+          return { url };
         },
       }),
     };
@@ -222,27 +264,8 @@ export class Polar<DataModel extends GenericDataModel> {
           );
           switch (event.type) {
             case "subscription.created": {
-              const newSubscription = convertToDatabaseSubscription(event.data);
-
-              const existingSubscriptions = await ctx.runQuery(
-                this.component.lib.listCustomerSubscriptions,
-                { customerId: newSubscription.customerId }
-              );
-
-              for (const subscription of existingSubscriptions) {
-                if (
-                  subscription.id !== newSubscription.id &&
-                  subscription.status === "active" &&
-                  !subscription.cancelAtPeriodEnd
-                ) {
-                  await this.polar.subscriptions.revoke({
-                    id: subscription.id,
-                  });
-                }
-              }
-
               await ctx.runMutation(this.component.lib.createSubscription, {
-                subscription: newSubscription,
+                subscription: convertToDatabaseSubscription(event.data),
               });
               break;
             }

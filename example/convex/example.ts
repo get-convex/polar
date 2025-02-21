@@ -3,27 +3,33 @@ import { api, components } from "./_generated/api";
 import { QueryCtx, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { DataModel, Id } from "./_generated/dataModel";
-import { PREMIUM_PLAN_NAME, PREMIUM_PLUS_PLAN_NAME } from "./seed";
 
-export const polar = new Polar<DataModel>(components.polar);
+const products = {
+  premium: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
+  premiumPlus: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
+};
+
+export const polar = new Polar<DataModel>(components.polar, {
+  products,
+  getUserInfo: async (ctx) => {
+    const user: { _id: Id<"users">; email: string } = await ctx.runQuery(
+      api.example.getCurrentUser
+    );
+    return {
+      userId: user._id,
+      email: user.email,
+    };
+  },
+});
 
 export const MAX_FREE_TODOS = 3;
 export const MAX_PREMIUM_TODOS = 6;
 
+export const { changeCurrentSubscription, cancelCurrentSubscription } =
+  polar.api();
+
 export const { generateCheckoutLink, generateCustomerPortalUrl } =
-  polar.checkoutApi({
-    products: {
-      premium: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
-      premiumPlus: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
-    },
-    getUserInfo: async (ctx) => {
-      const user = await ctx.runQuery(api.example.getCurrentUser);
-      return {
-        userId: user._id,
-        email: user.email,
-      };
-    },
-  });
+  polar.checkoutApi();
 
 // In a real app you'll set up authentication, we just use a
 // fake user for the example.
@@ -32,20 +38,12 @@ const currentUser = async (ctx: QueryCtx) => {
   if (!user) {
     throw new Error("No user found");
   }
-  const subscriptions = await polar.listUserSubscriptions(ctx, {
+  const subscription = await polar.getCurrentSubscription(ctx, {
     userId: user._id,
   });
-  // In a real app you would have product ids from your Polar products,
-  // probably in environment variables, rather than comparing to hardcoded
-  // product names.
-  const isPremiumPlus = subscriptions.some(
-    (subscription) => subscription.product?.name === PREMIUM_PLUS_PLAN_NAME
-  );
+  const isPremiumPlus = subscription?.product?.id === products.premiumPlus;
   const isPremium =
-    isPremiumPlus ||
-    subscriptions.some(
-      (subscription) => subscription.product?.name === PREMIUM_PLAN_NAME
-    );
+    isPremiumPlus || subscription?.product?.id === products.premium;
   return {
     ...user,
     isPremium,
