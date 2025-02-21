@@ -3,6 +3,8 @@ import { ArrowRight, Check, Star, Settings } from "lucide-react";
 import { CheckoutLink, CustomerPortalLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
 import { useAction } from "convex/react";
+import { useState } from "react";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 export function UpgradeCTA({
   isPremium,
@@ -17,6 +19,11 @@ export function UpgradeCTA({
   const cancelCurrentSubscription = useAction(
     api.example.cancelCurrentSubscription
   );
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
+  const [pendingDowngrade, setPendingDowngrade] = useState<
+    "premium" | "free"
+  >();
+
   return (
     <div className="mt-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -90,9 +97,8 @@ export function UpgradeCTA({
               variant="ghost"
               className="w-full mt-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               onClick={() => {
-                cancelCurrentSubscription({
-                  revokeImmediately: true,
-                });
+                setPendingDowngrade("free");
+                setShowDowngradeModal(true);
               }}
             >
               Downgrade to Free{" "}
@@ -178,9 +184,8 @@ export function UpgradeCTA({
               variant="ghost"
               className="w-full mt-2 text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
               onClick={() => {
-                changeCurrentSubscription({
-                  productKey: "premium",
-                });
+                setPendingDowngrade("premium");
+                setShowDowngradeModal(true);
               }}
             >
               Downgrade to Premium{" "}
@@ -331,6 +336,32 @@ export function UpgradeCTA({
           )}
         </div>
       </div>
+      <ConfirmationModal
+        open={showDowngradeModal}
+        onOpenChange={setShowDowngradeModal}
+        title={`Downgrade to ${pendingDowngrade === "premium" ? "Premium" : "Free"}`}
+        description={
+          pendingDowngrade === "premium"
+            ? "Your Premium Plus features will remain active until the end of your current billing period. After that, you'll be moved to the Premium plan."
+            : "Your premium features will remain active until the end of your current billing period. After that, you'll be moved to the Free plan."
+        }
+        actionLabel="Confirm Downgrade"
+        onConfirm={() => {
+          if (!pendingDowngrade) {
+            return;
+          }
+          if (pendingDowngrade === "free") {
+            cancelCurrentSubscription({
+              revokeImmediately: true,
+            });
+          } else {
+            changeCurrentSubscription({
+              productKey: pendingDowngrade,
+            });
+          }
+        }}
+        variant="destructive"
+      />
     </div>
   );
 }
