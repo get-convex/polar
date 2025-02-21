@@ -29,7 +29,29 @@ export function UpgradeCTA({
   >();
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
+      <h2 className="text-2xl font-light mb-6 text-gray-800 dark:text-gray-100">
+        Billing Settings
+      </h2>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <h3 className="text-lg font-medium">Current Plan:</h3>
+          <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+            {!isPremium && !isPremiumPlus && "Free"}
+            {isPremium && !isPremiumPlus && "Premium"}
+            {isPremiumPlus && "Premium Plus"}
+          </span>
+        </div>
+        {(isPremium || isPremiumPlus) && (
+          <CustomerPortalLink
+            polarApi={api.example}
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-2"
+          >
+            <Settings className="w-4 h-4" /> Manage Subscription
+          </CustomerPortalLink>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           className={`relative flex flex-col bg-gradient-to-br ${
