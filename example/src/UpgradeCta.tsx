@@ -23,6 +23,10 @@ export function UpgradeCTA({
   const [pendingDowngrade, setPendingDowngrade] = useState<
     "premium" | "free"
   >();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [pendingUpgrade, setPendingUpgrade] = useState<
+    "premium" | "premiumPlus"
+  >();
 
   return (
     <div className="mt-8">
@@ -195,7 +199,7 @@ export function UpgradeCTA({
           {!isPremium && !isPremiumPlus && (
             <Button
               variant="secondary"
-              className="w-full bg-white text-indigo-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-gray-700"
+              className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
               asChild
             >
               <CheckoutLink polarApi={api.example} productKey="premium">
@@ -309,12 +313,11 @@ export function UpgradeCTA({
               variant="secondary"
               className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
               onClick={() => {
-                changeCurrentSubscription({
-                  productKey: "premiumPlus",
-                });
+                setPendingUpgrade("premiumPlus");
+                setShowUpgradeModal(true);
               }}
             >
-              Upgrade to Premium Plus{" "}
+              Upgrade to Premium Plus
               <div className="ml-2">
                 <ArrowRight size={16} />
               </div>
@@ -337,6 +340,23 @@ export function UpgradeCTA({
         </div>
       </div>
       <ConfirmationModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title={`Upgrade to ${pendingUpgrade === "premium" ? "Premium" : "Premium Plus"}`}
+        description={
+          pendingUpgrade === "premium"
+            ? "Upgrade to Premium and get access to 6 todos, fewer ads, and support for the cheapskates!"
+            : "Get the ultimate todo experience with Premium Plus! Unlimited todos, no ads, and priority support!"
+        }
+        actionLabel="Confirm Upgrade"
+        onConfirm={() => {
+          if (!pendingUpgrade) return;
+          changeCurrentSubscription({
+            productKey: pendingUpgrade,
+          });
+        }}
+      />
+      <ConfirmationModal
         open={showDowngradeModal}
         onOpenChange={setShowDowngradeModal}
         title={`Downgrade to ${pendingDowngrade === "premium" ? "Premium" : "Free"}`}
@@ -347,9 +367,7 @@ export function UpgradeCTA({
         }
         actionLabel="Confirm Downgrade"
         onConfirm={() => {
-          if (!pendingDowngrade) {
-            return;
-          }
+          if (!pendingDowngrade) return;
           if (pendingDowngrade === "free") {
             cancelCurrentSubscription({
               revokeImmediately: true,
