@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@convex-dev/polar": "file:..",
-    "@polar-sh/sdk": "^0.26.0",
+    "@polar-sh/checkout": "^0.1.9",
+    "@polar-sh/sdk": "^0.26.1",
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@tanstack/react-table": "^8.20.6",

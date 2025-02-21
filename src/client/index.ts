@@ -136,12 +136,16 @@ export class Polar<DataModel extends GenericDataModel> {
   }
   async changeSubscription(
     ctx: GenericActionCtx<DataModel>,
-    { productId }: { productId: string }
+    { productKey }: { productKey: string }
   ) {
     const { userId } = await this.config.getUserInfo(ctx);
     const subscription = await this.getCurrentSubscription(ctx, { userId });
     if (!subscription) {
       throw new Error("Subscription not found");
+    }
+    const productId = this.config.products[productKey];
+    if (!productId) {
+      throw new Error("Product not found");
     }
     if (subscription.productId === productId) {
       throw new Error("Subscription already on this product");
@@ -153,7 +157,10 @@ export class Polar<DataModel extends GenericDataModel> {
       },
     });
   }
-  async cancelSubscription(ctx: GenericActionCtx<DataModel>) {
+  async cancelSubscription(
+    ctx: GenericActionCtx<DataModel>,
+    { revokeImmediately }: { revokeImmediately?: boolean } = {}
+  ) {
     const { userId } = await this.config.getUserInfo(ctx);
     const subscription = await this.getCurrentSubscription(ctx, { userId });
     if (!subscription) {
@@ -165,7 +172,8 @@ export class Polar<DataModel extends GenericDataModel> {
     await this.polar.subscriptions.update({
       id: subscription.id,
       subscriptionUpdate: {
-        cancelAtPeriodEnd: true,
+        cancelAtPeriodEnd: revokeImmediately ? null : true,
+        revoke: revokeImmediately ? true : null,
       },
     });
   }
@@ -173,18 +181,22 @@ export class Polar<DataModel extends GenericDataModel> {
     return {
       changeCurrentSubscription: actionGeneric({
         args: {
-          productId: v.string(),
+          productKey: v.string(),
         },
         handler: async (ctx, args) => {
           await this.changeSubscription(ctx, {
-            productId: args.productId,
+            productKey: args.productKey,
           });
         },
       }),
       cancelCurrentSubscription: actionGeneric({
-        args: {},
-        handler: async (ctx) => {
-          await this.cancelSubscription(ctx);
+        args: {
+          revokeImmediately: v.optional(v.boolean()),
+        },
+        handler: async (ctx, args) => {
+          await this.cancelSubscription(ctx, {
+            revokeImmediately: args.revokeImmediately,
+          });
         },
       }),
     };

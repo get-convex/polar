@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Star, Settings } from "lucide-react";
 import { CheckoutLink, CustomerPortalLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
+import { useAction } from "convex/react";
 
 export function UpgradeCTA({
   isPremium,
@@ -10,6 +11,12 @@ export function UpgradeCTA({
   isPremium: boolean;
   isPremiumPlus: boolean;
 }) {
+  const changeCurrentSubscription = useAction(
+    api.example.changeCurrentSubscription
+  );
+  const cancelCurrentSubscription = useAction(
+    api.example.cancelCurrentSubscription
+  );
   return (
     <div className="mt-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -82,12 +89,14 @@ export function UpgradeCTA({
             <Button
               variant="ghost"
               className="w-full mt-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              asChild
+              onClick={() => {
+                cancelCurrentSubscription({
+                  revokeImmediately: true,
+                });
+              }}
             >
-              <a href="#">
-                Downgrade to Free{" "}
-                <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
-              </a>
+              Downgrade to Free{" "}
+              <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
             </Button>
           )}
         </div>
@@ -168,12 +177,14 @@ export function UpgradeCTA({
             <Button
               variant="ghost"
               className="w-full mt-2 text-gray-600 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300"
-              asChild
+              onClick={() => {
+                changeCurrentSubscription({
+                  productKey: "premium",
+                });
+              }}
             >
-              <a href="#">
-                Downgrade to Premium{" "}
-                <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
-              </a>
+              Downgrade to Premium{" "}
+              <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
             </Button>
           )}
           {!isPremium && !isPremiumPlus && (
@@ -288,7 +299,23 @@ export function UpgradeCTA({
               </CustomerPortalLink>
             </Button>
           )}
-          {!isPremiumPlus && (
+          {isPremium && !isPremiumPlus && (
+            <Button
+              variant="secondary"
+              className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
+              onClick={() => {
+                changeCurrentSubscription({
+                  productKey: "premiumPlus",
+                });
+              }}
+            >
+              Upgrade to Premium Plus{" "}
+              <div className="ml-2">
+                <ArrowRight size={16} />
+              </div>
+            </Button>
+          )}
+          {!isPremium && !isPremiumPlus && (
             <Button
               variant="secondary"
               className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
