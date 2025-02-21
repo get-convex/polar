@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UpgradeCTA } from "./UpgradeCta";
+import { BillingSettings } from "./BillingSettings";
 import { AlertCircle } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -91,7 +91,7 @@ export default function TodoList() {
           </ul>
         </div>
 
-        <UpgradeCTA
+        <BillingSettings
           isPremium={user?.isPremium ?? false}
           isPremiumPlus={user?.isPremiumPlus ?? false}
         />
