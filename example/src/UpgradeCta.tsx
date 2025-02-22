@@ -17,15 +17,78 @@ export function UpgradeCTA() {
   );
   const [showDowngradeModal, setShowDowngradeModal] = useState(false);
   const [pendingDowngrade, setPendingDowngrade] = useState<
-    "free" | "premiumMonthly"
+    "free" | "premiumMonthly" | "premiumYearly"
   >();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [pendingUpgrade, setPendingUpgrade] = useState<
-    "premiumMonthly" | "premiumPlusMonthly"
+    | "premiumMonthly"
+    | "premiumYearly"
+    | "premiumPlusMonthly"
+    | "premiumPlusYearly"
   >();
+  const [billingInterval, setBillingInterval] = useState<"month" | "year">(
+    "month"
+  );
+
+  const getProductPrice = (
+    productKey:
+      | "premiumMonthly"
+      | "premiumYearly"
+      | "premiumPlusMonthly"
+      | "premiumPlusYearly"
+  ) => {
+    const product = products?.[productKey];
+    if (!product?.prices?.length) return;
+    const price = product.prices.find(
+      (p: { recurringInterval?: "month" | "year" | null }) =>
+        p.recurringInterval === billingInterval
+    );
+    return price?.priceAmount;
+  };
+
+  const calculateYearlySavings = (
+    monthlyPrice: number,
+    yearlyPrice: number
+  ) => {
+    const monthlyTotal = monthlyPrice * 12;
+    if (monthlyTotal === 0 || yearlyPrice === 0) return 0;
+    const savings = (
+      ((monthlyTotal - yearlyPrice) / monthlyTotal) *
+      100
+    ).toFixed(0);
+    return Number(savings);
+  };
 
   return (
     <>
+      <div className="flex justify-center mb-8">
+        <div className="inline-flex items-center bg-gray-100 dark:bg-gray-900 rounded-full p-1">
+          <button
+            onClick={() => setBillingInterval("month")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              billingInterval === "month"
+                ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingInterval("year")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center ${
+              billingInterval === "year"
+                ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Yearly
+            <span className="ml-2 text-xs text-green-500 dark:text-green-400 font-normal">
+              Save up to 20%
+            </span>
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           className={`relative flex flex-col bg-gradient-to-br ${
@@ -47,7 +110,7 @@ export function UpgradeCTA() {
             >
               Free
               <span className="block text-purple-700 dark:text-purple-300 text-sm mt-1">
-                $0/month
+                $0/mo
               </span>
             </h2>
             <ul className="space-y-3 mb-6">
@@ -131,13 +194,50 @@ export function UpgradeCTA() {
               }`}
             >
               Premium
-              {products?.premiumMonthly?.prices?.[0]?.priceAmount && (
-                <span className="block text-indigo-700 dark:text-indigo-300 text-sm mt-1">
-                  {`$${
-                    products.premiumMonthly.prices[0].priceAmount / 100
-                  }/month`}
-                </span>
-              )}
+              <div className="flex flex-col gap-1 mt-1">
+                {getProductPrice("premiumMonthly") !== undefined && (
+                  <span
+                    className={`text-sm ${
+                      user?.isPremium || user?.isPremiumPlus
+                        ? "text-indigo-700 dark:text-indigo-300"
+                        : "text-white"
+                    }`}
+                  >
+                    ${(getProductPrice("premiumMonthly") ?? 0) / 100}/mo
+                    {billingInterval === "year" && (
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 line-through">
+                        ${((getProductPrice("premiumMonthly") ?? 0) * 12) / 100}
+                        /year
+                      </span>
+                    )}
+                  </span>
+                )}
+                {billingInterval === "year" &&
+                  getProductPrice("premiumYearly") !== undefined && (
+                    <span
+                      className={`text-sm ${
+                        user?.isPremium || user?.isPremiumPlus
+                          ? "text-indigo-700 dark:text-indigo-300"
+                          : "text-white"
+                      }`}
+                    >
+                      ${(getProductPrice("premiumYearly") ?? 0) / 100}/year
+                      {calculateYearlySavings(
+                        getProductPrice("premiumMonthly") ?? 0,
+                        getProductPrice("premiumYearly") ?? 0
+                      ) > 0 && (
+                        <span className="ml-2 text-xs text-green-500 dark:text-green-400">
+                          Save{" "}
+                          {calculateYearlySavings(
+                            getProductPrice("premiumMonthly") ?? 0,
+                            getProductPrice("premiumYearly") ?? 0
+                          )}
+                          %
+                        </span>
+                      )}
+                    </span>
+                  )}
+              </div>
             </h2>
             <ul className="space-y-3 mb-6">
               <li
@@ -214,7 +314,13 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products.premiumMonthly.id}
+                productId={
+                  products[
+                    billingInterval === "year"
+                      ? "premiumYearly"
+                      : "premiumMonthly"
+                  ]?.id ?? ""
+                }
               >
                 Upgrade to Premium{" "}
                 <div className="ml-2">
@@ -251,13 +357,52 @@ export function UpgradeCTA() {
               }`}
             >
               Premium Plus
-              {products?.premiumPlusMonthly?.prices?.[0]?.priceAmount && (
-                <span className="block text-purple-700 dark:text-purple-300 text-sm mt-1">
-                  {`$${
-                    products.premiumPlusMonthly.prices[0].priceAmount / 100
-                  }/month`}
-                </span>
-              )}
+              <div className="flex flex-col gap-1 mt-1">
+                {getProductPrice("premiumPlusMonthly") !== undefined && (
+                  <span
+                    className={`text-sm ${
+                      user?.isPremiumPlus
+                        ? "text-purple-700 dark:text-purple-300"
+                        : "text-white"
+                    }`}
+                  >
+                    ${(getProductPrice("premiumPlusMonthly") ?? 0) / 100}/mo
+                    {billingInterval === "year" && (
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 line-through">
+                        $
+                        {((getProductPrice("premiumPlusMonthly") ?? 0) * 12) /
+                          100}
+                        /year
+                      </span>
+                    )}
+                  </span>
+                )}
+                {billingInterval === "year" &&
+                  getProductPrice("premiumPlusYearly") !== undefined && (
+                    <span
+                      className={`text-sm ${
+                        user?.isPremiumPlus
+                          ? "text-purple-700 dark:text-purple-300"
+                          : "text-white"
+                      }`}
+                    >
+                      ${(getProductPrice("premiumPlusYearly") ?? 0) / 100}/year
+                      {calculateYearlySavings(
+                        getProductPrice("premiumPlusMonthly") ?? 0,
+                        getProductPrice("premiumPlusYearly") ?? 0
+                      ) > 0 && (
+                        <span className="ml-2 text-xs text-green-500 dark:text-green-400">
+                          Save{" "}
+                          {calculateYearlySavings(
+                            getProductPrice("premiumPlusMonthly") ?? 0,
+                            getProductPrice("premiumPlusYearly") ?? 0
+                          )}
+                          %
+                        </span>
+                      )}
+                    </span>
+                  )}
+              </div>
             </h2>
             <ul className="space-y-3 mb-6">
               <li
@@ -334,7 +479,11 @@ export function UpgradeCTA() {
               variant="secondary"
               className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
               onClick={() => {
-                setPendingUpgrade("premiumPlusMonthly");
+                setPendingUpgrade(
+                  billingInterval === "year"
+                    ? "premiumPlusYearly"
+                    : "premiumPlusMonthly"
+                );
                 setShowUpgradeModal(true);
               }}
             >
@@ -352,7 +501,13 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products.premiumPlusMonthly.id}
+                productId={
+                  products[
+                    billingInterval === "year"
+                      ? "premiumPlusYearly"
+                      : "premiumPlusMonthly"
+                  ]?.id ?? ""
+                }
               >
                 Upgrade to Premium Plus{" "}
                 <div className="ml-2">
@@ -367,11 +522,11 @@ export function UpgradeCTA() {
       <ConfirmationModal
         open={showUpgradeModal}
         onOpenChange={setShowUpgradeModal}
-        title={`Upgrade to ${pendingUpgrade === "premiumMonthly" ? "Premium" : "Premium Plus"}`}
+        title={`Upgrade to ${pendingUpgrade?.includes("Plus") ? "Premium Plus" : "Premium"}`}
         description={
-          pendingUpgrade === "premiumMonthly"
-            ? "Upgrade to Premium and get access to 6 todos, fewer ads, and support for the cheapskates!"
-            : "Get the ultimate todo experience with Premium Plus! Unlimited todos, no ads, and priority support!"
+          pendingUpgrade?.includes("Plus")
+            ? "Get the ultimate todo experience with Premium Plus! Unlimited todos, no ads, and priority support!"
+            : "Upgrade to Premium and get access to 6 todos, fewer ads, and support for the cheapskates!"
         }
         actionLabel="Confirm Upgrade"
         onConfirm={() => {
@@ -388,11 +543,11 @@ export function UpgradeCTA() {
       <ConfirmationModal
         open={showDowngradeModal}
         onOpenChange={setShowDowngradeModal}
-        title={`Downgrade to ${pendingDowngrade === "premiumMonthly" ? "Premium" : "Free"}`}
+        title={`Downgrade to ${pendingDowngrade === "free" ? "Free" : "Premium"}`}
         description={
-          pendingDowngrade === "premiumMonthly"
-            ? "Your Premium Plus features will remain active until the end of your current billing period. After that, you'll be moved to the Premium plan."
-            : "Your premium features will remain active until the end of your current billing period. After that, you'll be moved to the Free plan."
+          pendingDowngrade === "free"
+            ? "Your premium features will remain active until the end of your current billing period. After that, you'll be moved to the Free plan."
+            : "Your Premium Plus features will remain active until the end of your current billing period. After that, you'll be moved to the Premium plan."
         }
         actionLabel="Confirm Downgrade"
         onConfirm={() => {

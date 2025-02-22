@@ -34,7 +34,7 @@ export function BillingSettings() {
     <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-2xl font-light text-gray-800 dark:text-gray-100">
-          {showPricingPlans ? "Available Plans" : "Billing Settings"}
+          Billing Settings
         </h2>
         <div className="flex items-center gap-4">
           {!showPricingPlans && user?.subscription && (
