@@ -74,6 +74,7 @@ export type Mounts = {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         };
       },
       any
@@ -166,6 +167,7 @@ export type Mounts = {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         };
         productId: string;
         recurringInterval: "month" | "year" | null;
@@ -225,6 +227,7 @@ export type Mounts = {
           recurringInterval?: "month" | "year" | null;
           type?: string;
         }>;
+        recurringInterval?: "month" | "year" | null;
       } | null
     >;
     getSubscription: FunctionReference<
@@ -290,8 +293,6 @@ export type Mounts = {
       "public",
       { includeArchived?: boolean },
       Array<{
-        _creationTime: number;
-        _id: string;
         createdAt: string;
         description: string | null;
         id: string;
@@ -319,6 +320,7 @@ export type Mounts = {
         modifiedAt: string | null;
         name: string;
         organizationId: string;
+        priceAmount?: number;
         prices: Array<{
           amountType?: string;
           createdAt: string;
@@ -331,6 +333,7 @@ export type Mounts = {
           recurringInterval?: "month" | "year" | null;
           type?: string;
         }>;
+        recurringInterval?: "month" | "year" | null;
       }>
     >;
     listUserSubscriptions: FunctionReference<
@@ -395,6 +398,7 @@ export type Mounts = {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         } | null;
         productId: string;
         recurringInterval: "month" | "year" | null;
@@ -446,6 +450,7 @@ export type Mounts = {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         };
       },
       any

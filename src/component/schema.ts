@@ -15,6 +15,9 @@ export default defineSchema(
       modifiedAt: v.union(v.string(), v.null()),
       name: v.string(),
       description: v.union(v.string(), v.null()),
+      recurringInterval: v.optional(
+        v.union(v.literal("month"), v.literal("year"), v.null())
+      ),
       isRecurring: v.boolean(),
       isArchived: v.boolean(),
       organizationId: v.string(),

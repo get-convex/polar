@@ -196,7 +196,7 @@ export function UpgradeCTA() {
               <ArrowRight className="ml-2 h-4 w-4 rotate-90" />
             </Button>
           )}
-          {user?.isFree && products && (
+          {user?.isFree && products?.premiumMonthly && (
             <Button
               variant="secondary"
               className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
@@ -204,7 +204,7 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products?.premiumMonthly.id}
+                productId={products.premiumMonthly.id}
               >
                 Upgrade to Premium{" "}
                 <div className="ml-2">
@@ -327,7 +327,7 @@ export function UpgradeCTA() {
               </div>
             </Button>
           )}
-          {user?.isFree && products && (
+          {user?.isFree && products?.premiumPlusMonthly && (
             <Button
               variant="secondary"
               className="w-full bg-white/95 backdrop-blur-sm text-purple-700 hover:bg-white dark:bg-white/10 dark:text-purple-200 dark:hover:bg-white/20"
@@ -335,7 +335,7 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products?.premiumPlusMonthly.id}
+                productId={products.premiumPlusMonthly.id}
               >
                 Upgrade to Premium Plus{" "}
                 <div className="ml-2">
@@ -361,7 +361,7 @@ export function UpgradeCTA() {
           if (!pendingUpgrade) {
             return;
           }
-          const productId = products?.[pendingUpgrade].id;
+          const productId = products?.[pendingUpgrade]?.id;
           if (!productId) {
             return;
           }
@@ -388,12 +388,12 @@ export function UpgradeCTA() {
             });
             return;
           }
-          const productId = products?.[pendingDowngrade].id;
+          const productId = products?.[pendingDowngrade]?.id;
           if (!productId) {
             return;
           }
           changeCurrentSubscription({
-            productId: products?.[pendingDowngrade].id,
+            productId,
           });
         }}
         variant="destructive"

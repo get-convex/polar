@@ -28,7 +28,7 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
-import { Doc } from "../component/_generated/dataModel";
+import { mapValues } from "remeda";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -226,12 +226,9 @@ export class Polar<
         args: {},
         handler: async (ctx) => {
           const products = await this.listProducts(ctx);
-          return Object.fromEntries(
-            Object.keys(this.products).map((key) => [
-              key,
-              products.find((p) => p.id === this.products[key]),
-            ])
-          ) as Record<keyof Products, Doc<"products">>;
+          return mapValues(this.products, (productId) =>
+            products.find((p) => p.id === productId)
+          );
         },
       }),
     };

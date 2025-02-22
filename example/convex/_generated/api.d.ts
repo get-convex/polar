@@ -88,6 +88,7 @@ export declare const components: {
               recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           };
         },
         any
@@ -180,6 +181,7 @@ export declare const components: {
               recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           };
           productId: string;
           recurringInterval: "month" | "year" | null;
@@ -244,6 +246,7 @@ export declare const components: {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         } | null
       >;
       getSubscription: FunctionReference<
@@ -309,8 +312,6 @@ export declare const components: {
         "internal",
         { includeArchived?: boolean },
         Array<{
-          _creationTime: number;
-          _id: string;
           createdAt: string;
           description: string | null;
           id: string;
@@ -338,6 +339,7 @@ export declare const components: {
           modifiedAt: string | null;
           name: string;
           organizationId: string;
+          priceAmount?: number;
           prices: Array<{
             amountType?: string;
             createdAt: string;
@@ -350,6 +352,7 @@ export declare const components: {
             recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         }>
       >;
       listUserSubscriptions: FunctionReference<
@@ -414,6 +417,7 @@ export declare const components: {
               recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           } | null;
           productId: string;
           recurringInterval: "month" | "year" | null;
@@ -465,6 +469,7 @@ export declare const components: {
               recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           };
         },
         any

@@ -5,6 +5,7 @@ import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { UpgradeCTA } from "@/UpgradeCta";
 import { useQuery } from "convex/react";
+import { formatWholeCents } from "@/util";
 
 export function BillingSettings() {
   const user = useQuery(api.example.getCurrentUser);
@@ -28,7 +29,7 @@ export function BillingSettings() {
     }
   };
 
-  const currentPlan = user?.subscription?.product;
+  const currentPlan = user?.subscription;
 
   return (
     <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
@@ -68,13 +69,13 @@ export function BillingSettings() {
             <h3 className="text-lg font-medium">Current Plan:</h3>
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                {currentPlan?.name || "Free"}
+                {currentPlan?.product.name || "Free"}
               </span>
               {currentPlan && (
                 <div className="flex flex-col text-sm">
                   <span className="font-medium text-gray-600 dark:text-gray-400">
-                    {currentPlan.prices[0].priceAmount}/
-                    {currentPlan.prices[0].recurringInterval}
+                    {formatWholeCents(currentPlan.amount!)}/
+                    {currentPlan.recurringInterval}
                   </span>
                 </div>
               )}

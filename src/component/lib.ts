@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
+import { omit } from "remeda";
 
 export const getCustomerByUserId = query({
   args: {
@@ -216,18 +217,17 @@ export const listProducts = query({
   returns: v.array(
     v.object({
       ...schema.tables.products.validator.fields,
-      _id: v.id("products"),
-      _creationTime: v.number(),
+      priceAmount: v.optional(v.number()),
     })
   ),
   handler: async (ctx, args) => {
-    if (args.includeArchived) {
-      return ctx.db.query("products").collect();
-    }
-    return ctx.db
-      .query("products")
-      .withIndex("isArchived", (q) => q.lt("isArchived", true))
-      .collect();
+    const q = ctx.db.query("products");
+    const products = args.includeArchived
+      ? await q.collect()
+      : await q
+          .withIndex("isArchived", (q) => q.lt("isArchived", true))
+          .collect();
+    return products.map((product) => omit(product, ["_id", "_creationTime"]));
   },
 });
 
