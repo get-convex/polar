@@ -219,7 +219,7 @@ export function UpgradeCTA() {
           className={`relative flex flex-col bg-gradient-to-br ${
             user?.isPremiumPlus
               ? "from-gray-100 to-white dark:from-gray-800 dark:to-gray-900 ring-2 ring-purple-300 dark:ring-purple-700"
-              : "from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-900"
+              : "from-purple-600 to-pink-600 dark:from-purple-900 dark:to-pink-900 shadow-[0_0_15px_rgba(168,85,247,0.35)] dark:shadow-[0_0_15px_rgba(168,85,247,0.15)]"
           } text-white p-6 rounded-lg shadow-xl`}
         >
           {user?.isPremiumPlus && (
@@ -228,7 +228,7 @@ export function UpgradeCTA() {
             </div>
           )}
           {!user?.isPremiumPlus && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
               Most Popular
             </div>
           )}
