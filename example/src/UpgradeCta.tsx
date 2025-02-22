@@ -46,6 +46,9 @@ export function UpgradeCTA() {
               }`}
             >
               Free
+              <span className="block text-purple-700 dark:text-purple-300 text-sm mt-1">
+                $0/month
+              </span>
             </h2>
             <ul className="space-y-3 mb-6">
               <li
@@ -128,6 +131,13 @@ export function UpgradeCTA() {
               }`}
             >
               Premium
+              {products?.premiumMonthly?.prices?.[0]?.priceAmount && (
+                <span className="block text-indigo-700 dark:text-indigo-300 text-sm mt-1">
+                  {`$${
+                    products.premiumMonthly.prices[0].priceAmount / 100
+                  }/month`}
+                </span>
+              )}
             </h2>
             <ul className="space-y-3 mb-6">
               <li
@@ -241,6 +251,13 @@ export function UpgradeCTA() {
               }`}
             >
               Premium Plus
+              {products?.premiumPlusMonthly?.prices?.[0]?.priceAmount && (
+                <span className="block text-purple-700 dark:text-purple-300 text-sm mt-1">
+                  {`$${
+                    products.premiumPlusMonthly.prices[0].priceAmount / 100
+                  }/month`}
+                </span>
+              )}
             </h2>
             <ul className="space-y-3 mb-6">
               <li
