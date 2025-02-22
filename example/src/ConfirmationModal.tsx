@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowRight } from "lucide-react";
+import { ReactNode } from "react";
 
 export function ConfirmationModal({
   open,
@@ -21,7 +22,7 @@ export function ConfirmationModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description: string;
+  description: ReactNode;
   actionLabel: string;
   onConfirm: () => void;
   variant?: "default" | "destructive";
@@ -33,9 +34,9 @@ export function ConfirmationModal({
           <DialogTitle className="text-xl font-semibold text-gray-700 dark:text-gray-300">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+          <div className="text-gray-600 dark:text-gray-400 mt-2">
             {description}
-          </DialogDescription>
+          </div>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-2 mt-6">
           <Button

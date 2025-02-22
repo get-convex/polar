@@ -46,6 +46,18 @@ export function UpgradeCTA() {
     return price?.priceAmount;
   };
 
+  const getDisplayPrice = (
+    productKey:
+      | "free"
+      | "premiumMonthly"
+      | "premiumYearly"
+      | "premiumPlusMonthly"
+      | "premiumPlusYearly"
+  ) => {
+    if (productKey === "free") return 0;
+    return getProductPrice(productKey) ?? 0;
+  };
+
   const calculateYearlySavings = (
     monthlyPrice: number,
     yearlyPrice: number
@@ -314,13 +326,8 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={
-                  products[
-                    billingInterval === "year"
-                      ? "premiumYearly"
-                      : "premiumMonthly"
-                  ]?.id ?? ""
-                }
+                productId={products.premiumMonthly?.id ?? ""}
+                yearlyProductId={products.premiumYearly?.id}
               >
                 Upgrade to Premium{" "}
                 <div className="ml-2">
@@ -501,13 +508,8 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={
-                  products[
-                    billingInterval === "year"
-                      ? "premiumPlusYearly"
-                      : "premiumPlusMonthly"
-                  ]?.id ?? ""
-                }
+                productId={products.premiumPlusMonthly?.id ?? ""}
+                yearlyProductId={products.premiumPlusYearly?.id}
               >
                 Upgrade to Premium Plus{" "}
                 <div className="ml-2">
@@ -524,49 +526,75 @@ export function UpgradeCTA() {
         onOpenChange={setShowUpgradeModal}
         title={`Upgrade to ${pendingUpgrade?.includes("Plus") ? "Premium Plus" : "Premium"}`}
         description={
-          pendingUpgrade?.includes("Plus")
-            ? "Get the ultimate todo experience with Premium Plus! Unlimited todos, no ads, and priority support!"
-            : "Upgrade to Premium and get access to 6 todos, fewer ads, and support for the cheapskates!"
+          <>
+            <p className="mb-4">
+              {pendingUpgrade?.includes("Plus")
+                ? "Get the ultimate todo experience with Premium Plus! Unlimited todos, no ads, and priority support!"
+                : "Upgrade to Premium and get access to 6 todos, fewer ads, and support for the cheapskates!"}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Your new subscription will be{" "}
+              <span className="font-medium text-gray-900 dark:text-gray-200">
+                ${getDisplayPrice(pendingUpgrade ?? "premiumMonthly") / 100}/
+                {billingInterval}
+              </span>
+              . The change will take effect immediately and any difference will
+              be prorated.
+            </p>
+          </>
         }
         actionLabel="Confirm Upgrade"
-        onConfirm={() => {
-          if (!pendingUpgrade) {
-            return;
-          }
+        onConfirm={async () => {
+          if (!pendingUpgrade) return;
           const productId = products?.[pendingUpgrade]?.id;
-          if (!productId) {
-            return;
-          }
-          changeCurrentSubscription({ productId });
+          if (!productId) return;
+          await changeCurrentSubscription({ productId });
+          setShowUpgradeModal(false);
         }}
       />
       <ConfirmationModal
         open={showDowngradeModal}
         onOpenChange={setShowDowngradeModal}
-        title={`Downgrade to ${pendingDowngrade === "free" ? "Free" : "Premium"}`}
+        title="Downgrade Subscription"
         description={
-          pendingDowngrade === "free"
-            ? "Your premium features will remain active until the end of your current billing period. After that, you'll be moved to the Free plan."
-            : "Your Premium Plus features will remain active until the end of your current billing period. After that, you'll be moved to the Premium plan."
+          <>
+            <p className="mb-4">
+              {pendingDowngrade === "free"
+                ? "Are you sure you want to cancel your subscription?"
+                : "Are you sure you want to downgrade your subscription?"}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {pendingDowngrade === "free" ? (
+                "Your subscription will be cancelled immediately and you'll lose access to premium features. Any remaining time will be prorated and refunded."
+              ) : (
+                <>
+                  Your new subscription will be{" "}
+                  <span className="font-medium text-gray-900 dark:text-gray-200">
+                    ${getDisplayPrice(pendingDowngrade ?? "free") / 100}/
+                    {billingInterval}
+                  </span>
+                  . The change will take effect immediately and any difference
+                  will be prorated.
+                </>
+              )}
+            </p>
+          </>
         }
-        actionLabel="Confirm Downgrade"
-        onConfirm={() => {
-          if (!pendingDowngrade) {
-            return;
-          }
+        actionLabel={
+          pendingDowngrade === "free"
+            ? "Cancel Subscription"
+            : "Confirm Downgrade"
+        }
+        onConfirm={async () => {
+          if (!pendingDowngrade) return;
           if (pendingDowngrade === "free") {
-            cancelCurrentSubscription({
-              revokeImmediately: true,
-            });
-            return;
+            await cancelCurrentSubscription({ revokeImmediately: true });
+          } else {
+            const productId = products?.[pendingDowngrade]?.id;
+            if (!productId) return;
+            await changeCurrentSubscription({ productId });
           }
-          const productId = products?.[pendingDowngrade]?.id;
-          if (!productId) {
-            return;
-          }
-          changeCurrentSubscription({
-            productId,
-          });
+          setShowDowngradeModal(false);
         }}
         variant="destructive"
       />

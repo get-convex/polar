@@ -76,10 +76,17 @@ export class Polar<
     ctx: GenericActionCtx<DataModel>,
     {
       productId,
+      yearlyProductId,
       userId,
       email,
       origin,
-    }: { productId: string; userId: string; email: string; origin: string }
+    }: {
+      productId: string;
+      yearlyProductId?: string;
+      userId: string;
+      email: string;
+      origin: string;
+    }
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
@@ -105,7 +112,7 @@ export class Polar<
     }
     return this.sdk.checkouts.create({
       allowDiscountCodes: true,
-      products: [productId],
+      products: yearlyProductId ? [productId, yearlyProductId] : [productId],
       customerId,
       embedOrigin: origin,
     });
@@ -238,6 +245,7 @@ export class Polar<
       generateCheckoutLink: actionGeneric({
         args: {
           productId: v.string(),
+          yearlyProductId: v.optional(v.string()),
           origin: v.string(),
         },
         returns: v.object({
@@ -247,6 +255,7 @@ export class Polar<
           const { userId, email } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCheckoutSession(ctx, {
             productId: args.productId,
+            yearlyProductId: args.yearlyProductId,
             userId,
             email,
             origin: args.origin,
