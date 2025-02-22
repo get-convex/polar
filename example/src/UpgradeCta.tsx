@@ -3,7 +3,7 @@ import { ArrowRight, Check, Star, Settings } from "lucide-react";
 import { CheckoutLink, CustomerPortalLink } from "../../src/react";
 import { api } from "../convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 export function UpgradeCTA() {
@@ -27,8 +27,14 @@ export function UpgradeCTA() {
     | "premiumPlusYearly"
   >();
   const [billingInterval, setBillingInterval] = useState<"month" | "year">(
-    "month"
+    user?.subscription?.recurringInterval ?? "month"
   );
+
+  useEffect(() => {
+    if (user?.subscription?.recurringInterval) {
+      setBillingInterval(user.subscription.recurringInterval);
+    }
+  }, [user?.subscription?.recurringInterval]);
 
   const getProductPrice = (
     productKey:
