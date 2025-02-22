@@ -7,6 +7,7 @@ import {
   actionGeneric,
   httpActionGeneric,
   GenericActionCtx,
+  queryGeneric,
 } from "convex/server";
 import {
   type ComponentApi,
@@ -27,6 +28,7 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
+import { Doc } from "../component/_generated/dataModel";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -38,15 +40,15 @@ export type SubscriptionHandler = FunctionReference<
 >;
 
 export type CheckoutApi<
-  DataModel extends GenericDataModel,
-  Products extends Record<string, string>,
+  DataModel extends GenericDataModel = GenericDataModel,
+  Products extends Record<string, string> = Record<string, string>,
 > = ApiFromModules<{
   checkout: ReturnType<Polar<DataModel, Products>["checkoutApi"]>;
 }>["checkout"];
 
 export class Polar<
-  DataModel extends GenericDataModel,
-  Products extends Record<string, string>,
+  DataModel extends GenericDataModel = GenericDataModel,
+  Products extends Record<string, string> = Record<string, string>,
 > {
   public sdk: PolarSdk;
   public products: Products;
@@ -129,30 +131,44 @@ export class Polar<
   }
   listProducts(
     ctx: RunQueryCtx,
-    { includeArchived }: { includeArchived: boolean }
+    { includeArchived }: { includeArchived?: boolean } = {}
   ) {
-    return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
-  }
-  getCurrentSubscription(ctx: RunQueryCtx, { userId }: { userId: string }) {
-    return ctx.runQuery(this.component.lib.getCurrentSubscription, {
-      userId,
+    return ctx.runQuery(this.component.lib.listProducts, {
+      includeArchived,
     });
+  }
+  async getCurrentSubscription(
+    ctx: RunQueryCtx,
+    { userId }: { userId: string }
+  ) {
+    const subscription = await ctx.runQuery(
+      this.component.lib.getCurrentSubscription,
+      {
+        userId,
+      }
+    );
+    if (!subscription) {
+      return null;
+    }
+    const productKey = (
+      Object.keys(this.products) as Array<keyof Products>
+    ).find((key) => this.products[key] === subscription.productId);
+    return {
+      ...subscription,
+      productKey,
+    };
   }
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
   async changeSubscription(
     ctx: GenericActionCtx<DataModel>,
-    { productKey }: { productKey: string }
+    { productId }: { productId: string }
   ) {
     const { userId } = await this.config.getUserInfo(ctx);
     const subscription = await this.getCurrentSubscription(ctx, { userId });
     if (!subscription) {
       throw new Error("Subscription not found");
-    }
-    const productId = this.config.products[productKey];
-    if (!productId) {
-      throw new Error("Product not found");
     }
     if (subscription.productId === productId) {
       throw new Error("Subscription already on this product");
@@ -188,11 +204,11 @@ export class Polar<
     return {
       changeCurrentSubscription: actionGeneric({
         args: {
-          productKey: v.string(),
+          productId: v.string(),
         },
         handler: async (ctx, args) => {
           await this.changeSubscription(ctx, {
-            productKey: args.productKey,
+            productId: args.productId,
           });
         },
       }),
@@ -206,13 +222,25 @@ export class Polar<
           });
         },
       }),
+      getProducts: queryGeneric({
+        args: {},
+        handler: async (ctx) => {
+          const products = await this.listProducts(ctx);
+          return Object.fromEntries(
+            Object.keys(this.products).map((key) => [
+              key,
+              products.find((p) => p.id === this.products[key]),
+            ])
+          ) as Record<keyof Products, Doc<"products">>;
+        },
+      }),
     };
   }
   checkoutApi() {
     return {
       generateCheckoutLink: actionGeneric({
         args: {
-          productKey: v.string(),
+          productId: v.string(),
           origin: v.string(),
         },
         returns: v.object({
@@ -221,7 +249,7 @@ export class Polar<
         handler: async (ctx, args) => {
           const { userId, email } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCheckoutSession(ctx, {
-            productId: this.config.products?.[args.productKey],
+            productId: args.productId,
             userId,
             email,
             origin: args.origin,

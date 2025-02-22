@@ -2,15 +2,16 @@ import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
 import { QueryCtx, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { DataModel, Id } from "./_generated/dataModel";
+import { Id } from "./_generated/dataModel";
 
-const products = {
-  premium: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
-  premiumPlus: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
-};
-
-export const polar = new Polar<DataModel>(components.polar, {
-  products,
+export const polar = new Polar(components.polar, {
+  products: {
+    // These would probably be environment variables in a production app
+    premiumMonthly: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
+    premiumYearly: "9bc5ed5f-2065-40a4-bd1f-e012e448d82f",
+    premiumPlusMonthly: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
+    premiumPlusYearly: "9ff9976e-459e-4ebc-8cde-b2ced74f8822",
+  },
   getUserInfo: async (ctx) => {
     const user: { _id: Id<"users">; email: string } = await ctx.runQuery(
       api.example.getCurrentUser
@@ -25,8 +26,11 @@ export const polar = new Polar<DataModel>(components.polar, {
 export const MAX_FREE_TODOS = 3;
 export const MAX_PREMIUM_TODOS = 6;
 
-export const { changeCurrentSubscription, cancelCurrentSubscription } =
-  polar.api();
+export const {
+  changeCurrentSubscription,
+  cancelCurrentSubscription,
+  getProducts,
+} = polar.api();
 
 export const { generateCheckoutLink, generateCustomerPortalUrl } =
   polar.checkoutApi();
@@ -41,14 +45,17 @@ const currentUser = async (ctx: QueryCtx) => {
   const subscription = await polar.getCurrentSubscription(ctx, {
     userId: user._id,
   });
-  const isPremiumPlus =
-    subscription?.product?.id === polar.products.premiumPlus;
+  const productKey = subscription?.productKey;
   const isPremium =
-    isPremiumPlus || subscription?.product?.id === polar.products.premium;
+    productKey === "premiumMonthly" || productKey === "premiumYearly";
+  const isPremiumPlus =
+    productKey === "premiumPlusMonthly" || productKey === "premiumPlusYearly";
   return {
     ...user,
+    isFree: !isPremium && !isPremiumPlus,
     isPremium,
     isPremiumPlus,
+    subscription,
     maxTodos: isPremiumPlus
       ? MAX_PREMIUM_TODOS
       : isPremium
@@ -111,10 +118,15 @@ export const insertTodo = mutation({
         .withIndex("userId", (q) => q.eq("userId", user._id))
         .collect()
     ).length;
-    if (!user.isPremium && todoCount >= MAX_FREE_TODOS) {
+    const productKey = user.subscription?.productKey;
+    if (!productKey && todoCount >= MAX_FREE_TODOS) {
       throw new Error("Reached maximum number of todos for free plan");
     }
-    if (!user.isPremiumPlus && todoCount >= MAX_PREMIUM_TODOS) {
+    if (
+      (productKey === "premiumMonthly" ||
+        productKey === "premiumPlusMonthly") &&
+      todoCount >= MAX_PREMIUM_TODOS
+    ) {
       throw new Error("Reached maximum number of todos for premium plan");
     }
     await ctx.db.insert("todos", {

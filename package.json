@@ -89,6 +89,7 @@
     "@polar-sh/checkout": "^0.1.9",
     "buffer": "^6.0.3",
     "convex-helpers": "^0.1.63",
+    "remeda": "^2.20.2",
     "standardwebhooks": "^1.0.0"
   }
 }

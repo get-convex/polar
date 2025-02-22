@@ -90,11 +90,7 @@ export default function TodoList() {
             ))}
           </ul>
         </div>
-
-        <BillingSettings
-          isPremium={user?.isPremium ?? false}
-          isPremiumPlus={user?.isPremiumPlus ?? false}
-        />
+        <BillingSettings />
       </div>
     </main>
   );

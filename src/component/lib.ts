@@ -211,7 +211,7 @@ export const listUserSubscriptions = query({
 
 export const listProducts = query({
   args: {
-    includeArchived: v.boolean(),
+    includeArchived: v.optional(v.boolean()),
   },
   returns: v.array(
     v.object({

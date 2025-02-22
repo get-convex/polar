@@ -85,7 +85,7 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
           };
@@ -111,7 +111,7 @@ export declare const components: {
             modifiedAt: string | null;
             priceId: string;
             productId: string;
-            recurringInterval: string;
+            recurringInterval: "month" | "year" | null;
             startedAt: string | null;
             status: string;
           };
@@ -177,12 +177,12 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
           };
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
         } | null
@@ -241,7 +241,7 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
         } | null
@@ -267,7 +267,7 @@ export declare const components: {
           modifiedAt: string | null;
           priceId: string;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
         } | null
@@ -299,7 +299,7 @@ export declare const components: {
           modifiedAt: string | null;
           priceId: string;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
         }>
@@ -307,7 +307,7 @@ export declare const components: {
       listProducts: FunctionReference<
         "query",
         "internal",
-        { includeArchived: boolean },
+        { includeArchived?: boolean },
         Array<{
           _creationTime: number;
           _id: string;
@@ -347,7 +347,7 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
         }>
@@ -411,12 +411,12 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
           } | null;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
         }>
@@ -462,7 +462,7 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
           };
@@ -488,7 +488,7 @@ export declare const components: {
             modifiedAt: string | null;
             priceId: string;
             productId: string;
-            recurringInterval: string;
+            recurringInterval: "month" | "year" | null;
             startedAt: string | null;
             status: string;
           };

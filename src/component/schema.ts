@@ -29,7 +29,9 @@ export default defineSchema(
           priceCurrency: v.optional(v.string()),
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
-          recurringInterval: v.optional(v.string()),
+          recurringInterval: v.optional(
+            v.union(v.literal("month"), v.literal("year"), v.null())
+          ),
         })
       ),
       medias: v.array(
@@ -63,7 +65,11 @@ export default defineSchema(
       modifiedAt: v.union(v.string(), v.null()),
       amount: v.union(v.number(), v.null()),
       currency: v.union(v.string(), v.null()),
-      recurringInterval: v.string(),
+      recurringInterval: v.union(
+        v.literal("month"),
+        v.literal("year"),
+        v.null()
+      ),
       status: v.string(),
       currentPeriodStart: v.string(),
       currentPeriodEnd: v.union(v.string(), v.null()),
