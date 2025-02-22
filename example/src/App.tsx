@@ -51,6 +51,16 @@ export default function TodoList() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (
+      confirm(
+        "Are you sure you want to cancel your subscription? This will immediately end your subscription and any remaining time will be prorated and refunded."
+      )
+    ) {
+      await cancelSubscription({ revokeImmediately: true });
+    }
+  };
+
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault();
     const todo = newTodo.trim();
@@ -273,9 +283,7 @@ export default function TodoList() {
                 <Button
                   variant="ghost"
                   className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                  onClick={() =>
-                    cancelSubscription({ revokeImmediately: true })
-                  }
+                  onClick={handleCancelSubscription}
                 >
                   Cancel Subscription
                 </Button>
