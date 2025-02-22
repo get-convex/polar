@@ -222,11 +222,12 @@ export function UpgradeCTA() {
               : "from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-900"
           } text-white p-6 rounded-lg shadow-xl`}
         >
-          {user?.isPremiumPlus ? (
+          {user?.isPremiumPlus && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
               <Star className="w-3 h-3" /> Current Plan
             </div>
-          ) : (
+          )}
+          {!user?.isPremiumPlus && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-medium">
               Most Popular
             </div>
