@@ -19,9 +19,12 @@ export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
 };
 export type RunMutationCtx = {
+  runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
   runMutation: GenericMutationCtx<GenericDataModel>["runMutation"];
 };
 export type RunActionCtx = {
+  runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
+  runMutation: GenericMutationCtx<GenericDataModel>["runMutation"];
   runAction: GenericActionCtx<GenericDataModel>["runAction"];
 };
 

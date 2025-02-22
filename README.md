@@ -69,7 +69,7 @@ import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 
-export const polar = new Polar<DataModel>(components.polar, {
+export const polar = new Polar(components.polar, {
   products: {
     // Map your product keys to Polar product IDs
     premiumMonthly: "product_id_from_polar",

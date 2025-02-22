@@ -73,7 +73,7 @@ export class Polar<
     return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
   }
   async createCheckoutSession(
-    ctx: GenericActionCtx<GenericDataModel>,
+    ctx: RunMutationCtx,
     {
       productIds,
       userId,
