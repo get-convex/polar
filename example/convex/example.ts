@@ -1,18 +1,10 @@
 import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
-import {
-  QueryCtx,
-  mutation,
-  query,
-  action,
-  ActionCtx,
-} from "./_generated/server";
+import { QueryCtx, mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
-import { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
-import { DataModel } from "./_generated/dataModel";
 
-export const polar = new Polar<DataModel>(components.polar, {
+export const polar = new Polar(components.polar, {
   products: {
     // These would probably be environment variables in a production app
     premiumMonthly: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
@@ -45,35 +37,15 @@ export const { generateCustomerPortalUrl } = polar.checkoutApi();
 // Custom implementation of generateCheckoutLink that accepts a productKey
 export const generateCheckoutLink = action({
   args: {
-    productId: v.string(),
-    yearlyProductId: v.optional(v.string()),
+    productIds: v.array(v.string()),
     origin: v.string(),
   },
-  returns: v.object({ url: v.string() }),
-  handler: async (ctx: ActionCtx, args): Promise<{ url: string }> => {
+  handler: async (ctx, args) => {
     const user = await ctx.runQuery(api.example.getCurrentUser);
-    const session = await ctx.runAction(api.example.createCheckoutSession, {
-      productId: args.productId,
-      yearlyProductId: args.yearlyProductId,
-      origin: args.origin,
-    });
-    return { url: session.url };
-  },
-});
+    if (!user) throw new Error("No user found");
 
-// Create a checkout session using the Polar SDK
-export const createCheckoutSession = action({
-  args: {
-    productId: v.string(),
-    yearlyProductId: v.optional(v.string()),
-    origin: v.string(),
-  },
-  returns: v.object({ url: v.string() }),
-  handler: async (ctx: ActionCtx, args): Promise<{ url: string }> => {
-    const user = await ctx.runQuery(api.example.getCurrentUser);
     const session = await polar.createCheckoutSession(ctx, {
-      productId: args.productId,
-      yearlyProductId: args.yearlyProductId,
+      productIds: args.productIds,
       userId: user._id,
       email: user.email,
       origin: args.origin,

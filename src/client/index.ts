@@ -73,16 +73,14 @@ export class Polar<
     return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
   }
   async createCheckoutSession(
-    ctx: GenericActionCtx<DataModel>,
+    ctx: GenericActionCtx<GenericDataModel>,
     {
-      productId,
-      yearlyProductId,
+      productIds,
       userId,
       email,
       origin,
     }: {
-      productId: string;
-      yearlyProductId?: string;
+      productIds: string[];
       userId: string;
       email: string;
       origin: string;
@@ -112,7 +110,7 @@ export class Polar<
     }
     return this.sdk.checkouts.create({
       allowDiscountCodes: true,
-      products: yearlyProductId ? [productId, yearlyProductId] : [productId],
+      products: productIds,
       customerId,
       embedOrigin: origin,
     });
@@ -244,8 +242,7 @@ export class Polar<
     return {
       generateCheckoutLink: actionGeneric({
         args: {
-          productId: v.string(),
-          yearlyProductId: v.optional(v.string()),
+          productIds: v.array(v.string()),
           origin: v.string(),
         },
         returns: v.object({
@@ -254,8 +251,7 @@ export class Polar<
         handler: async (ctx, args) => {
           const { userId, email } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCheckoutSession(ctx, {
-            productId: args.productId,
-            yearlyProductId: args.yearlyProductId,
+            productIds: args.productIds,
             userId,
             email,
             origin: args.origin,

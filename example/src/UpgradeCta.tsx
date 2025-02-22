@@ -332,8 +332,10 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products.premiumMonthly?.id ?? ""}
-                yearlyProductId={products.premiumYearly?.id}
+                productIds={[
+                  products.premiumMonthly?.id,
+                  products.premiumYearly?.id,
+                ].filter((id): id is string => id !== undefined)}
               >
                 Upgrade to Premium{" "}
                 <div className="ml-2">
@@ -514,8 +516,10 @@ export function UpgradeCTA() {
             >
               <CheckoutLink
                 polarApi={api.example}
-                productId={products.premiumPlusMonthly?.id ?? ""}
-                yearlyProductId={products.premiumPlusYearly?.id}
+                productIds={[
+                  products.premiumPlusMonthly?.id,
+                  products.premiumPlusYearly?.id,
+                ].filter((id): id is string => id !== undefined)}
               >
                 Upgrade to Premium Plus{" "}
                 <div className="ml-2">

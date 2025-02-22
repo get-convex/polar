@@ -205,8 +205,10 @@ export default function TodoList() {
                               generateCheckoutLink:
                                 api.example.generateCheckoutLink,
                             }}
-                            productId={premiumMonthly.id}
-                            yearlyProductId={premiumYearly?.id}
+                            productIds={[
+                              premiumMonthly.id,
+                              premiumYearly?.id,
+                            ].filter((id): id is string => id !== undefined)}
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                           >
                             Upgrade to Premium
@@ -253,8 +255,10 @@ export default function TodoList() {
                               generateCheckoutLink:
                                 api.example.generateCheckoutLink,
                             }}
-                            productId={premiumPlusMonthly.id}
-                            yearlyProductId={premiumPlusYearly?.id}
+                            productIds={[
+                              premiumPlusMonthly.id,
+                              premiumPlusYearly?.id,
+                            ].filter((id): id is string => id !== undefined)}
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                           >
                             Upgrade to Premium Plus

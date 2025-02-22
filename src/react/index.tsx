@@ -38,15 +38,13 @@ export const CustomerPortalLink = <DataModel extends GenericDataModel>({
 
 export const CheckoutLink = ({
   polarApi,
-  productId,
-  yearlyProductId,
+  productIds,
   children,
   className,
   theme = "dark",
 }: PropsWithChildren<{
   polarApi: Pick<CheckoutApi, "generateCheckoutLink">;
-  productId: string;
-  yearlyProductId?: string;
+  productIds: string[];
   className?: string;
   theme?: "dark" | "light";
 }>) => {
@@ -56,11 +54,10 @@ export const CheckoutLink = ({
   useEffect(() => {
     PolarEmbedCheckout.init();
     void generateCheckoutLink({
-      productId,
-      yearlyProductId,
+      productIds,
       origin: window.location.origin,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productId, yearlyProductId]);
+  }, [productIds]);
 
   return (
     <a
