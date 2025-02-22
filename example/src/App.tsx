@@ -14,10 +14,42 @@ export default function TodoList() {
   const completeTodo = useMutation(api.example.completeTodo);
   const deleteTodo = useMutation(api.example.deleteTodo);
   const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
+  const changeSubscription = useAction(api.example.changeCurrentSubscription);
   const [newTodo, setNewTodo] = useState("");
 
   const todosLength = todos?.length ?? 0;
   const isAtMaxTodos = user?.maxTodos && todosLength >= user.maxTodos;
+
+  const {
+    premiumMonthly,
+    premiumYearly,
+    premiumPlusMonthly,
+    premiumPlusYearly,
+  } = products ?? {};
+
+  const getButtonText = (targetProductId: string) => {
+    if (!user?.subscription) return "Upgrade";
+    const currentAmount = user.subscription.amount ?? 0;
+    const targetProduct = Object.values(products ?? {}).find(
+      (p) => p?.id === targetProductId
+    );
+    const targetAmount = targetProduct?.prices[0].priceAmount ?? 0;
+    if (targetAmount > currentAmount) return "Upgrade";
+    if (targetAmount < currentAmount) return "Downgrade";
+    return "Switch";
+  };
+
+  const handlePlanChange = async (productId: string) => {
+    if (!user?.subscription) return;
+    const action = getButtonText(productId);
+    if (
+      confirm(
+        `Are you sure you want to ${action.toLowerCase()} your subscription? Any price difference will be prorated.`
+      )
+    ) {
+      await changeSubscription({ productId });
+    }
+  };
 
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,76 +163,104 @@ export default function TodoList() {
             </div>
 
             {/* Available Plans */}
-            {user?.isFree && products?.premiumMonthly && (
+            {premiumMonthly && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Available Plans:</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  {user?.isFree ? "Available Plans:" : "Change Plan:"}
+                </h3>
                 <div className="space-y-2">
                   {/* Premium Monthly */}
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Premium</h4>
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          $
-                          {(products.premiumMonthly.prices[0].priceAmount ??
-                            0) / 100}
-                          /month
-                        </p>
-                        {products.premiumYearly && (
+                  {premiumMonthly && (
+                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+                      <div>
+                        <h4 className="font-medium">Premium</h4>
+                        <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            $
-                            {(products.premiumYearly.prices[0].priceAmount ??
-                              0) / 100}
-                            /year
+                            ${(premiumMonthly.prices[0].priceAmount ?? 0) / 100}
+                            /month
                           </p>
-                        )}
+                          {premiumYearly && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              $
+                              {(premiumYearly.prices[0].priceAmount ?? 0) / 100}
+                              /year
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      {user?.subscription?.productId !== premiumMonthly.id &&
+                        (user?.isFree ? (
+                          <CheckoutLink
+                            polarApi={{
+                              generateCheckoutLink:
+                                api.example.generateCheckoutLink,
+                            }}
+                            productId={premiumMonthly.id}
+                            yearlyProductId={premiumYearly?.id}
+                            className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                          >
+                            Upgrade to Premium
+                          </CheckoutLink>
+                        ) : (
+                          <Button
+                            variant="link"
+                            className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
+                            onClick={() => handlePlanChange(premiumMonthly.id)}
+                          >
+                            {getButtonText(premiumMonthly.id)} to Premium
+                          </Button>
+                        ))}
                     </div>
-                    <CheckoutLink
-                      polarApi={{
-                        generateCheckoutLink: api.example.generateCheckoutLink,
-                      }}
-                      productId={products.premiumMonthly.id}
-                      yearlyProductId={products.premiumYearly?.id}
-                      className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >
-                      Upgrade to Premium
-                    </CheckoutLink>
-                  </div>
+                  )}
 
                   {/* Premium Plus Monthly */}
-                  {products.premiumPlusMonthly && (
+                  {premiumPlusMonthly && (
                     <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
                       <div>
                         <h4 className="font-medium">Premium Plus</h4>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             $
-                            {(products.premiumPlusMonthly.prices[0]
-                              .priceAmount ?? 0) / 100}
+                            {(premiumPlusMonthly.prices[0].priceAmount ?? 0) /
+                              100}
                             /month
                           </p>
-                          {products.premiumPlusYearly && (
+                          {premiumPlusYearly && (
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               $
-                              {(products.premiumPlusYearly.prices[0]
-                                .priceAmount ?? 0) / 100}
+                              {(premiumPlusYearly.prices[0].priceAmount ?? 0) /
+                                100}
                               /year
                             </p>
                           )}
                         </div>
                       </div>
-                      <CheckoutLink
-                        polarApi={{
-                          generateCheckoutLink:
-                            api.example.generateCheckoutLink,
-                        }}
-                        productId={products.premiumPlusMonthly.id}
-                        yearlyProductId={products.premiumPlusYearly?.id}
-                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                      >
-                        Upgrade to Premium Plus
-                      </CheckoutLink>
+                      {user?.subscription?.productId !==
+                        premiumPlusMonthly.id &&
+                        (user?.isFree ? (
+                          <CheckoutLink
+                            polarApi={{
+                              generateCheckoutLink:
+                                api.example.generateCheckoutLink,
+                            }}
+                            productId={premiumPlusMonthly.id}
+                            yearlyProductId={premiumPlusYearly?.id}
+                            className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                          >
+                            Upgrade to Premium Plus
+                          </CheckoutLink>
+                        ) : (
+                          <Button
+                            variant="link"
+                            className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
+                            onClick={() =>
+                              handlePlanChange(premiumPlusMonthly.id)
+                            }
+                          >
+                            {getButtonText(premiumPlusMonthly.id)} to Premium
+                            Plus
+                          </Button>
+                        ))}
                     </div>
                   )}
                 </div>
