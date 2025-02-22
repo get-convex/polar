@@ -41,9 +41,10 @@ const currentUser = async (ctx: QueryCtx) => {
   const subscription = await polar.getCurrentSubscription(ctx, {
     userId: user._id,
   });
-  const isPremiumPlus = subscription?.product?.id === products.premiumPlus;
+  const isPremiumPlus =
+    subscription?.product?.id === polar.products.premiumPlus;
   const isPremium =
-    isPremiumPlus || subscription?.product?.id === products.premium;
+    isPremiumPlus || subscription?.product?.id === polar.products.premium;
   return {
     ...user,
     isPremium,

@@ -37,24 +37,31 @@ export type SubscriptionHandler = FunctionReference<
   { subscription: Subscription }
 >;
 
-export type CheckoutApi<DataModel extends GenericDataModel> = ApiFromModules<{
-  checkout: ReturnType<Polar<DataModel>["checkoutApi"]>;
+export type CheckoutApi<
+  DataModel extends GenericDataModel,
+  Products extends Record<string, string>,
+> = ApiFromModules<{
+  checkout: ReturnType<Polar<DataModel, Products>["checkoutApi"]>;
 }>["checkout"];
 
-export class Polar<DataModel extends GenericDataModel> {
-  private polar: PolarSdk;
+export class Polar<
+  DataModel extends GenericDataModel,
+  Products extends Record<string, string>,
+> {
+  public sdk: PolarSdk;
+  public products: Products;
   constructor(
     public component: ComponentApi,
     private config: {
-      products: Record<string, string>;
-
+      products: Products;
       getUserInfo: (ctx: RunQueryCtx) => Promise<{
         userId: string;
         email: string;
       }>;
     }
   ) {
-    this.polar = new PolarSdk({
+    this.products = config.products;
+    this.sdk = new PolarSdk({
       accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
       server:
         (process.env["POLAR_SERVER"] as "sandbox" | "production") ?? "sandbox",
@@ -81,7 +88,7 @@ export class Polar<DataModel extends GenericDataModel> {
     const customerId =
       dbCustomer?.id ||
       (
-        await this.polar.customers.create({
+        await this.sdk.customers.create({
           email,
           metadata: {
             userId,
@@ -94,7 +101,7 @@ export class Polar<DataModel extends GenericDataModel> {
         userId,
       });
     }
-    return this.polar.checkouts.create({
+    return this.sdk.checkouts.create({
       allowDiscountCodes: true,
       products: [productId],
       customerId,
@@ -114,7 +121,7 @@ export class Polar<DataModel extends GenericDataModel> {
       throw new Error("Customer not found");
     }
 
-    const session = await this.polar.customerSessions.create({
+    const session = await this.sdk.customerSessions.create({
       customerId: customer.id,
     });
 
@@ -150,7 +157,7 @@ export class Polar<DataModel extends GenericDataModel> {
     if (subscription.productId === productId) {
       throw new Error("Subscription already on this product");
     }
-    await this.polar.subscriptions.update({
+    await this.sdk.subscriptions.update({
       id: subscription.id,
       subscriptionUpdate: {
         productId,
@@ -169,7 +176,7 @@ export class Polar<DataModel extends GenericDataModel> {
     if (subscription.status !== "active") {
       throw new Error("Subscription is not active");
     }
-    await this.polar.subscriptions.update({
+    await this.sdk.subscriptions.update({
       id: subscription.id,
       subscriptionUpdate: {
         cancelAtPeriodEnd: revokeImmediately ? null : true,

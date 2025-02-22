@@ -19,6 +19,13 @@ export function BillingSettings({
     : isPremium
       ? "Premium"
       : "Free";
+
+  const currentPrice = isPremiumPlus
+    ? "$20/month or $200/year"
+    : isPremium
+      ? "$10/month or $100/year"
+      : "Free";
+
   const features = isPremiumPlus
     ? ["Unlimited todos", "No ads", "Priority support", "Advanced analytics"]
     : isPremium
@@ -61,9 +68,21 @@ export function BillingSettings({
         <div className="mt-4">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="text-lg font-medium">Current Plan:</h3>
-            <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-              {currentPlan}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                {currentPlan}
+              </span>
+              {currentPrice !== "Free" && (
+                <div className="flex flex-col text-sm">
+                  <span className="font-medium text-gray-600 dark:text-gray-400">
+                    {isPremiumPlus ? "$20/month" : "$10/month"}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500">
+                    or {isPremiumPlus ? "$200/year" : "$100/year"}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           <ul className="mt-4 space-y-2">
             {features.map((feature) => (
