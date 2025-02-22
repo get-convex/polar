@@ -139,10 +139,22 @@ export default function TodoList() {
                   <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
                     <div>
                       <h4 className="font-medium">Premium</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        ${products.premiumMonthly.prices[0].priceAmount ?? 0}
-                        /month
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          $
+                          {(products.premiumMonthly.prices[0].priceAmount ??
+                            0) / 100}
+                          /month
+                        </p>
+                        {products.premiumYearly && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            $
+                            {(products.premiumYearly.prices[0].priceAmount ??
+                              0) / 100}
+                            /year
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <CheckoutLink
                       polarApi={{
@@ -161,12 +173,22 @@ export default function TodoList() {
                     <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
                       <div>
                         <h4 className="font-medium">Premium Plus</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          $
-                          {products.premiumPlusMonthly.prices[0].priceAmount ??
-                            0}
-                          /month
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            $
+                            {(products.premiumPlusMonthly.prices[0]
+                              .priceAmount ?? 0) / 100}
+                            /month
+                          </p>
+                          {products.premiumPlusYearly && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              $
+                              {(products.premiumPlusYearly.prices[0]
+                                .priceAmount ?? 0) / 100}
+                              /year
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <CheckoutLink
                         polarApi={{
