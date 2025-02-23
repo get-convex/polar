@@ -110,6 +110,8 @@ export const {
   generateCheckoutLink,
   generateCustomerPortalUrl,
 } = polar.checkoutApi();
+
+export const _ = query(
 ```
 
 ### 2. Set up webhooks
