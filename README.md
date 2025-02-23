@@ -136,7 +136,51 @@ polar.registerRoutes(http as any);
 export default http;
 ```
 
-### 3. Add subscription UI components
+### 3. Display products and prices
+
+Use the exported `getProducts` function to display your products and their prices:
+
+```tsx
+// React component
+const products = useQuery(api.example.getProducts);
+
+// Simple example of displaying products and prices
+function PricingTable() {
+  const products = useQuery(api.example.getProducts);
+  if (!products) return null;
+
+  return (
+    <div>
+      {products.premiumMonthly && (
+        <div>
+          <h3>{products.premiumMonthly.name}</h3>
+          <p>
+            ${(products.premiumMonthly.prices[0].priceAmount ?? 0) / 100}/month
+          </p>
+        </div>
+      )}
+      {products.premiumYearly && (
+        <div>
+          <h3>{products.premiumYearly.name}</h3>
+          <p>
+            ${(products.premiumYearly.prices[0].priceAmount ?? 0) / 100}/year
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+Each product includes:
+- `id`: The Polar product ID
+- `name`: The product name
+- `prices`: Array of prices with:
+  - `priceAmount`: Price in cents
+  - `priceCurrency`: Currency code (e.g., "USD")
+  - `recurringInterval`: "month" or "year"
+
+### 4. Add subscription UI components
 
 Use the provided React components to add subscription functionality to your app:
 
@@ -164,7 +208,7 @@ import { api } from "../convex/_generated/api";
 </CustomerPortalLink>
 ```
 
-### 4. Handle subscription changes
+### 5. Handle subscription changes
 
 The Polar component provides functions to handle subscription changes for the
 current user.
@@ -182,7 +226,7 @@ const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
 await cancelSubscription({ revokeImmediately: true });
 ```
 
-### 5. Access subscription data
+### 6. Access subscription data
 
 Query subscription information in your app:
 
