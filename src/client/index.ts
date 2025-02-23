@@ -1,34 +1,35 @@
 import "./polyfill";
+import { Polar as PolarSdk } from "@polar-sh/sdk";
+import type { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
+import type { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
+import type { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
+import type { WebhookSubscriptionCreatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptioncreatedpayload.js";
+import type { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload.js";
 import {
-  ApiFromModules,
-  FunctionReference,
-  GenericDataModel,
+  WebhookVerificationError,
+  validateEvent,
+} from "@polar-sh/sdk/webhooks";
+import {
+  type ApiFromModules,
+  type FunctionReference,
+  type GenericActionCtx,
+  type GenericDataModel,
   type HttpRouter,
   actionGeneric,
   httpActionGeneric,
-  GenericActionCtx,
   queryGeneric,
 } from "convex/server";
+import { type Infer, v } from "convex/values";
+import { mapValues } from "remeda";
+import schema from "../component/schema";
 import {
   type ComponentApi,
+  type RunMutationCtx,
+  type RunQueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
-  RunMutationCtx,
-  RunQueryCtx,
+  RunActionCtx,
 } from "../component/util";
-import { Polar as PolarSdk } from "@polar-sh/sdk";
-import { Infer, v } from "convex/values";
-import schema from "../component/schema";
-import { WebhookSubscriptionCreatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptioncreatedpayload.js";
-import { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload.js";
-import { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
-import { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
-import { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
-import {
-  validateEvent,
-  WebhookVerificationError,
-} from "@polar-sh/sdk/webhooks";
-import { mapValues } from "remeda";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -186,7 +187,7 @@ export class Polar<
     });
   }
   async cancelSubscription(
-    ctx: GenericActionCtx<DataModel>,
+    ctx: RunActionCtx,
     { revokeImmediately }: { revokeImmediately?: boolean } = {}
   ) {
     const { userId } = await this.config.getUserInfo(ctx);

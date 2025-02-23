@@ -83,6 +83,7 @@ import { DataModel } from "./_generated/dataModel";
 export const polar = new Polar(components.polar, {
   products: {
     // Map your product keys to Polar product IDs (you can also use env vars for this)
+    // Replace these with whatever your products are (eg., "pro", "pro_monthly", whatever you want)
     premiumMonthly: "product_id_from_polar",
     premiumYearly: "product_id_from_polar",
     premiumPlusMonthly: "product_id_from_polar",
@@ -111,7 +112,31 @@ export const {
 } = polar.checkoutApi();
 ```
 
-### 2. Add subscription UI components
+### 2. Set up webhooks
+
+The Polar component uses webhooks to keep subscription data in sync. You'll need to:
+
+1. Create a webhook and webhook secret in the Polar dashboard, using your [Convex site URL](https://docs.convex.dev/production/environment-variables#system-environment-variables)
+   + `/polar/events` as the webhook endpoint.
+2. Set the webhook secret in your Convex environment:
+```sh
+npx convex env set POLAR_WEBHOOK_SECRET xxxxx
+```
+
+1. Register the webhook handler in your `convex/http.ts`:
+```ts
+import { httpRouter } from "convex/server";
+import { polar } from "./example";
+
+const http = httpRouter();
+
+// Register the webhook handler at /polar/events
+polar.registerRoutes(http as any);
+
+export default http;
+```
+
+### 3. Add subscription UI components
 
 Use the provided React components to add subscription functionality to your app:
 
@@ -139,7 +164,7 @@ import { api } from "../convex/_generated/api";
 </CustomerPortalLink>
 ```
 
-### 3. Handle subscription changes
+### 4. Handle subscription changes
 
 The Polar component provides functions to handle subscription changes for the
 current user.
@@ -157,7 +182,7 @@ const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
 await cancelSubscription({ revokeImmediately: true });
 ```
 
-### 4. Access subscription data
+### 5. Access subscription data
 
 Query subscription information in your app:
 
@@ -243,3 +268,14 @@ List all available products and their prices:
 ```ts
 const products = await polar.listProducts(ctx);
 ```
+
+#### registerRoutes
+Register webhook handlers for the Polar component:
+```ts
+polar.registerRoutes(http, {
+  // Optional: customize the webhook endpoint path (defaults to "/polar/events")
+  path: "/custom/webhook/path",
+});
+```
+
+The webhook handler requires the `POLAR_WEBHOOK_SECRET` environment variable to be set.
