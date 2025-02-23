@@ -26,9 +26,17 @@ const user = useQuery(api.example.getCurrentUser);
 
 ### Polar Account
 - [Create a Polar account](https://polar.sh)
-- Create an organization
-- Create products and pricing plans
-- Get your organization token from the settings page
+- Create an organization and generate an organization token
+- Create a product in the Polar dashboard for each pricing plan
+
+**Note:** You can have one price per plan, so a plan with monthly and yearly
+pricing requires two products in Polar.
+
+**Note:** The Convex Polar component is currently built to support recurring
+subscriptions, and may not work as expected with one-time payments. Please
+[open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
+if you run into any issues.
+
 
 ### Convex App
 You'll need a Convex App to use the component. Follow any of the [Convex quickstarts](https://docs.convex.dev/home) to set one up.
@@ -36,11 +44,14 @@ You'll need a Convex App to use the component. Follow any of the [Convex quickst
 ## Installation
 
 Install the component package:
+
 ```ts
 npm install @convex-dev/polar
 ```
 
-Create a `convex.config.ts` file in your app's `convex/` folder and install the component by calling `use`:
+Create a `convex.config.ts` file in your app's `convex/` folder and install the
+component by calling `app.use`:
+
 ```ts
 // convex/convex.config.ts
 import { defineApp } from "convex/server";
@@ -71,7 +82,7 @@ import { DataModel } from "./_generated/dataModel";
 
 export const polar = new Polar(components.polar, {
   products: {
-    // Map your product keys to Polar product IDs
+    // Map your product keys to Polar product IDs (you can also use env vars for this)
     premiumMonthly: "product_id_from_polar",
     premiumYearly: "product_id_from_polar",
     premiumPlusMonthly: "product_id_from_polar",
@@ -130,7 +141,11 @@ import { api } from "../convex/_generated/api";
 
 ### 3. Handle subscription changes
 
-The Polar component provides functions to handle subscription changes:
+The Polar component provides functions to handle subscription changes for the
+current user.
+
+**Note:** It is highly recommended to prompt the user for confirmation before
+changing their subscription this way!
 
 ```ts
 // Change subscription
@@ -148,6 +163,8 @@ Query subscription information in your app:
 
 ```ts
 // convex/example.ts
+
+// A query that returns a user with their subscription details
 export const getCurrentUser = query({
   handler: async (ctx) => {
     const user = await ctx.db.query("users").first();
