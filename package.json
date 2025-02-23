@@ -1,5 +1,5 @@
 {
-  "name": "@convex-dev/polar",
+  "name": "@erquhart/convex-polar",
   "description": "A Polar component for Convex.",
   "repository": "github:get-convex/polar",
   "homepage": "https://github.com/get-convex/polar#readme",
@@ -7,7 +7,7 @@
     "email": "support@convex.dev",
     "url": "https://github.com/get-convex/polar/issues"
   },
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.d19956b",
   "license": "Apache-2.0",
   "keywords": [
     "convex",
