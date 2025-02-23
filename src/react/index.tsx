@@ -1,15 +1,14 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { CheckoutApi } from "../client";
-import { GenericDataModel } from "convex/server";
 import { useAction } from "convex/react";
 
-export const CustomerPortalLink = <DataModel extends GenericDataModel>({
+export const CustomerPortalLink = ({
   polarApi,
   children,
   className,
 }: PropsWithChildren<{
-  polarApi: Pick<CheckoutApi<DataModel>, "generateCustomerPortalUrl">;
+  polarApi: Pick<CheckoutApi, "generateCustomerPortalUrl">;
   className?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
