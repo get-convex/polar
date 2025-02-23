@@ -109,11 +109,16 @@ export class Polar<
         userId,
       });
     }
+    console.log("customerId", customerId);
+    console.log("productIds", productIds);
+    console.log("origin", origin);
     return this.sdk.checkouts.create({
       allowDiscountCodes: true,
-      products: productIds,
       customerId,
       embedOrigin: origin,
+      ...(productIds.length === 1
+        ? { productId: productIds[0] }
+        : { products: productIds }),
     });
   }
   async createCustomerPortalSession(
