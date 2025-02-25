@@ -2,6 +2,67 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
+import { omit } from "remeda";
+
+export const getCustomerByUserId = query({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      ...schema.tables.customers.validator.fields,
+      _id: v.id("customers"),
+      _creationTime: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+  },
+});
+
+export const insertCustomer = mutation({
+  args: {
+    id: v.string(),
+    userId: v.string(),
+  },
+  returns: v.id("customers"),
+  handler: async (ctx, args) => {
+    return ctx.db.insert("customers", {
+      id: args.id,
+      userId: args.userId,
+    });
+  },
+});
+
+export const upsertCustomer = mutation({
+  args: {
+    userId: v.string(),
+    customerId: v.string(),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      const customerId = await ctx.db.insert("customers", {
+        id: args.customerId,
+        userId: args.userId,
+      });
+      const newCustomer = await ctx.db.get(customerId);
+      if (!newCustomer) {
+        throw new Error("Failed to create customer");
+      }
+      return newCustomer.id;
+    }
+    return customer.id;
+  },
+});
 
 export const getSubscription = query({
   args: {
@@ -18,26 +79,6 @@ export const getSubscription = query({
   handler: async (ctx, args) => {
     return ctx.db
       .query("subscriptions")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const getOrder = query({
-  args: {
-    id: v.id("orders"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.orders.validator.fields,
-      _id: v.id("orders"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("orders")
       .withIndex("id", (q) => q.eq("id", args.id))
       .unique();
   },
@@ -63,6 +104,55 @@ export const getProduct = query({
   },
 });
 
+// For apps that have 0 or 1 active subscription per user.
+export const getCurrentSubscription = query({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      ...schema.tables.subscriptions.validator.fields,
+      _id: v.id("subscriptions"),
+      _creationTime: v.number(),
+      product: v.object({
+        ...schema.tables.products.validator.fields,
+        _id: v.id("products"),
+        _creationTime: v.number(),
+      }),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return null;
+    }
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("customerId_endedAt", (q) =>
+        q.eq("customerId", customer.id).eq("endedAt", null)
+      )
+      .unique();
+    if (!subscription) {
+      return null;
+    }
+    const product = await ctx.db
+      .query("products")
+      .withIndex("id", (q) => q.eq("id", subscription.productId))
+      .unique();
+    if (!product) {
+      throw new Error(`Product not found: ${subscription.productId}`);
+    }
+    return {
+      ...subscription,
+      product,
+    };
+  },
+});
+
 export const listUserSubscriptions = query({
   args: {
     userId: v.string(),
@@ -83,12 +173,25 @@ export const listUserSubscriptions = query({
     })
   ),
   handler: async (ctx, args) => {
-    return asyncMap(
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return [];
+    }
+    const subscriptions = await asyncMap(
       ctx.db
         .query("subscriptions")
-        .withIndex("userId", (q) => q.eq("userId", args.userId))
+        .withIndex("customerId", (q) => q.eq("customerId", customer.id))
         .collect(),
       async (subscription) => {
+        if (
+          subscription.endedAt &&
+          subscription.endedAt <= new Date().toISOString()
+        ) {
+          return;
+        }
         const product = subscription.productId
           ? (await ctx.db
               .query("products")
@@ -101,45 +204,39 @@ export const listUserSubscriptions = query({
         };
       }
     );
+    return subscriptions.flatMap((subscription) =>
+      subscription ? [subscription] : []
+    );
   },
 });
 
 export const listProducts = query({
   args: {
-    includeArchived: v.boolean(),
+    includeArchived: v.optional(v.boolean()),
   },
   returns: v.array(
     v.object({
       ...schema.tables.products.validator.fields,
-      _id: v.id("products"),
-      _creationTime: v.number(),
+      priceAmount: v.optional(v.number()),
     })
   ),
   handler: async (ctx, args) => {
-    if (args.includeArchived) {
-      return ctx.db.query("products").collect();
-    }
-    return ctx.db
-      .query("products")
-      .withIndex("isArchived", (q) => q.lt("isArchived", true))
-      .collect();
+    const q = ctx.db.query("products");
+    const products = args.includeArchived
+      ? await q.collect()
+      : await q
+          .withIndex("isArchived", (q) => q.lt("isArchived", true))
+          .collect();
+    return products.map((product) => omit(product, ["_id", "_creationTime"]));
   },
 });
 
-export const updateOrder = mutation({
+export const createSubscription = mutation({
   args: {
-    order: schema.tables.orders.validator,
+    subscription: schema.tables.subscriptions.validator,
   },
   handler: async (ctx, args) => {
-    const existingOrder = await ctx.db
-      .query("orders")
-      .withIndex("id", (q) => q.eq("id", args.order.id))
-      .unique();
-    if (existingOrder) {
-      await ctx.db.patch(existingOrder._id, args.order);
-      return;
-    }
-    await ctx.db.insert("orders", args.order);
+    await ctx.db.insert("subscriptions", args.subscription);
   },
 });
 
@@ -152,11 +249,19 @@ export const updateSubscription = mutation({
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
       .unique();
-    if (existingSubscription) {
-      await ctx.db.patch(existingSubscription._id, args.subscription);
-      return;
+    if (!existingSubscription) {
+      throw new Error(`Subscription not found: ${args.subscription.id}`);
     }
-    await ctx.db.insert("subscriptions", args.subscription);
+    await ctx.db.patch(existingSubscription._id, args.subscription);
+  },
+});
+
+export const createProduct = mutation({
+  args: {
+    product: schema.tables.products.validator,
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("products", args.product);
   },
 });
 
@@ -169,117 +274,28 @@ export const updateProduct = mutation({
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.product.id))
       .unique();
-    if (existingProduct) {
-      await ctx.db.patch(existingProduct._id, args.product);
-      return;
+    if (!existingProduct) {
+      throw new Error(`Product not found: ${args.product.id}`);
     }
-    await ctx.db.insert("products", args.product);
+    await ctx.db.patch(existingProduct._id, args.product);
   },
 });
 
-export const updateBenefit = mutation({
+export const listCustomerSubscriptions = query({
   args: {
-    benefit: schema.tables.benefits.validator,
-  },
-  handler: async (ctx, args) => {
-    const existingBenefit = await ctx.db
-      .query("benefits")
-      .withIndex("id", (q) => q.eq("id", args.benefit.id))
-      .unique();
-    if (existingBenefit) {
-      await ctx.db.patch(existingBenefit._id, args.benefit);
-      return;
-    }
-    await ctx.db.insert("benefits", args.benefit);
-  },
-});
-
-export const getBenefit = query({
-  args: {
-    id: v.id("benefits"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.benefits.validator.fields,
-      _id: v.id("benefits"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("benefits")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const listBenefits = query({
-  args: {},
-  returns: v.array(
-    v.object({
-      ...schema.tables.benefits.validator.fields,
-      _id: v.id("benefits"),
-      _creationTime: v.number(),
-    })
-  ),
-  handler: async (ctx) => {
-    return ctx.db.query("benefits").collect();
-  },
-});
-
-export const updateBenefitGrant = mutation({
-  args: {
-    benefitGrant: schema.tables.benefitGrants.validator,
-  },
-  handler: async (ctx, args) => {
-    const existingBenefitGrant = await ctx.db
-      .query("benefitGrants")
-      .withIndex("id", (q) => q.eq("id", args.benefitGrant.id))
-      .unique();
-    if (existingBenefitGrant) {
-      await ctx.db.patch(existingBenefitGrant._id, args.benefitGrant);
-      return;
-    }
-    await ctx.db.insert("benefitGrants", args.benefitGrant);
-  },
-});
-
-export const getBenefitGrant = query({
-  args: {
-    id: v.id("benefitGrants"),
-  },
-  returns: v.union(
-    v.object({
-      ...schema.tables.benefitGrants.validator.fields,
-      _id: v.id("benefitGrants"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    return ctx.db
-      .query("benefitGrants")
-      .withIndex("id", (q) => q.eq("id", args.id))
-      .unique();
-  },
-});
-
-export const listUserBenefitGrants = query({
-  args: {
-    userId: v.string(),
+    customerId: v.string(),
   },
   returns: v.array(
     v.object({
-      ...schema.tables.benefitGrants.validator.fields,
-      _id: v.id("benefitGrants"),
+      ...schema.tables.subscriptions.validator.fields,
+      _id: v.id("subscriptions"),
       _creationTime: v.number(),
     })
   ),
   handler: async (ctx, args) => {
     return ctx.db
-      .query("benefitGrants")
-      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .query("subscriptions")
+      .withIndex("customerId", (q) => q.eq("customerId", args.customerId))
       .collect();
   },
 });

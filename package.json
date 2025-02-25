@@ -1,5 +1,5 @@
 {
-  "name": "@convex-dev/polar",
+  "name": "@erquhart/convex-polar",
   "description": "A Polar component for Convex.",
   "repository": "github:get-convex/polar",
   "homepage": "https://github.com/get-convex/polar#readme",
@@ -7,7 +7,7 @@
     "email": "support@convex.dev",
     "url": "https://github.com/get-convex/polar/issues"
   },
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.1",
   "license": "Apache-2.0",
   "keywords": [
     "convex",
@@ -49,13 +49,13 @@
     "./react": {
       "import": {
         "@convex-dev/component-source": "./src/react/index.ts",
-        "types": "./dist/esm/react.d.ts",
-        "default": "./dist/esm/react.js"
+        "types": "./dist/esm/react/index.d.ts",
+        "default": "./dist/esm/react/index.js"
       },
       "require": {
         "@convex-dev/component-source": "./src/react/index.ts",
-        "types": "./dist/commonjs/react.d.ts",
-        "default": "./dist/commonjs/react.js"
+        "types": "./dist/commonjs/react/index.d.ts",
+        "default": "./dist/commonjs/react/index.js"
       }
     },
     "./convex.config": {
@@ -67,8 +67,10 @@
     }
   },
   "peerDependencies": {
-    "convex": "^1.17.0",
-    "@polar-sh/sdk": "~0.16.0"
+    "@polar-sh/sdk": "^0.26.1",
+    "convex": "^1.19.2",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
@@ -86,7 +88,10 @@
   "types": "./dist/commonjs/client/index.d.ts",
   "module": "./dist/esm/client/index.js",
   "dependencies": {
+    "@polar-sh/checkout": "^0.1.9",
+    "buffer": "^6.0.3",
     "convex-helpers": "^0.1.63",
+    "remeda": "^2.20.2",
     "standardwebhooks": "^1.0.0"
   }
 }

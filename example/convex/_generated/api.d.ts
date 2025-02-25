@@ -10,6 +10,7 @@
 
 import type * as example from "../example.js";
 import type * as http from "../http.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -27,6 +28,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   example: typeof example;
   http: typeof http;
+  seed: typeof seed;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
@@ -42,65 +44,160 @@ export declare const internal: FilterApi<
 export declare const components: {
   polar: {
     lib: {
-      getBenefit: FunctionReference<
-        "query",
+      createProduct: FunctionReference<
+        "mutation",
         "internal",
-        { id: string },
         {
-          _creationTime: number;
-          _id: string;
-          createdAt: string;
-          deletable: boolean;
-          description: string;
-          id: string;
-          modifiedAt: string | null;
-          organizationId: string;
-          properties: Record<string, any>;
-          selectable: boolean;
-          type?: string;
-        } | null
+          product: {
+            createdAt: string;
+            description: string | null;
+            id: string;
+            isArchived: boolean;
+            isRecurring: boolean;
+            medias: Array<{
+              checksumEtag: string | null;
+              checksumSha256Base64: string | null;
+              checksumSha256Hex: string | null;
+              createdAt: string;
+              id: string;
+              isUploaded: boolean;
+              lastModifiedAt: string | null;
+              mimeType: string;
+              name: string;
+              organizationId: string;
+              path: string;
+              publicUrl: string;
+              service?: string;
+              size: number;
+              sizeReadable: string;
+              storageVersion: string | null;
+              version: string | null;
+            }>;
+            modifiedAt: string | null;
+            name: string;
+            organizationId: string;
+            prices: Array<{
+              amountType?: string;
+              createdAt: string;
+              id: string;
+              isArchived: boolean;
+              modifiedAt: string | null;
+              priceAmount?: number;
+              priceCurrency?: string;
+              productId: string;
+              recurringInterval?: "month" | "year" | null;
+              type?: string;
+            }>;
+            recurringInterval?: "month" | "year" | null;
+          };
+        },
+        any
       >;
-      getBenefitGrant: FunctionReference<
-        "query",
+      createSubscription: FunctionReference<
+        "mutation",
         "internal",
-        { id: string },
         {
-          _creationTime: number;
-          _id: string;
-          benefitId: string;
-          createdAt: string;
-          grantedAt: string | null;
-          id: string;
-          isGranted: boolean;
-          isRevoked: boolean;
-          modifiedAt: string | null;
-          orderId: string | null;
-          properties: Record<string, any>;
-          revokedAt: string | null;
-          subscriptionId: string | null;
-          userId: string;
-        } | null
+          subscription: {
+            amount: number | null;
+            cancelAtPeriodEnd: boolean;
+            checkoutId: string | null;
+            createdAt: string;
+            currency: string | null;
+            currentPeriodEnd: string | null;
+            currentPeriodStart: string;
+            customerId: string;
+            endedAt: string | null;
+            id: string;
+            metadata: Record<string, any>;
+            modifiedAt: string | null;
+            priceId: string;
+            productId: string;
+            recurringInterval: "month" | "year" | null;
+            startedAt: string | null;
+            status: string;
+          };
+        },
+        any
       >;
-      getOrder: FunctionReference<
+      getCurrentSubscription: FunctionReference<
         "query",
         "internal",
-        { id: string },
+        { userId: string },
         {
           _creationTime: number;
           _id: string;
-          amount: number;
-          billingReason: string;
+          amount: number | null;
+          cancelAtPeriodEnd: boolean;
           checkoutId: string | null;
           createdAt: string;
-          currency: string;
+          currency: string | null;
+          currentPeriodEnd: string | null;
+          currentPeriodStart: string;
+          customerId: string;
+          endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          productId: string | null;
-          productPriceId: string;
-          subscriptionId: string | null;
-          taxAmount: number;
-          userId: string | null;
+          priceId: string;
+          product: {
+            _creationTime: number;
+            _id: string;
+            createdAt: string;
+            description: string | null;
+            id: string;
+            isArchived: boolean;
+            isRecurring: boolean;
+            medias: Array<{
+              checksumEtag: string | null;
+              checksumSha256Base64: string | null;
+              checksumSha256Hex: string | null;
+              createdAt: string;
+              id: string;
+              isUploaded: boolean;
+              lastModifiedAt: string | null;
+              mimeType: string;
+              name: string;
+              organizationId: string;
+              path: string;
+              publicUrl: string;
+              service?: string;
+              size: number;
+              sizeReadable: string;
+              storageVersion: string | null;
+              version: string | null;
+            }>;
+            modifiedAt: string | null;
+            name: string;
+            organizationId: string;
+            prices: Array<{
+              amountType?: string;
+              createdAt: string;
+              id: string;
+              isArchived: boolean;
+              modifiedAt: string | null;
+              priceAmount?: number;
+              priceCurrency?: string;
+              productId: string;
+              recurringInterval?: "month" | "year" | null;
+              type?: string;
+            }>;
+            recurringInterval?: "month" | "year" | null;
+          };
+          productId: string;
+          recurringInterval: "month" | "year" | null;
+          startedAt: string | null;
+          status: string;
+        } | null
+      >;
+      getCustomerByUserId: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        {
+          _creationTime: number;
+          _id: string;
+          id: string;
+          userId: string;
         } | null
       >;
       getProduct: FunctionReference<
@@ -146,9 +243,10 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         } | null
       >;
       getSubscription: FunctionReference<
@@ -165,43 +263,55 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
           priceId: string;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
-          userId: string;
         } | null
       >;
-      listBenefits: FunctionReference<
+      insertCustomer: FunctionReference<
+        "mutation",
+        "internal",
+        { id: string; userId: string },
+        string
+      >;
+      listCustomerSubscriptions: FunctionReference<
         "query",
         "internal",
-        {},
+        { customerId: string },
         Array<{
           _creationTime: number;
           _id: string;
+          amount: number | null;
+          cancelAtPeriodEnd: boolean;
+          checkoutId: string | null;
           createdAt: string;
-          deletable: boolean;
-          description: string;
+          currency: string | null;
+          currentPeriodEnd: string | null;
+          currentPeriodStart: string;
+          customerId: string;
+          endedAt: string | null;
           id: string;
+          metadata: Record<string, any>;
           modifiedAt: string | null;
-          organizationId: string;
-          properties: Record<string, any>;
-          selectable: boolean;
-          type?: string;
+          priceId: string;
+          productId: string;
+          recurringInterval: "month" | "year" | null;
+          startedAt: string | null;
+          status: string;
         }>
       >;
       listProducts: FunctionReference<
         "query",
         "internal",
-        { includeArchived: boolean },
+        { includeArchived?: boolean },
         Array<{
-          _creationTime: number;
-          _id: string;
           createdAt: string;
           description: string | null;
           id: string;
@@ -229,6 +339,7 @@ export declare const components: {
           modifiedAt: string | null;
           name: string;
           organizationId: string;
+          priceAmount?: number;
           prices: Array<{
             amountType?: string;
             createdAt: string;
@@ -238,30 +349,10 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
-        }>
-      >;
-      listUserBenefitGrants: FunctionReference<
-        "query",
-        "internal",
-        { userId: string },
-        Array<{
-          _creationTime: number;
-          _id: string;
-          benefitId: string;
-          createdAt: string;
-          grantedAt: string | null;
-          id: string;
-          isGranted: boolean;
-          isRevoked: boolean;
-          modifiedAt: string | null;
-          orderId: string | null;
-          properties: Record<string, any>;
-          revokedAt: string | null;
-          subscriptionId: string | null;
-          userId: string;
+          recurringInterval?: "month" | "year" | null;
         }>
       >;
       listUserSubscriptions: FunctionReference<
@@ -278,6 +369,7 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
@@ -322,77 +414,16 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           } | null;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
-          userId: string;
         }>
-      >;
-      updateBenefit: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          benefit: {
-            createdAt: string;
-            deletable: boolean;
-            description: string;
-            id: string;
-            modifiedAt: string | null;
-            organizationId: string;
-            properties: Record<string, any>;
-            selectable: boolean;
-            type?: string;
-          };
-        },
-        any
-      >;
-      updateBenefitGrant: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          benefitGrant: {
-            benefitId: string;
-            createdAt: string;
-            grantedAt: string | null;
-            id: string;
-            isGranted: boolean;
-            isRevoked: boolean;
-            modifiedAt: string | null;
-            orderId: string | null;
-            properties: Record<string, any>;
-            revokedAt: string | null;
-            subscriptionId: string | null;
-            userId: string;
-          };
-        },
-        any
-      >;
-      updateOrder: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          order: {
-            amount: number;
-            billingReason: string;
-            checkoutId: string | null;
-            createdAt: string;
-            currency: string;
-            id: string;
-            metadata: Record<string, any>;
-            modifiedAt: string | null;
-            productId: string | null;
-            productPriceId: string;
-            subscriptionId: string | null;
-            taxAmount: number;
-            userId: string | null;
-          };
-        },
-        any
       >;
       updateProduct: FunctionReference<
         "mutation",
@@ -435,9 +466,10 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: string;
+              recurringInterval?: "month" | "year" | null;
               type?: string;
             }>;
+            recurringInterval?: "month" | "year" | null;
           };
         },
         any
@@ -454,19 +486,25 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerId: string;
             endedAt: string | null;
             id: string;
             metadata: Record<string, any>;
             modifiedAt: string | null;
             priceId: string;
             productId: string;
-            recurringInterval: string;
+            recurringInterval: "month" | "year" | null;
             startedAt: string | null;
             status: string;
-            userId: string;
           };
         },
         any
+      >;
+      upsertCustomer: FunctionReference<
+        "mutation",
+        "internal",
+        { customerId: string; userId: string },
+        string
       >;
     };
   };

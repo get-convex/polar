@@ -1,96 +1,306 @@
+import "./polyfill";
+import { Polar as PolarSdk } from "@polar-sh/sdk";
+import type { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
+import type { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
+import type { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
+import type { WebhookSubscriptionCreatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptioncreatedpayload.js";
+import type { WebhookSubscriptionUpdatedPayload } from "@polar-sh/sdk/models/components/webhooksubscriptionupdatedpayload.js";
 import {
-  type WebhookBenefitCreatedPayload$Outbound,
-  WebhookBenefitCreatedPayload$inboundSchema,
-  type WebhookBenefitGrantCreatedPayload$Outbound,
-  WebhookBenefitGrantCreatedPayload$inboundSchema,
-  type WebhookBenefitGrantUpdatedPayload$Outbound,
-  WebhookBenefitGrantUpdatedPayload$inboundSchema,
-  type WebhookBenefitUpdatedPayload$Outbound,
-  WebhookBenefitUpdatedPayload$inboundSchema,
-  type WebhookOrderCreatedPayload$Outbound,
-  WebhookOrderCreatedPayload$inboundSchema,
-  type WebhookProductCreatedPayload$Outbound,
-  WebhookProductCreatedPayload$inboundSchema,
-  type WebhookProductUpdatedPayload$Outbound,
-  WebhookProductUpdatedPayload$inboundSchema,
-  type WebhookSubscriptionCreatedPayload$Outbound,
-  WebhookSubscriptionCreatedPayload$inboundSchema,
-  type WebhookSubscriptionUpdatedPayload$Outbound,
-  WebhookSubscriptionUpdatedPayload$inboundSchema,
-} from "@polar-sh/sdk/models/components";
+  WebhookVerificationError,
+  validateEvent,
+} from "@polar-sh/sdk/webhooks";
 import {
+  type ApiFromModules,
   type FunctionReference,
+  type GenericActionCtx,
+  type GenericDataModel,
   type HttpRouter,
-  createFunctionHandle,
+  actionGeneric,
   httpActionGeneric,
+  queryGeneric,
 } from "convex/server";
-import { Webhook } from "standardwebhooks";
+import { type Infer, v } from "convex/values";
+import { mapValues } from "remeda";
+import schema from "../component/schema";
 import {
   type ComponentApi,
-  convertToDatabaseBenefit,
-  convertToDatabaseBenefitGrant,
-  convertToDatabaseOrder,
+  type RunMutationCtx,
+  type RunQueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
-  RunQueryCtx,
+  RunActionCtx,
 } from "../component/util";
 
-export type EventType = (
-  | WebhookOrderCreatedPayload$Outbound
-  | WebhookSubscriptionCreatedPayload$Outbound
-  | WebhookSubscriptionUpdatedPayload$Outbound
-  | WebhookBenefitCreatedPayload$Outbound
-  | WebhookBenefitUpdatedPayload$Outbound
-  | WebhookProductCreatedPayload$Outbound
-  | WebhookProductUpdatedPayload$Outbound
-  | WebhookBenefitGrantCreatedPayload$Outbound
-  | WebhookBenefitGrantUpdatedPayload$Outbound
-)["type"];
+export const subscriptionValidator = schema.tables.subscriptions.validator;
+export type Subscription = Infer<typeof subscriptionValidator>;
 
-export type EventHandler = FunctionReference<
+export type SubscriptionHandler = FunctionReference<
   "mutation",
   "internal",
-  { payload: unknown }
+  { subscription: Subscription }
 >;
 
-export class Polar {
-  constructor(public component: ComponentApi) {}
+export type CheckoutApi<
+  DataModel extends GenericDataModel = GenericDataModel,
+  Products extends Record<string, string> = Record<string, string>,
+> = ApiFromModules<{
+  checkout: ReturnType<Polar<DataModel, Products>["checkoutApi"]>;
+}>["checkout"];
+
+export class Polar<
+  DataModel extends GenericDataModel = GenericDataModel,
+  Products extends Record<string, string> = Record<string, string>,
+> {
+  public sdk: PolarSdk;
+  public products: Products;
+  constructor(
+    public component: ComponentApi,
+    private config: {
+      products: Products;
+      getUserInfo: (ctx: RunQueryCtx) => Promise<{
+        userId: string;
+        email: string;
+      }>;
+    }
+  ) {
+    this.products = config.products;
+    this.sdk = new PolarSdk({
+      accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
+      server:
+        (process.env["POLAR_SERVER"] as "sandbox" | "production") ?? "sandbox",
+    });
+  }
+  getCustomerByUserId(ctx: RunQueryCtx, userId: string) {
+    return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
+  }
+  async createCheckoutSession(
+    ctx: RunMutationCtx,
+    {
+      productIds,
+      userId,
+      email,
+      origin,
+    }: {
+      productIds: string[];
+      userId: string;
+      email: string;
+      origin: string;
+    }
+  ): Promise<Checkout> {
+    const dbCustomer = await ctx.runQuery(
+      this.component.lib.getCustomerByUserId,
+      {
+        userId,
+      }
+    );
+    const customerId =
+      dbCustomer?.id ||
+      (
+        await this.sdk.customers.create({
+          email,
+          metadata: {
+            userId,
+          },
+        })
+      ).id;
+    if (!dbCustomer) {
+      await ctx.runMutation(this.component.lib.insertCustomer, {
+        id: customerId,
+        userId,
+      });
+    }
+    console.log("customerId", customerId);
+    console.log("productIds", productIds);
+    console.log("origin", origin);
+    return this.sdk.checkouts.create({
+      allowDiscountCodes: true,
+      customerId,
+      embedOrigin: origin,
+      ...(productIds.length === 1
+        ? { productId: productIds[0] }
+        : { products: productIds }),
+    });
+  }
+  async createCustomerPortalSession(
+    ctx: GenericActionCtx<DataModel>,
+    { userId }: { userId: string }
+  ) {
+    const customer = await ctx.runQuery(
+      this.component.lib.getCustomerByUserId,
+      { userId }
+    );
+
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    const session = await this.sdk.customerSessions.create({
+      customerId: customer.id,
+    });
+
+    return { url: session.customerPortalUrl };
+  }
   listProducts(
     ctx: RunQueryCtx,
-    { includeArchived }: { includeArchived: boolean }
+    { includeArchived }: { includeArchived?: boolean } = {}
   ) {
-    return ctx.runQuery(this.component.lib.listProducts, { includeArchived });
+    return ctx.runQuery(this.component.lib.listProducts, {
+      includeArchived,
+    });
   }
-  listUserSubscriptions(ctx: RunQueryCtx, { userId }: { userId: string }) {
-    return ctx.runQuery(this.component.lib.listUserSubscriptions, { userId });
+  async getCurrentSubscription(
+    ctx: RunQueryCtx,
+    { userId }: { userId: string }
+  ) {
+    const subscription = await ctx.runQuery(
+      this.component.lib.getCurrentSubscription,
+      {
+        userId,
+      }
+    );
+    if (!subscription) {
+      return null;
+    }
+    const productKey = (
+      Object.keys(this.products) as Array<keyof Products>
+    ).find((key) => this.products[key] === subscription.productId);
+    return {
+      ...subscription,
+      productKey,
+    };
   }
-  getSubscription(ctx: RunQueryCtx, { id }: { id: string }) {
-    return ctx.runQuery(this.component.lib.getSubscription, { id });
+  getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
+    return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
-  getOrder(ctx: RunQueryCtx, { id }: { id: string }) {
-    return ctx.runQuery(this.component.lib.getOrder, { id });
+  async changeSubscription(
+    ctx: GenericActionCtx<DataModel>,
+    { productId }: { productId: string }
+  ) {
+    const { userId } = await this.config.getUserInfo(ctx);
+    const subscription = await this.getCurrentSubscription(ctx, { userId });
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+    if (subscription.productId === productId) {
+      throw new Error("Subscription already on this product");
+    }
+    await this.sdk.subscriptions.update({
+      id: subscription.id,
+      subscriptionUpdate: {
+        productId,
+      },
+    });
   }
-  getBenefit(ctx: RunQueryCtx, { id }: { id: string }) {
-    return ctx.runQuery(this.component.lib.getBenefit, { id });
+  async cancelSubscription(
+    ctx: RunActionCtx,
+    { revokeImmediately }: { revokeImmediately?: boolean } = {}
+  ) {
+    const { userId } = await this.config.getUserInfo(ctx);
+    const subscription = await this.getCurrentSubscription(ctx, { userId });
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+    if (subscription.status !== "active") {
+      throw new Error("Subscription is not active");
+    }
+    await this.sdk.subscriptions.update({
+      id: subscription.id,
+      subscriptionUpdate: {
+        cancelAtPeriodEnd: revokeImmediately ? null : true,
+        revoke: revokeImmediately ? true : null,
+      },
+    });
   }
-  getBenefitGrant(ctx: RunQueryCtx, { id }: { id: string }) {
-    return ctx.runQuery(this.component.lib.getBenefitGrant, { id });
+  api() {
+    return {
+      changeCurrentSubscription: actionGeneric({
+        args: {
+          productId: v.string(),
+        },
+        handler: async (ctx, args) => {
+          await this.changeSubscription(ctx, {
+            productId: args.productId,
+          });
+        },
+      }),
+      cancelCurrentSubscription: actionGeneric({
+        args: {
+          revokeImmediately: v.optional(v.boolean()),
+        },
+        handler: async (ctx, args) => {
+          await this.cancelSubscription(ctx, {
+            revokeImmediately: args.revokeImmediately,
+          });
+        },
+      }),
+      getProducts: queryGeneric({
+        args: {},
+        handler: async (ctx) => {
+          const products = await this.listProducts(ctx);
+          return mapValues(this.products, (productId) =>
+            products.find((p) => p.id === productId)
+          );
+        },
+      }),
+    };
   }
-  getProduct(ctx: RunQueryCtx, { id }: { id: string }) {
-    return ctx.runQuery(this.component.lib.getProduct, { id });
-  }
-  listBenefits(ctx: RunQueryCtx) {
-    return ctx.runQuery(this.component.lib.listBenefits);
-  }
-  listUserBenefitGrants(ctx: RunQueryCtx, { userId }: { userId: string }) {
-    return ctx.runQuery(this.component.lib.listUserBenefitGrants, { userId });
+  checkoutApi() {
+    return {
+      generateCheckoutLink: actionGeneric({
+        args: {
+          productIds: v.array(v.string()),
+          origin: v.string(),
+        },
+        returns: v.object({
+          url: v.string(),
+        }),
+        handler: async (ctx, args) => {
+          const { userId, email } = await this.config.getUserInfo(ctx);
+          const { url } = await this.createCheckoutSession(ctx, {
+            productIds: args.productIds,
+            userId,
+            email,
+            origin: args.origin,
+          });
+          return { url };
+        },
+      }),
+      generateCustomerPortalUrl: actionGeneric({
+        args: {},
+        returns: v.object({ url: v.string() }),
+        handler: async (ctx) => {
+          const { userId } = await this.config.getUserInfo(ctx);
+          const { url } = await this.createCustomerPortalSession(ctx, {
+            userId,
+          });
+          return { url };
+        },
+      }),
+    };
   }
   registerRoutes(
     http: HttpRouter,
     {
       path = "/polar/events",
-      eventCallback,
-    }: { eventCallback?: EventHandler; path?: string } = {}
+    }: {
+      path?: string;
+      onSubscriptionCreated?: (
+        ctx: RunMutationCtx,
+        event: WebhookSubscriptionCreatedPayload
+      ) => Promise<void>;
+      onSubscriptionUpdated?: (
+        ctx: RunMutationCtx,
+        event: WebhookSubscriptionUpdatedPayload
+      ) => Promise<void>;
+      onProductCreated?: (
+        ctx: RunMutationCtx,
+        event: WebhookProductCreatedPayload
+      ) => Promise<void>;
+      onProductUpdated?: (
+        ctx: RunMutationCtx,
+        event: WebhookProductUpdatedPayload
+      ) => Promise<void>;
+    } = {}
   ) {
     http.route({
       path,
@@ -100,78 +310,47 @@ export class Polar {
           throw new Error("No body");
         }
         const body = await request.text();
-        const wh = new Webhook(btoa(process.env.POLAR_WEBHOOK_SECRET!));
         const headers = Object.fromEntries(request.headers.entries());
-        const payload = wh.verify(body, headers) as {
-          type: EventType;
-          data: unknown;
-        };
-
-        switch (payload.type) {
-          case "order.created": {
-            await ctx.runMutation(this.component.lib.updateOrder, {
-              order: convertToDatabaseOrder(
-                WebhookOrderCreatedPayload$inboundSchema.parse(payload).data
-              ),
-            });
-            break;
+        try {
+          const event = validateEvent(
+            body,
+            headers,
+            process.env["POLAR_WEBHOOK_SECRET"] ?? ""
+          );
+          switch (event.type) {
+            case "subscription.created": {
+              await ctx.runMutation(this.component.lib.createSubscription, {
+                subscription: convertToDatabaseSubscription(event.data),
+              });
+              break;
+            }
+            case "subscription.updated": {
+              await ctx.runMutation(this.component.lib.updateSubscription, {
+                subscription: convertToDatabaseSubscription(event.data),
+              });
+              break;
+            }
+            case "product.created": {
+              await ctx.runMutation(this.component.lib.createProduct, {
+                product: convertToDatabaseProduct(event.data),
+              });
+              break;
+            }
+            case "product.updated": {
+              await ctx.runMutation(this.component.lib.updateProduct, {
+                product: convertToDatabaseProduct(event.data),
+              });
+              break;
+            }
           }
-          case "subscription.created":
-          case "subscription.updated": {
-            const schema =
-              payload.type === "subscription.created"
-                ? WebhookSubscriptionCreatedPayload$inboundSchema
-                : WebhookSubscriptionUpdatedPayload$inboundSchema;
-            await ctx.runMutation(this.component.lib.updateSubscription, {
-              subscription: convertToDatabaseSubscription(
-                schema.parse(payload).data
-              ),
-            });
-            break;
+          return new Response("Accepted", { status: 202 });
+        } catch (error) {
+          if (error instanceof WebhookVerificationError) {
+            console.error(error);
+            return new Response("Forbidden", { status: 403 });
           }
-          case "product.created":
-          case "product.updated": {
-            const schema =
-              payload.type === "product.created"
-                ? WebhookProductCreatedPayload$inboundSchema
-                : WebhookProductUpdatedPayload$inboundSchema;
-            await ctx.runMutation(this.component.lib.updateProduct, {
-              product: convertToDatabaseProduct(schema.parse(payload).data),
-            });
-            break;
-          }
-          case "benefit.created":
-          case "benefit.updated": {
-            const schema =
-              payload.type === "benefit.created"
-                ? WebhookBenefitCreatedPayload$inboundSchema
-                : WebhookBenefitUpdatedPayload$inboundSchema;
-            await ctx.runMutation(this.component.lib.updateBenefit, {
-              benefit: convertToDatabaseBenefit(schema.parse(payload).data),
-            });
-            break;
-          }
-          case "benefit_grant.created":
-          case "benefit_grant.updated": {
-            const schema =
-              payload.type === "benefit_grant.created"
-                ? WebhookBenefitGrantCreatedPayload$inboundSchema
-                : WebhookBenefitGrantUpdatedPayload$inboundSchema;
-            await ctx.runMutation(this.component.lib.updateBenefitGrant, {
-              benefitGrant: convertToDatabaseBenefitGrant(
-                schema.parse(payload).data
-              ),
-            });
-            break;
-          }
+          throw error;
         }
-
-        if (eventCallback) {
-          await ctx.runMutation(await createFunctionHandle(eventCallback), {
-            payload,
-          });
-        }
-        return new Response("OK", { status: 200 });
       }),
     });
   }

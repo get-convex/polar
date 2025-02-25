@@ -30,119 +30,85 @@ declare const fullApi: ApiFromModules<{
 }>;
 export type Mounts = {
   lib: {
-    getBenefit: FunctionReference<
-      "query",
+    createProduct: FunctionReference<
+      "mutation",
       "public",
-      { id: string },
       {
-        _creationTime: number;
-        _id: string;
-        createdAt: string;
-        deletable: boolean;
-        description: string;
-        id: string;
-        modifiedAt: string | null;
-        organizationId: string;
-        properties: Record<string, any>;
-        selectable: boolean;
-        type?: string;
-      } | null
-    >;
-    getBenefitGrant: FunctionReference<
-      "query",
-      "public",
-      { id: string },
-      {
-        _creationTime: number;
-        _id: string;
-        benefitId: string;
-        createdAt: string;
-        grantedAt: string | null;
-        id: string;
-        isGranted: boolean;
-        isRevoked: boolean;
-        modifiedAt: string | null;
-        orderId: string | null;
-        properties: Record<string, any>;
-        revokedAt: string | null;
-        subscriptionId: string | null;
-        userId: string;
-      } | null
-    >;
-    getOrder: FunctionReference<
-      "query",
-      "public",
-      { id: string },
-      {
-        _creationTime: number;
-        _id: string;
-        amount: number;
-        billingReason: string;
-        checkoutId: string | null;
-        createdAt: string;
-        currency: string;
-        id: string;
-        metadata: Record<string, any>;
-        modifiedAt: string | null;
-        productId: string | null;
-        productPriceId: string;
-        subscriptionId: string | null;
-        taxAmount: number;
-        userId: string | null;
-      } | null
-    >;
-    getProduct: FunctionReference<
-      "query",
-      "public",
-      { id: string },
-      {
-        _creationTime: number;
-        _id: string;
-        createdAt: string;
-        description: string | null;
-        id: string;
-        isArchived: boolean;
-        isRecurring: boolean;
-        medias: Array<{
-          checksumEtag: string | null;
-          checksumSha256Base64: string | null;
-          checksumSha256Hex: string | null;
+        product: {
           createdAt: string;
-          id: string;
-          isUploaded: boolean;
-          lastModifiedAt: string | null;
-          mimeType: string;
-          name: string;
-          organizationId: string;
-          path: string;
-          publicUrl: string;
-          service?: string;
-          size: number;
-          sizeReadable: string;
-          storageVersion: string | null;
-          version: string | null;
-        }>;
-        modifiedAt: string | null;
-        name: string;
-        organizationId: string;
-        prices: Array<{
-          amountType?: string;
-          createdAt: string;
+          description: string | null;
           id: string;
           isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
           modifiedAt: string | null;
-          priceAmount?: number;
-          priceCurrency?: string;
-          productId: string;
-          recurringInterval?: string;
-          type?: string;
-        }>;
-      } | null
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: "month" | "year" | null;
+            type?: string;
+          }>;
+          recurringInterval?: "month" | "year" | null;
+        };
+      },
+      any
     >;
-    getSubscription: FunctionReference<
+    createSubscription: FunctionReference<
+      "mutation",
+      "public",
+      {
+        subscription: {
+          amount: number | null;
+          cancelAtPeriodEnd: boolean;
+          checkoutId: string | null;
+          createdAt: string;
+          currency: string | null;
+          currentPeriodEnd: string | null;
+          currentPeriodStart: string;
+          customerId: string;
+          endedAt: string | null;
+          id: string;
+          metadata: Record<string, any>;
+          modifiedAt: string | null;
+          priceId: string;
+          productId: string;
+          recurringInterval: "month" | "year" | null;
+          startedAt: string | null;
+          status: string;
+        };
+      },
+      any
+    >;
+    getCurrentSubscription: FunctionReference<
       "query",
       "public",
-      { id: string },
+      { userId: string },
       {
         _creationTime: number;
         _id: string;
@@ -153,119 +119,7 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
-        endedAt: string | null;
-        id: string;
-        metadata: Record<string, any>;
-        modifiedAt: string | null;
-        priceId: string;
-        productId: string;
-        recurringInterval: string;
-        startedAt: string | null;
-        status: string;
-        userId: string;
-      } | null
-    >;
-    listBenefits: FunctionReference<
-      "query",
-      "public",
-      {},
-      Array<{
-        _creationTime: number;
-        _id: string;
-        createdAt: string;
-        deletable: boolean;
-        description: string;
-        id: string;
-        modifiedAt: string | null;
-        organizationId: string;
-        properties: Record<string, any>;
-        selectable: boolean;
-        type?: string;
-      }>
-    >;
-    listProducts: FunctionReference<
-      "query",
-      "public",
-      { includeArchived: boolean },
-      Array<{
-        _creationTime: number;
-        _id: string;
-        createdAt: string;
-        description: string | null;
-        id: string;
-        isArchived: boolean;
-        isRecurring: boolean;
-        medias: Array<{
-          checksumEtag: string | null;
-          checksumSha256Base64: string | null;
-          checksumSha256Hex: string | null;
-          createdAt: string;
-          id: string;
-          isUploaded: boolean;
-          lastModifiedAt: string | null;
-          mimeType: string;
-          name: string;
-          organizationId: string;
-          path: string;
-          publicUrl: string;
-          service?: string;
-          size: number;
-          sizeReadable: string;
-          storageVersion: string | null;
-          version: string | null;
-        }>;
-        modifiedAt: string | null;
-        name: string;
-        organizationId: string;
-        prices: Array<{
-          amountType?: string;
-          createdAt: string;
-          id: string;
-          isArchived: boolean;
-          modifiedAt: string | null;
-          priceAmount?: number;
-          priceCurrency?: string;
-          productId: string;
-          recurringInterval?: string;
-          type?: string;
-        }>;
-      }>
-    >;
-    listUserBenefitGrants: FunctionReference<
-      "query",
-      "public",
-      { userId: string },
-      Array<{
-        _creationTime: number;
-        _id: string;
-        benefitId: string;
-        createdAt: string;
-        grantedAt: string | null;
-        id: string;
-        isGranted: boolean;
-        isRevoked: boolean;
-        modifiedAt: string | null;
-        orderId: string | null;
-        properties: Record<string, any>;
-        revokedAt: string | null;
-        subscriptionId: string | null;
-        userId: string;
-      }>
-    >;
-    listUserSubscriptions: FunctionReference<
-      "query",
-      "public",
-      { userId: string },
-      Array<{
-        _creationTime: number;
-        _id: string;
-        amount: number | null;
-        cancelAtPeriodEnd: boolean;
-        checkoutId: string | null;
-        createdAt: string;
-        currency: string | null;
-        currentPeriodEnd: string | null;
-        currentPeriodStart: string;
+        customerId: string;
         endedAt: string | null;
         id: string;
         metadata: Record<string, any>;
@@ -310,77 +164,247 @@ export type Mounts = {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
-        } | null;
+          recurringInterval?: "month" | "year" | null;
+        };
         productId: string;
-        recurringInterval: string;
+        recurringInterval: "month" | "year" | null;
         startedAt: string | null;
         status: string;
-        userId: string;
+      } | null
+    >;
+    getCustomerByUserId: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      { _creationTime: number; _id: string; id: string; userId: string } | null
+    >;
+    getProduct: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        _creationTime: number;
+        _id: string;
+        createdAt: string;
+        description: string | null;
+        id: string;
+        isArchived: boolean;
+        isRecurring: boolean;
+        medias: Array<{
+          checksumEtag: string | null;
+          checksumSha256Base64: string | null;
+          checksumSha256Hex: string | null;
+          createdAt: string;
+          id: string;
+          isUploaded: boolean;
+          lastModifiedAt: string | null;
+          mimeType: string;
+          name: string;
+          organizationId: string;
+          path: string;
+          publicUrl: string;
+          service?: string;
+          size: number;
+          sizeReadable: string;
+          storageVersion: string | null;
+          version: string | null;
+        }>;
+        modifiedAt: string | null;
+        name: string;
+        organizationId: string;
+        prices: Array<{
+          amountType?: string;
+          createdAt: string;
+          id: string;
+          isArchived: boolean;
+          modifiedAt: string | null;
+          priceAmount?: number;
+          priceCurrency?: string;
+          productId: string;
+          recurringInterval?: "month" | "year" | null;
+          type?: string;
+        }>;
+        recurringInterval?: "month" | "year" | null;
+      } | null
+    >;
+    getSubscription: FunctionReference<
+      "query",
+      "public",
+      { id: string },
+      {
+        _creationTime: number;
+        _id: string;
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        customerId: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        productId: string;
+        recurringInterval: "month" | "year" | null;
+        startedAt: string | null;
+        status: string;
+      } | null
+    >;
+    insertCustomer: FunctionReference<
+      "mutation",
+      "public",
+      { id: string; userId: string },
+      string
+    >;
+    listCustomerSubscriptions: FunctionReference<
+      "query",
+      "public",
+      { customerId: string },
+      Array<{
+        _creationTime: number;
+        _id: string;
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        customerId: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        productId: string;
+        recurringInterval: "month" | "year" | null;
+        startedAt: string | null;
+        status: string;
       }>
     >;
-    updateBenefit: FunctionReference<
-      "mutation",
+    listProducts: FunctionReference<
+      "query",
       "public",
-      {
-        benefit: {
+      { includeArchived?: boolean },
+      Array<{
+        createdAt: string;
+        description: string | null;
+        id: string;
+        isArchived: boolean;
+        isRecurring: boolean;
+        medias: Array<{
+          checksumEtag: string | null;
+          checksumSha256Base64: string | null;
+          checksumSha256Hex: string | null;
           createdAt: string;
-          deletable: boolean;
-          description: string;
           id: string;
-          modifiedAt: string | null;
+          isUploaded: boolean;
+          lastModifiedAt: string | null;
+          mimeType: string;
+          name: string;
           organizationId: string;
-          properties: Record<string, any>;
-          selectable: boolean;
+          path: string;
+          publicUrl: string;
+          service?: string;
+          size: number;
+          sizeReadable: string;
+          storageVersion: string | null;
+          version: string | null;
+        }>;
+        modifiedAt: string | null;
+        name: string;
+        organizationId: string;
+        priceAmount?: number;
+        prices: Array<{
+          amountType?: string;
+          createdAt: string;
+          id: string;
+          isArchived: boolean;
+          modifiedAt: string | null;
+          priceAmount?: number;
+          priceCurrency?: string;
+          productId: string;
+          recurringInterval?: "month" | "year" | null;
           type?: string;
-        };
-      },
-      any
+        }>;
+        recurringInterval?: "month" | "year" | null;
+      }>
     >;
-    updateBenefitGrant: FunctionReference<
-      "mutation",
+    listUserSubscriptions: FunctionReference<
+      "query",
       "public",
-      {
-        benefitGrant: {
-          benefitId: string;
+      { userId: string },
+      Array<{
+        _creationTime: number;
+        _id: string;
+        amount: number | null;
+        cancelAtPeriodEnd: boolean;
+        checkoutId: string | null;
+        createdAt: string;
+        currency: string | null;
+        currentPeriodEnd: string | null;
+        currentPeriodStart: string;
+        customerId: string;
+        endedAt: string | null;
+        id: string;
+        metadata: Record<string, any>;
+        modifiedAt: string | null;
+        priceId: string;
+        product: {
+          _creationTime: number;
+          _id: string;
           createdAt: string;
-          grantedAt: string | null;
+          description: string | null;
           id: string;
-          isGranted: boolean;
-          isRevoked: boolean;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
           modifiedAt: string | null;
-          orderId: string | null;
-          properties: Record<string, any>;
-          revokedAt: string | null;
-          subscriptionId: string | null;
-          userId: string;
-        };
-      },
-      any
-    >;
-    updateOrder: FunctionReference<
-      "mutation",
-      "public",
-      {
-        order: {
-          amount: number;
-          billingReason: string;
-          checkoutId: string | null;
-          createdAt: string;
-          currency: string;
-          id: string;
-          metadata: Record<string, any>;
-          modifiedAt: string | null;
-          productId: string | null;
-          productPriceId: string;
-          subscriptionId: string | null;
-          taxAmount: number;
-          userId: string | null;
-        };
-      },
-      any
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: "month" | "year" | null;
+            type?: string;
+          }>;
+          recurringInterval?: "month" | "year" | null;
+        } | null;
+        productId: string;
+        recurringInterval: "month" | "year" | null;
+        startedAt: string | null;
+        status: string;
+      }>
     >;
     updateProduct: FunctionReference<
       "mutation",
@@ -423,9 +447,10 @@ export type Mounts = {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: string;
+            recurringInterval?: "month" | "year" | null;
             type?: string;
           }>;
+          recurringInterval?: "month" | "year" | null;
         };
       },
       any
@@ -442,19 +467,25 @@ export type Mounts = {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
           priceId: string;
           productId: string;
-          recurringInterval: string;
+          recurringInterval: "month" | "year" | null;
           startedAt: string | null;
           status: string;
-          userId: string;
         };
       },
       any
+    >;
+    upsertCustomer: FunctionReference<
+      "mutation",
+      "public",
+      { customerId: string; userId: string },
+      string
     >;
   };
 };
