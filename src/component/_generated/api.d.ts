@@ -110,8 +110,6 @@ export type Mounts = {
       "public",
       { userId: string },
       {
-        _creationTime: number;
-        _id: string;
         amount: number | null;
         cancelAtPeriodEnd: boolean;
         checkoutId: string | null;
@@ -126,8 +124,6 @@ export type Mounts = {
         modifiedAt: string | null;
         priceId: string;
         product: {
-          _creationTime: number;
-          _id: string;
           createdAt: string;
           description: string | null;
           id: string;
@@ -179,15 +175,13 @@ export type Mounts = {
       "query",
       "public",
       { userId: string },
-      { _creationTime: number; _id: string; id: string; userId: string } | null
+      { id: string; userId: string } | null
     >;
     getProduct: FunctionReference<
       "query",
       "public",
       { id: string },
       {
-        _creationTime: number;
-        _id: string;
         createdAt: string;
         description: string | null;
         id: string;
@@ -235,8 +229,6 @@ export type Mounts = {
       "public",
       { id: string },
       {
-        _creationTime: number;
-        _id: string;
         amount: number | null;
         cancelAtPeriodEnd: boolean;
         checkoutId: string | null;
@@ -267,8 +259,6 @@ export type Mounts = {
       "public",
       { customerId: string },
       Array<{
-        _creationTime: number;
-        _id: string;
         amount: number | null;
         cancelAtPeriodEnd: boolean;
         checkoutId: string | null;
@@ -341,8 +331,6 @@ export type Mounts = {
       "public",
       { userId: string },
       Array<{
-        _creationTime: number;
-        _id: string;
         amount: number | null;
         cancelAtPeriodEnd: boolean;
         checkoutId: string | null;
@@ -357,8 +345,6 @@ export type Mounts = {
         modifiedAt: string | null;
         priceId: string;
         product: {
-          _creationTime: number;
-          _id: string;
           createdAt: string;
           description: string | null;
           id: string;

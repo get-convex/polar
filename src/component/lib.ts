@@ -2,25 +2,19 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
-import { omit } from "remeda";
+import { omitSystemFields } from "./util";
 
 export const getCustomerByUserId = query({
   args: {
     userId: v.string(),
   },
-  returns: v.union(
-    v.object({
-      ...schema.tables.customers.validator.fields,
-      _id: v.id("customers"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
+  returns: v.union(schema.tables.customers.validator, v.null()),
   handler: async (ctx, args) => {
-    return ctx.db
+    const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
       .unique();
+    return omitSystemFields(customer);
   },
 });
 
@@ -66,41 +60,29 @@ export const upsertCustomer = mutation({
 
 export const getSubscription = query({
   args: {
-    id: v.id("subscriptions"),
+    id: v.string(),
   },
-  returns: v.union(
-    v.object({
-      ...schema.tables.subscriptions.validator.fields,
-      _id: v.id("subscriptions"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
+  returns: v.union(schema.tables.subscriptions.validator, v.null()),
   handler: async (ctx, args) => {
-    return ctx.db
+    const subscription = await ctx.db
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.id))
       .unique();
+    return omitSystemFields(subscription);
   },
 });
 
 export const getProduct = query({
   args: {
-    id: v.id("products"),
+    id: v.string(),
   },
-  returns: v.union(
-    v.object({
-      ...schema.tables.products.validator.fields,
-      _id: v.id("products"),
-      _creationTime: v.number(),
-    }),
-    v.null()
-  ),
+  returns: v.union(schema.tables.products.validator, v.null()),
   handler: async (ctx, args) => {
-    return ctx.db
+    const product = await ctx.db
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.id))
       .unique();
+    return omitSystemFields(product);
   },
 });
 
@@ -112,13 +94,7 @@ export const getCurrentSubscription = query({
   returns: v.union(
     v.object({
       ...schema.tables.subscriptions.validator.fields,
-      _id: v.id("subscriptions"),
-      _creationTime: v.number(),
-      product: v.object({
-        ...schema.tables.products.validator.fields,
-        _id: v.id("products"),
-        _creationTime: v.number(),
-      }),
+      product: schema.tables.products.validator,
     }),
     v.null()
   ),
@@ -147,8 +123,8 @@ export const getCurrentSubscription = query({
       throw new Error(`Product not found: ${subscription.productId}`);
     }
     return {
-      ...subscription,
-      product,
+      ...omitSystemFields(subscription),
+      product: omitSystemFields(product),
     };
   },
 });
@@ -160,16 +136,7 @@ export const listUserSubscriptions = query({
   returns: v.array(
     v.object({
       ...schema.tables.subscriptions.validator.fields,
-      _id: v.id("subscriptions"),
-      _creationTime: v.number(),
-      product: v.union(
-        v.object({
-          ...schema.tables.products.validator.fields,
-          _id: v.id("products"),
-          _creationTime: v.number(),
-        }),
-        v.null()
-      ),
+      product: v.union(schema.tables.products.validator, v.null()),
     })
   ),
   handler: async (ctx, args) => {
@@ -199,8 +166,8 @@ export const listUserSubscriptions = query({
               .unique()) || null
           : null;
         return {
-          ...subscription,
-          product,
+          ...omitSystemFields(subscription),
+          product: omitSystemFields(product),
         };
       }
     );
@@ -227,7 +194,7 @@ export const listProducts = query({
       : await q
           .withIndex("isArchived", (q) => q.lt("isArchived", true))
           .collect();
-    return products.map((product) => omit(product, ["_id", "_creationTime"]));
+    return products.map((product) => omitSystemFields(product));
   },
 });
 
@@ -285,17 +252,12 @@ export const listCustomerSubscriptions = query({
   args: {
     customerId: v.string(),
   },
-  returns: v.array(
-    v.object({
-      ...schema.tables.subscriptions.validator.fields,
-      _id: v.id("subscriptions"),
-      _creationTime: v.number(),
-    })
-  ),
+  returns: v.array(schema.tables.subscriptions.validator),
   handler: async (ctx, args) => {
-    return ctx.db
+    const subscriptions = await ctx.db
       .query("subscriptions")
       .withIndex("customerId", (q) => q.eq("customerId", args.customerId))
       .collect();
+    return subscriptions.map(omitSystemFields);
   },
 });

@@ -15,6 +15,18 @@ import type { Doc } from "./_generated/dataModel";
 import { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 import { Product } from "@polar-sh/sdk/models/components/product.js";
 
+export const omitSystemFields = <
+  T extends { _id: string; _creationTime: number } | null | undefined,
+>(
+  doc: T
+) => {
+  if (!doc) {
+    return doc;
+  }
+  const { _id, _creationTime, ...rest } = doc;
+  return rest;
+};
+
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
 };
