@@ -9,7 +9,7 @@ import { CheckoutLink, CustomerPortalLink } from "../../src/react";
 export default function TodoList() {
   const user = useQuery(api.example.getCurrentUser);
   const todos = useQuery(api.example.listTodos);
-  const products = useQuery(api.example.getProducts);
+  const products = useQuery(api.example.getConfiguredProducts);
   const insertTodo = useMutation(api.example.insertTodo);
   const completeTodo = useMutation(api.example.completeTodo);
   const deleteTodo = useMutation(api.example.deleteTodo);

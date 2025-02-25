@@ -29,7 +29,13 @@ export const MAX_PREMIUM_TODOS = 6;
 export const {
   changeCurrentSubscription,
   cancelCurrentSubscription,
-  getProducts,
+
+  // If you configure your products by key in the Polar constructor,
+  // this query provides a keyed object of the products.
+  getConfiguredProducts,
+
+  // This provides all products, useful if you don't configure products by key.
+  listAllProducts,
 } = polar.api();
 
 export const { generateCustomerPortalUrl } = polar.checkoutApi();

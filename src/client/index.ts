@@ -56,14 +56,14 @@ export class Polar<
   constructor(
     public component: ComponentApi,
     private config: {
-      products: Products;
+      products?: Products;
       getUserInfo: (ctx: RunQueryCtx) => Promise<{
         userId: string;
         email: string;
       }>;
     }
   ) {
-    this.products = config.products;
+    this.products = config.products ?? ({} as Products);
     this.sdk = new PolarSdk({
       accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
       server:
@@ -109,9 +109,6 @@ export class Polar<
         userId,
       });
     }
-    console.log("customerId", customerId);
-    console.log("productIds", productIds);
-    console.log("origin", origin);
     return this.sdk.checkouts.create({
       allowDiscountCodes: true,
       customerId,
@@ -161,12 +158,19 @@ export class Polar<
     if (!subscription) {
       return null;
     }
+    const product = await ctx.runQuery(this.component.lib.getProduct, {
+      id: subscription.productId,
+    });
+    if (!product) {
+      throw new Error("Product not found");
+    }
     const productKey = (
       Object.keys(this.products) as Array<keyof Products>
     ).find((key) => this.products[key] === subscription.productId);
     return {
       ...subscription,
       productKey,
+      product,
     };
   }
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
@@ -233,13 +237,21 @@ export class Polar<
           });
         },
       }),
-      getProducts: queryGeneric({
+      getConfiguredProducts: queryGeneric({
         args: {},
         handler: async (ctx) => {
           const products = await this.listProducts(ctx);
           return mapValues(this.products, (productId) =>
             products.find((p) => p.id === productId)
           );
+        },
+      }),
+      listAllProducts: queryGeneric({
+        args: { includeArchived: v.optional(v.boolean()) },
+        handler: async (ctx, args) => {
+          return await this.listProducts(ctx, {
+            includeArchived: args.includeArchived,
+          });
         },
       }),
     };

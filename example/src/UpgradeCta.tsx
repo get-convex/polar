@@ -8,7 +8,7 @@ import { ConfirmationModal } from "./ConfirmationModal";
 
 export function UpgradeCTA() {
   const user = useQuery(api.example.getCurrentUser);
-  const products = useQuery(api.example.getProducts);
+  const products = useQuery(api.example.getConfiguredProducts);
   const changeCurrentSubscription = useAction(
     api.example.changeCurrentSubscription
   );
