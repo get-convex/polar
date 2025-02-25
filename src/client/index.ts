@@ -247,11 +247,9 @@ export class Polar<
         },
       }),
       listAllProducts: queryGeneric({
-        args: { includeArchived: v.optional(v.boolean()) },
-        handler: async (ctx, args) => {
-          return await this.listProducts(ctx, {
-            includeArchived: args.includeArchived,
-          });
+        args: {},
+        handler: async (ctx) => {
+          return await this.listProducts(ctx);
         },
       }),
     };
