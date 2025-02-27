@@ -53,6 +53,10 @@ export class Polar<
 > {
   public sdk: PolarSdk;
   public products: Products;
+  private organizationToken: string;
+  private webhookSecret: string;
+  private server: "sandbox" | "production";
+
   constructor(
     public component: ComponentApi,
     private config: {
@@ -61,13 +65,24 @@ export class Polar<
         userId: string;
         email: string;
       }>;
+      organizationToken?: string;
+      webhookSecret?: string;
+      server?: "sandbox" | "production";
     }
   ) {
     this.products = config.products ?? ({} as Products);
+    this.organizationToken =
+      config.organizationToken ?? process.env["POLAR_ORGANIZATION_TOKEN"] ?? "";
+    this.webhookSecret =
+      config.webhookSecret ?? process.env["POLAR_WEBHOOK_SECRET"] ?? "";
+    this.server =
+      config.server ??
+      (process.env["POLAR_SERVER"] as "sandbox" | "production") ??
+      "sandbox";
+
     this.sdk = new PolarSdk({
-      accessToken: process.env["POLAR_ORGANIZATION_TOKEN"] ?? "",
-      server:
-        (process.env["POLAR_SERVER"] as "sandbox" | "production") ?? "sandbox",
+      accessToken: this.organizationToken,
+      server: this.server,
     });
   }
   getCustomerByUserId(ctx: RunQueryCtx, userId: string) {
@@ -322,11 +337,7 @@ export class Polar<
         const body = await request.text();
         const headers = Object.fromEntries(request.headers.entries());
         try {
-          const event = validateEvent(
-            body,
-            headers,
-            process.env["POLAR_WEBHOOK_SECRET"] ?? ""
-          );
+          const event = validateEvent(body, headers, this.webhookSecret);
           switch (event.type) {
             case "subscription.created": {
               await ctx.runMutation(this.component.lib.createSubscription, {

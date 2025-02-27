@@ -21,6 +21,11 @@ export const polar = new Polar(components.polar, {
       email: user.email,
     };
   },
+  // These can be configured in code or via environment variables
+  // Uncomment and replace with actual values to configure in code:
+  // organizationToken: "your_organization_token", // Or use POLAR_ORGANIZATION_TOKEN env var
+  // webhookSecret: "your_webhook_secret", // Or use POLAR_WEBHOOK_SECRET env var
+  // server: "sandbox", // "sandbox" or "production", falls back to POLAR_SERVER env var
 });
 
 export const MAX_FREE_TODOS = 3;

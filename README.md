@@ -97,6 +97,10 @@ export const polar = new Polar(components.polar, {
       email: user.email,
     };
   },
+  // Optional: Configure Polar settings directly in code (alternatively use environment variables)
+  // organizationToken: "your_organization_token", // Optional: Falls back to POLAR_ORGANIZATION_TOKEN env var
+  // webhookSecret: "your_webhook_secret", // Optional: Falls back to POLAR_WEBHOOK_SECRET env var
+  // server: "sandbox", // Optional: "sandbox" or "production", falls back to POLAR_SERVER env var
 });
 
 // Export the API functions
@@ -273,6 +277,9 @@ The example app demonstrates:
 The `Polar` class accepts a configuration object with:
 - `products`: Map of product keys to Polar product IDs
 - `getUserInfo`: Function to get the current user's ID and email
+- `organizationToken`: (Optional) Your Polar organization token. Falls back to `POLAR_ORGANIZATION_TOKEN` env var
+- `webhookSecret`: (Optional) Your Polar webhook secret. Falls back to `POLAR_WEBHOOK_SECRET` env var
+- `server`: (Optional) Polar server environment: "sandbox" or "production". Falls back to `POLAR_SERVER` env var
 
 ### React Components
 
@@ -324,4 +331,4 @@ polar.registerRoutes(http, {
 });
 ```
 
-The webhook handler requires the `POLAR_WEBHOOK_SECRET` environment variable to be set.
+The webhook handler uses the `webhookSecret` from the Polar client configuration or the `POLAR_WEBHOOK_SECRET` environment variable.
