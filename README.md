@@ -24,6 +24,9 @@ const user = useQuery(api.example.getCurrentUser);
 
 ## Prerequisites
 
+### Convex App
+You'll need a Convex App to use the component. Follow any of the [Convex quickstarts](https://docs.convex.dev/home) to set one up.
+
 ### Polar Account
 - [Create a Polar account](https://polar.sh)
 - Create an organization and generate an organization token with permissions:
@@ -40,19 +43,7 @@ const user = useQuery(api.example.getCurrentUser);
   - `customer_portal:read`
   - `customer_portal:write`
   - `customer_sessions:write`
-- Create a product in the Polar dashboard for each pricing plan that you want to offer
 
-**Note:** You can have one price per plan, so a plan with monthly and yearly
-pricing requires two products in Polar.
-
-**Note:** The Convex Polar component is currently built to support recurring
-subscriptions, and may not work as expected with one-time payments. Please
-[open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
-if you run into any issues.
-
-
-### Convex App
-You'll need a Convex App to use the component. Follow any of the [Convex quickstarts](https://docs.convex.dev/home) to set one up.
 
 ## Installation
 
@@ -83,7 +74,53 @@ npx convex env set POLAR_ORGANIZATION_TOKEN xxxxx
 
 ## Usage
 
-### 1. Initialize the Polar client
+### 1. Set up Polar webhooks
+
+The Polar component uses webhooks to keep subscription data in sync. You'll need to:
+
+1. Create a webhook and webhook secret in the Polar dashboard, using your
+   [Convex site
+   URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) + `/polar/events` as the webhook endpoint. Enable the following events:
+     - `product.created`
+     - `product.updated`
+     - `subscription.created`
+     - `subscription.updated`
+2. Set the webhook secret in your Convex environment:
+```sh
+npx convex env set POLAR_WEBHOOK_SECRET xxxxx
+```
+
+3. Register the webhook handler in your `convex/http.ts`:
+```ts
+import { httpRouter } from "convex/server";
+import { polar } from "./example";
+
+const http = httpRouter();
+
+// Register the webhook handler at /polar/events
+polar.registerRoutes(http as any);
+
+export default http;
+```
+4. Be sure to run `npx convex dev` to start your Convex app with the Polar
+   component enabled, which will deploy the webhook handler to your Convex
+   instance.
+
+### 2. Create products in Polar
+
+Create a product in the Polar dashboard for each pricing plan that you want to
+offer. The product data will be synced to your Convex app automatically.
+
+**Note:** You can have one price per plan, so a plan with monthly and yearly
+pricing requires two products in Polar.
+
+**Note:** The Convex Polar component is currently built to support recurring
+subscriptions, and may not work as expected with one-time payments. Please
+[open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
+if you run into any issues.
+
+
+### 3. Initialize the Polar client
 
 Create a Polar client in your Convex backend:
 
@@ -94,7 +131,10 @@ import { api, components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 
 export const polar = new Polar(components.polar, {
-  // Optional: Configure static keys for referencing your products
+  // Optional: Configure static keys for referencing your products.
+  // Alternatively you can use the `listAllProducts` function to get
+  // the product data and sort it out in your UI however you like
+  // (eg., by price, name, recurrence, etc.).
   // Map your product keys to Polar product IDs (you can also use env vars for this)
   // Replace these with whatever your products are (eg., "pro", "pro_monthly", whatever you want)
   products: {
@@ -122,6 +162,7 @@ export const {
   changeCurrentSubscription,
   cancelCurrentSubscription,
   getProducts,
+  listAllProducts,
 } = polar.api();
 
 export const {
@@ -132,33 +173,9 @@ export const {
 export const _ = query(
 ```
 
-### 2. Set up webhooks
+### 4. Display products and prices
 
-The Polar component uses webhooks to keep subscription data in sync. You'll need to:
-
-1. Create a webhook and webhook secret in the Polar dashboard, using your [Convex site URL](https://docs.convex.dev/production/environment-variables#system-environment-variables)
-   + `/polar/events` as the webhook endpoint.
-2. Set the webhook secret in your Convex environment:
-```sh
-npx convex env set POLAR_WEBHOOK_SECRET xxxxx
-```
-
-1. Register the webhook handler in your `convex/http.ts`:
-```ts
-import { httpRouter } from "convex/server";
-import { polar } from "./example";
-
-const http = httpRouter();
-
-// Register the webhook handler at /polar/events
-polar.registerRoutes(http as any);
-
-export default http;
-```
-
-### 3. Display products and prices
-
-Use the exported `getProducts` function to display your products and their prices:
+Use the exported `getProducts` or `listAllProducts`function to display your products and their prices:
 
 ```tsx
 // React component
