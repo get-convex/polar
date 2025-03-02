@@ -27,18 +27,18 @@ const user = useQuery(api.example.getCurrentUser);
 ### Polar Account
 - [Create a Polar account](https://polar.sh)
 - Create an organization and generate an organization token with permissions:
-  - `products:read`,
-  - `products:write`,
-  - `subscriptions:read`,
-  - `subscriptions:write`,
-  - `customers:read`,
-  - `customers:write`,
-  - `checkouts:read`,
-  - `checkouts:write`,
-  - `checkout_links:read`,
-  - `checkout_links:write`,
-  - `customer_portal:read`,
-  - `customer_portal:write`,
+  - `products:read`
+  - `products:write`
+  - `subscriptions:read`
+  - `subscriptions:write`
+  - `customers:read`
+  - `customers:write`
+  - `checkouts:read`
+  - `checkouts:write`
+  - `checkout_links:read`
+  - `checkout_links:write`
+  - `customer_portal:read`
+  - `customer_portal:write`
   - `customer_sessions:write`
 - Create a product in the Polar dashboard for each pricing plan that you want to offer
 
