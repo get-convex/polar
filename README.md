@@ -26,8 +26,21 @@ const user = useQuery(api.example.getCurrentUser);
 
 ### Polar Account
 - [Create a Polar account](https://polar.sh)
-- Create an organization and generate an organization token
-- Create a product in the Polar dashboard for each pricing plan
+- Create an organization and generate an organization token with permissions:
+  - `products:read`,
+  - `products:write`,
+  - `subscriptions:read`,
+  - `subscriptions:write`,
+  - `customers:read`,
+  - `customers:write`,
+  - `checkouts:read`,
+  - `checkouts:write`,
+  - `checkout_links:read`,
+  - `checkout_links:write`,
+  - `customer_portal:read`,
+  - `customer_portal:write`,
+  - `customer_sessions:write`
+- Create a product in the Polar dashboard for each pricing plan that you want to offer
 
 **Note:** You can have one price per plan, so a plan with monthly and yearly
 pricing requires two products in Polar.
@@ -81,9 +94,10 @@ import { api, components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 
 export const polar = new Polar(components.polar, {
+  // Optional: Configure static keys for referencing your products
+  // Map your product keys to Polar product IDs (you can also use env vars for this)
+  // Replace these with whatever your products are (eg., "pro", "pro_monthly", whatever you want)
   products: {
-    // Map your product keys to Polar product IDs (you can also use env vars for this)
-    // Replace these with whatever your products are (eg., "pro", "pro_monthly", whatever you want)
     premiumMonthly: "product_id_from_polar",
     premiumYearly: "product_id_from_polar",
     premiumPlusMonthly: "product_id_from_polar",
@@ -97,7 +111,7 @@ export const polar = new Polar(components.polar, {
       email: user.email,
     };
   },
-  // Optional: Configure Polar settings directly in code (alternatively use environment variables)
+  // Optional: Configure Polar settings directly in code
   // organizationToken: "your_organization_token", // Optional: Falls back to POLAR_ORGANIZATION_TOKEN env var
   // webhookSecret: "your_webhook_secret", // Optional: Falls back to POLAR_WEBHOOK_SECRET env var
   // server: "sandbox", // Optional: "sandbox" or "production", falls back to POLAR_SERVER env var
