@@ -104,6 +104,32 @@ polar.registerRoutes(http as any);
 
 export default http;
 ```
+
+You can also provide callbacks for webhook events:
+
+```ts
+polar.registerRoutes(http, {
+  // Optional custom path, default is "/events/polar"
+  path: "/events/polar",
+  // Optional callbacks for webhook events
+  onSubscriptionUpdated: async (ctx, event) => {
+    // Handle subscription updates, like cancellations
+    if (event.data.customerCancellationReason) {
+      console.log("Customer cancelled:", event.data.customerCancellationReason);
+    }
+  },
+  onSubscriptionCreated: async (ctx, event) => {
+    // Handle new subscriptions
+  },
+  onProductCreated: async (ctx, event) => {
+    // Handle new products
+  },
+  onProductUpdated: async (ctx, event) => {
+    // Handle product updates
+  },
+});
+```
+
 4. Be sure to run `npx convex dev` to start your Convex app with the Polar
    component enabled, which will deploy the webhook handler to your Convex
    instance.

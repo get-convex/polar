@@ -89,6 +89,8 @@ export const convertToDatabaseSubscription = (
     currentPeriodStart: subscription.currentPeriodStart.toISOString(),
     currentPeriodEnd: subscription.currentPeriodEnd?.toISOString() ?? null,
     cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+    customerCancellationReason: subscription.customerCancellationReason,
+    customerCancellationComment: subscription.customerCancellationComment,
     startedAt: subscription.startedAt?.toISOString() ?? null,
     endedAt: subscription.endedAt?.toISOString() ?? null,
     metadata: subscription.metadata,

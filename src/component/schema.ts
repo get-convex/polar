@@ -83,6 +83,8 @@ export default defineSchema(
       priceId: v.string(),
       checkoutId: v.union(v.string(), v.null()),
       metadata: v.record(v.string(), v.any()),
+      customerCancellationReason: v.optional(v.union(v.string(), v.null())),
+      customerCancellationComment: v.optional(v.union(v.string(), v.null())),
     })
       .index("id", ["id"])
       .index("customerId", ["customerId"])
