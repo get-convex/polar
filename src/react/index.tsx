@@ -41,17 +41,21 @@ export const CheckoutLink = ({
   children,
   className,
   theme = "dark",
+  embed = true,
 }: PropsWithChildren<{
   polarApi: Pick<CheckoutApi, "generateCheckoutLink">;
   productIds: string[];
   className?: string;
   theme?: "dark" | "light";
+  embed?: boolean;
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
   const [checkoutLink, setCheckoutLink] = useState<string>();
 
   useEffect(() => {
-    PolarEmbedCheckout.init();
+    if (embed) {
+      PolarEmbedCheckout.init();
+    }
     void generateCheckoutLink({
       productIds,
       origin: window.location.origin,
@@ -62,8 +66,8 @@ export const CheckoutLink = ({
     <a
       className={className}
       href={checkoutLink}
-      data-polar-checkout
       data-polar-checkout-theme={theme}
+      {...(embed ? { "data-polar-checkout": true } : {})}
     >
       {children}
     </a>

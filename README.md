@@ -10,6 +10,8 @@ const user = useQuery(api.example.getCurrentUser);
 <CheckoutLink
   polarApi={api.example}
   productIds={[products.premiumMonthly.id, products.premiumYearly.id]}
+  // Optional: turn off embedding to link to a checkout page
+  embed={false}
 >
   Upgrade to Premium
 </CheckoutLink>
@@ -231,6 +233,8 @@ import { api } from "../convex/_generated/api";
     generateCheckoutLink: api.example.generateCheckoutLink,
   }}
   productIds={[products.premiumMonthly.id, products.premiumYearly.id]}
+  // Optional: turn off embedding to link to a checkout page
+  embed={false}
 >
   Upgrade to Premium
 </CheckoutLink>
@@ -318,9 +322,9 @@ The `Polar` class accepts a configuration object with:
 Props:
 - `polarApi`: Object containing `generateCheckoutLink` function
 - `productIds`: Array of product IDs to show in the checkout
+- `embed`: (Optional) Whether to embed the checkout link. Defaults to `true`.
 - `className`: Optional CSS class name
 - `children`: React children (button content)
-
 #### CustomerPortalLink
 Props:
 - `polarApi`: Object containing `generateCustomerPortalUrl` function

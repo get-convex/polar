@@ -210,6 +210,7 @@ export default function TodoList() {
                               premiumYearly?.id,
                             ].filter((id): id is string => id !== undefined)}
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                            embed={false}
                           >
                             Upgrade to Premium
                           </CheckoutLink>
