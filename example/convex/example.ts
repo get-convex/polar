@@ -1,6 +1,6 @@
 import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
-import { QueryCtx, mutation, query, action } from "./_generated/server";
+import { QueryCtx, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
@@ -43,27 +43,8 @@ export const {
   listAllProducts,
 } = polar.api();
 
-export const { generateCustomerPortalUrl } = polar.checkoutApi();
-
-// Custom implementation of generateCheckoutLink that accepts a productKey
-export const generateCheckoutLink = action({
-  args: {
-    productIds: v.array(v.string()),
-    origin: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(api.example.getCurrentUser);
-    if (!user) throw new Error("No user found");
-
-    const session = await polar.createCheckoutSession(ctx, {
-      productIds: args.productIds,
-      userId: user._id,
-      email: user.email,
-      origin: args.origin,
-    });
-    return { url: session.url };
-  },
-});
+export const { generateCustomerPortalUrl, generateCheckoutLink } =
+  polar.checkoutApi();
 
 // In a real app you'll set up authentication, we just use a
 // fake user for the example.

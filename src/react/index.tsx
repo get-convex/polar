@@ -59,6 +59,7 @@ export const CheckoutLink = ({
     void generateCheckoutLink({
       productIds,
       origin: window.location.origin,
+      successUrl: window.location.href,
     }).then(({ url }) => setCheckoutLink(url));
   }, [productIds]);
 
