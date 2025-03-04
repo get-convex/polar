@@ -6,6 +6,7 @@ export default defineSchema(
     customers: defineTable({
       id: v.string(),
       userId: v.string(),
+      metadata: v.optional(v.record(v.string(), v.any())),
     })
       .index("userId", ["userId"])
       .index("id", ["id"]),
@@ -21,6 +22,7 @@ export default defineSchema(
       isRecurring: v.boolean(),
       isArchived: v.boolean(),
       organizationId: v.string(),
+      metadata: v.optional(v.record(v.string(), v.any())),
       prices: v.array(
         v.object({
           id: v.string(),

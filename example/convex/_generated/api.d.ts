@@ -73,6 +73,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -105,6 +106,8 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerCancellationComment?: string | null;
+            customerCancellationReason?: string | null;
             customerId: string;
             endedAt: string | null;
             id: string;
@@ -131,6 +134,8 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -162,6 +167,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -189,7 +195,7 @@ export declare const components: {
         "query",
         "internal",
         { userId: string },
-        { id: string; userId: string } | null
+        { id: string; metadata?: Record<string, any>; userId: string } | null
       >;
       getProduct: FunctionReference<
         "query",
@@ -220,6 +226,7 @@ export declare const components: {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -250,6 +257,8 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -265,7 +274,7 @@ export declare const components: {
       insertCustomer: FunctionReference<
         "mutation",
         "internal",
-        { id: string; userId: string },
+        { id: string; metadata?: Record<string, any>; userId: string },
         string
       >;
       listCustomerSubscriptions: FunctionReference<
@@ -280,6 +289,8 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -321,6 +332,7 @@ export declare const components: {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -352,6 +364,8 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -383,6 +397,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -435,6 +450,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -467,6 +483,8 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerCancellationComment?: string | null;
+            customerCancellationReason?: string | null;
             customerId: string;
             endedAt: string | null;
             id: string;
@@ -484,7 +502,7 @@ export declare const components: {
       upsertCustomer: FunctionReference<
         "mutation",
         "internal",
-        { customerId: string; userId: string },
+        { id: string; metadata?: Record<string, any>; userId: string },
         string
       >;
     };

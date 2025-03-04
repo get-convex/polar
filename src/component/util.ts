@@ -110,6 +110,7 @@ export const convertToDatabaseProduct = (
     createdAt: product.createdAt.toISOString(),
     modifiedAt: product.modifiedAt?.toISOString() ?? null,
     recurringInterval: product.recurringInterval,
+    metadata: product.metadata,
     prices: product.prices.map((price) => ({
       id: price.id,
       productId: price.productId,

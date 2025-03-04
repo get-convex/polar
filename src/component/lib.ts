@@ -19,24 +19,19 @@ export const getCustomerByUserId = query({
 });
 
 export const insertCustomer = mutation({
-  args: {
-    id: v.string(),
-    userId: v.string(),
-  },
+  args: schema.tables.customers.validator,
   returns: v.id("customers"),
   handler: async (ctx, args) => {
     return ctx.db.insert("customers", {
       id: args.id,
       userId: args.userId,
+      metadata: args.metadata,
     });
   },
 });
 
 export const upsertCustomer = mutation({
-  args: {
-    userId: v.string(),
-    customerId: v.string(),
-  },
+  args: schema.tables.customers.validator,
   returns: v.string(),
   handler: async (ctx, args) => {
     const customer = await ctx.db
@@ -45,8 +40,9 @@ export const upsertCustomer = mutation({
       .unique();
     if (!customer) {
       const customerId = await ctx.db.insert("customers", {
-        id: args.customerId,
+        id: args.id,
         userId: args.userId,
+        metadata: args.metadata,
       });
       const newCustomer = await ctx.db.get(customerId);
       if (!newCustomer) {
@@ -203,7 +199,10 @@ export const createSubscription = mutation({
     subscription: schema.tables.subscriptions.validator,
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("subscriptions", args.subscription);
+    await ctx.db.insert("subscriptions", {
+      ...args.subscription,
+      metadata: args.subscription.metadata,
+    });
   },
 });
 
@@ -219,7 +218,10 @@ export const updateSubscription = mutation({
     if (!existingSubscription) {
       throw new Error(`Subscription not found: ${args.subscription.id}`);
     }
-    await ctx.db.patch(existingSubscription._id, args.subscription);
+    await ctx.db.patch(existingSubscription._id, {
+      ...args.subscription,
+      metadata: args.subscription.metadata,
+    });
   },
 });
 
@@ -228,7 +230,10 @@ export const createProduct = mutation({
     product: schema.tables.products.validator,
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("products", args.product);
+    await ctx.db.insert("products", {
+      ...args.product,
+      metadata: args.product.metadata,
+    });
   },
 });
 
@@ -244,7 +249,10 @@ export const updateProduct = mutation({
     if (!existingProduct) {
       throw new Error(`Product not found: ${args.product.id}`);
     }
-    await ctx.db.patch(existingProduct._id, args.product);
+    await ctx.db.patch(existingProduct._id, {
+      ...args.product,
+      metadata: args.product.metadata,
+    });
   },
 });
 

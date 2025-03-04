@@ -59,6 +59,7 @@ export type Mounts = {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -91,6 +92,8 @@ export type Mounts = {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -117,6 +120,8 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerCancellationComment?: string | null;
+        customerCancellationReason?: string | null;
         customerId: string;
         endedAt: string | null;
         id: string;
@@ -148,6 +153,7 @@ export type Mounts = {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -175,7 +181,7 @@ export type Mounts = {
       "query",
       "public",
       { userId: string },
-      { id: string; userId: string } | null
+      { id: string; metadata?: Record<string, any>; userId: string } | null
     >;
     getProduct: FunctionReference<
       "query",
@@ -206,6 +212,7 @@ export type Mounts = {
           storageVersion: string | null;
           version: string | null;
         }>;
+        metadata?: Record<string, any>;
         modifiedAt: string | null;
         name: string;
         organizationId: string;
@@ -236,6 +243,8 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerCancellationComment?: string | null;
+        customerCancellationReason?: string | null;
         customerId: string;
         endedAt: string | null;
         id: string;
@@ -251,7 +260,7 @@ export type Mounts = {
     insertCustomer: FunctionReference<
       "mutation",
       "public",
-      { id: string; userId: string },
+      { id: string; metadata?: Record<string, any>; userId: string },
       string
     >;
     listCustomerSubscriptions: FunctionReference<
@@ -266,6 +275,8 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerCancellationComment?: string | null;
+        customerCancellationReason?: string | null;
         customerId: string;
         endedAt: string | null;
         id: string;
@@ -307,6 +318,7 @@ export type Mounts = {
           storageVersion: string | null;
           version: string | null;
         }>;
+        metadata?: Record<string, any>;
         modifiedAt: string | null;
         name: string;
         organizationId: string;
@@ -338,6 +350,8 @@ export type Mounts = {
         currency: string | null;
         currentPeriodEnd: string | null;
         currentPeriodStart: string;
+        customerCancellationComment?: string | null;
+        customerCancellationReason?: string | null;
         customerId: string;
         endedAt: string | null;
         id: string;
@@ -369,6 +383,7 @@ export type Mounts = {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -421,6 +436,7 @@ export type Mounts = {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -453,6 +469,8 @@ export type Mounts = {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
@@ -470,7 +488,7 @@ export type Mounts = {
     upsertCustomer: FunctionReference<
       "mutation",
       "public",
-      { customerId: string; userId: string },
+      { id: string; metadata?: Record<string, any>; userId: string },
       string
     >;
   };

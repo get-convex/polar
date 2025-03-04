@@ -67,7 +67,6 @@
     }
   },
   "peerDependencies": {
-    "@polar-sh/sdk": "^0.26.1",
     "convex": "^1.19.2",
     "react": "^18",
     "react-dom": "^18"
@@ -88,7 +87,8 @@
   "types": "./dist/commonjs/client/index.d.ts",
   "module": "./dist/esm/client/index.js",
   "dependencies": {
-    "@polar-sh/checkout": "^0.1.9",
+    "@polar-sh/checkout": "^0.1.10",
+    "@polar-sh/sdk": "^0.28.0",
     "buffer": "^6.0.3",
     "convex-helpers": "^0.1.63",
     "remeda": "^2.20.2",
