@@ -301,6 +301,10 @@ export class Polar<
       }),
     };
   }
+  // Deprecated: use api() instead
+  checkoutApi() {
+    return this.api();
+  }
   registerRoutes(
     http: HttpRouter,
     {

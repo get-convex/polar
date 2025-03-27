@@ -64,7 +64,7 @@ export const {
 
   // Cancels the current subscription.
   cancelCurrentSubscription,
-} = polar.api();
+} = polar.checkoutApi();
 
 // In a real app you'll set up authentication, we just use a
 // fake user for the example.
