@@ -5,14 +5,25 @@ import { AlertCircle } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { CheckoutLink, CustomerPortalLink } from "../../src/react";
+import {
+  insertTodoOptimistic,
+  completeTodoOptimistic,
+  deleteTodoOptimistic,
+} from "@/optimistic";
 
 export default function TodoList() {
   const user = useQuery(api.example.getCurrentUser);
   const todos = useQuery(api.example.listTodos);
   const products = useQuery(api.example.getConfiguredProducts);
-  const insertTodo = useMutation(api.example.insertTodo);
-  const completeTodo = useMutation(api.example.completeTodo);
-  const deleteTodo = useMutation(api.example.deleteTodo);
+  const insertTodo = useMutation(api.example.insertTodo).withOptimisticUpdate(
+    insertTodoOptimistic
+  );
+  const completeTodo = useMutation(
+    api.example.completeTodo
+  ).withOptimisticUpdate(completeTodoOptimistic);
+  const deleteTodo = useMutation(api.example.deleteTodo).withOptimisticUpdate(
+    deleteTodoOptimistic
+  );
   const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
   const changeSubscription = useAction(api.example.changeCurrentSubscription);
   const [newTodo, setNewTodo] = useState("");
@@ -84,6 +95,14 @@ export default function TodoList() {
           <h1 className="text-3xl font-light mb-6 text-gray-800 dark:text-gray-100">
             Todo List
           </h1>
+          <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+            <p>Plan limits:</p>
+            <ul className="list-disc list-inside mt-1">
+              <li>Free: Up to 3 todos</li>
+              <li>Premium: Up to 6 todos</li>
+              <li>Premium Plus: Unlimited todos</li>
+            </ul>
+          </div>
           <form onSubmit={addTodo} className="mb-6">
             <Input
               type="text"
@@ -169,6 +188,14 @@ export default function TodoList() {
                     {user.subscription.recurringInterval}
                   </span>
                 )}
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  •{" "}
+                  {user?.isPremiumPlus
+                    ? "Unlimited todos"
+                    : user?.isPremium
+                      ? "Up to 6 todos"
+                      : "Up to 3 todos"}
+                </span>
               </div>
             </div>
 
@@ -185,17 +212,25 @@ export default function TodoList() {
                       <div>
                         <h4 className="font-medium">Premium</h4>
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            ${(premiumMonthly.prices[0].priceAmount ?? 0) / 100}
-                            /month
-                          </p>
-                          {premiumYearly && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
                               $
-                              {(premiumYearly.prices[0].priceAmount ?? 0) / 100}
-                              /year
-                            </p>
-                          )}
+                              {(premiumMonthly.prices[0].priceAmount ?? 0) /
+                                100}
+                              /month
+                            </span>
+                            {premiumYearly && (
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                or $
+                                {(premiumYearly.prices[0].priceAmount ?? 0) /
+                                  100}
+                                /year
+                              </span>
+                            )}
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              • Up to 6 todos
+                            </span>
+                          </div>
                         </div>
                       </div>
                       {user?.subscription?.productId !== premiumMonthly.id &&
@@ -212,7 +247,7 @@ export default function TodoList() {
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                             embed={false}
                           >
-                            Upgrade to Premium
+                            Upgrade to Premium (redirect)
                           </CheckoutLink>
                         ) : (
                           <Button
@@ -232,20 +267,25 @@ export default function TodoList() {
                       <div>
                         <h4 className="font-medium">Premium Plus</h4>
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            $
-                            {(premiumPlusMonthly.prices[0].priceAmount ?? 0) /
-                              100}
-                            /month
-                          </p>
-                          {premiumPlusYearly && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
                               $
-                              {(premiumPlusYearly.prices[0].priceAmount ?? 0) /
+                              {(premiumPlusMonthly.prices[0].priceAmount ?? 0) /
                                 100}
-                              /year
-                            </p>
-                          )}
+                              /month
+                            </span>
+                            {premiumPlusYearly && (
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                or $
+                                {(premiumPlusYearly.prices[0].priceAmount ??
+                                  0) / 100}
+                                /year
+                              </span>
+                            )}
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              • Unlimited todos
+                            </span>
+                          </div>
                         </div>
                       </div>
                       {user?.subscription?.productId !==
@@ -262,7 +302,7 @@ export default function TodoList() {
                             ].filter((id): id is string => id !== undefined)}
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                           >
-                            Upgrade to Premium Plus
+                            Upgrade to Premium Plus (modal)
                           </CheckoutLink>
                         ) : (
                           <Button
