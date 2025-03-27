@@ -90,19 +90,30 @@ export default function TodoList() {
   return (
     <main className="min-h-screen bg-gray-100 dark:bg-gray-950 py-10 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4">
+        {/* Introduction */}
+        <div className="mb-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
+          <h1 className="text-2xl font-light mb-4 text-gray-800 dark:text-gray-100">
+            Polar Subscription Example
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            This example demonstrates Polar's subscription management
+            capabilities with a simple todo app. Test it out by:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400 mb-4">
+            <li>
+              Adding todos (limits: Free=3, Premium=6, Premium Plus=unlimited)
+            </li>
+            <li>Upgrading/downgrading between plans</li>
+            <li>Managing subscriptions via the customer portal</li>
+            <li>Testing subscription enforcement</li>
+          </ol>
+        </div>
+
         {/* Todo List */}
         <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
-          <h1 className="text-3xl font-light mb-6 text-gray-800 dark:text-gray-100">
+          <h2 className="text-3xl font-light mb-6 text-gray-800 dark:text-gray-100">
             Todo List
-          </h1>
-          <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-            <p>Plan limits:</p>
-            <ul className="list-disc list-inside mt-1">
-              <li>Free: Up to 3 todos</li>
-              <li>Premium: Up to 6 todos</li>
-              <li>Premium Plus: Unlimited todos</li>
-            </ul>
-          </div>
+          </h2>
           <form onSubmit={addTodo} className="mb-6">
             <Input
               type="text"
