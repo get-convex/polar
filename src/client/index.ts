@@ -301,7 +301,9 @@ export class Polar<
       }),
     };
   }
-  // Deprecated: use api() instead
+  /**
+   * @deprecated: use api() instead
+   */
   checkoutApi() {
     return this.api();
   }
