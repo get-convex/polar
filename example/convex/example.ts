@@ -4,6 +4,20 @@ import { QueryCtx, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
+// User query to use in the Polar component
+export const getUserInfo = query({
+  args: {},
+  handler: async (ctx) => {
+    // This would be replaced with an actual auth query,
+    // eg., ctx.auth.getUserIdentity() or getAuthUserId(ctx)
+    const user = await ctx.db.query("users").first();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  },
+});
+
 export const polar = new Polar(components.polar, {
   products: {
     premiumMonthly: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
@@ -13,13 +27,14 @@ export const polar = new Polar(components.polar, {
   },
   getUserInfo: async (ctx) => {
     const user: { _id: Id<"users">; email: string } = await ctx.runQuery(
-      api.example.getCurrentUser
+      api.example.getUserInfo
     );
     return {
       userId: user._id,
       email: user.email,
     };
   },
+
   // These can be configured in code or via environment variables
   // Uncomment and replace with actual values to configure in code:
   // organizationToken: "your_organization_token", // Or use POLAR_ORGANIZATION_TOKEN env var
