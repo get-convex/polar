@@ -6,7 +6,6 @@ import { Id } from "./_generated/dataModel";
 
 export const polar = new Polar(components.polar, {
   products: {
-    // These would probably be environment variables in a production app
     premiumMonthly: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
     premiumYearly: "9bc5ed5f-2065-40a4-bd1f-e012e448d82f",
     premiumPlusMonthly: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
@@ -32,19 +31,25 @@ export const MAX_FREE_TODOS = 3;
 export const MAX_PREMIUM_TODOS = 6;
 
 export const {
-  changeCurrentSubscription,
-  cancelCurrentSubscription,
-
   // If you configure your products by key in the Polar constructor,
   // this query provides a keyed object of the products.
   getConfiguredProducts,
 
-  // This provides all products, useful if you don't configure products by key.
+  // Lists all non-archived products, useful if you don't configure products by key.
   listAllProducts,
-} = polar.api();
 
-export const { generateCustomerPortalUrl, generateCheckoutLink } =
-  polar.checkoutApi();
+  // Generates a checkout link for the given product IDs.
+  generateCheckoutLink,
+
+  // Generates a customer portal URL for the current user.
+  generateCustomerPortalUrl,
+
+  // Changes the current subscription to the given product ID.
+  changeCurrentSubscription,
+
+  // Cancels the current subscription.
+  cancelCurrentSubscription,
+} = polar.api();
 
 // In a real app you'll set up authentication, we just use a
 // fake user for the example.

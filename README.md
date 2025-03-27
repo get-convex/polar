@@ -2,9 +2,19 @@
 
 Add subscriptions and billing to your Convex app with [Polar](https://polar.sh).
 
+**Check out the [example app](example) for a complete example.**
+
 ```tsx
-// Add subscriptions to your app
-const user = useQuery(api.example.getCurrentUser);
+// Get subscription details for the current user
+const {
+  productKey,
+  status,
+  currentPeriodEnd,
+  currentPeriodStart,
+  ...
+} = await polar.getCurrentSubscription(ctx, {
+  userId: user._id,
+});
 
 // Show available plans
 <CheckoutLink
@@ -22,14 +32,14 @@ const user = useQuery(api.example.getCurrentUser);
 </CustomerPortalLink>
 ```
 
-**Check out the [example app](example) for a complete example.**
-
 ## Prerequisites
 
 ### Convex App
+
 You'll need a Convex App to use the component. Follow any of the [Convex quickstarts](https://docs.convex.dev/home) to set one up.
 
 ### Polar Account
+
 - [Create a Polar account](https://polar.sh)
 - Create an organization and generate an organization token with permissions:
   - `products:read`
@@ -45,7 +55,6 @@ You'll need a Convex App to use the component. Follow any of the [Convex quickst
   - `customer_portal:read`
   - `customer_portal:write`
   - `customer_sessions:write`
-
 
 ## Installation
 
@@ -70,29 +79,37 @@ export default app;
 ```
 
 Set your Polar organization token:
+
 ```sh
 npx convex env set POLAR_ORGANIZATION_TOKEN xxxxx
 ```
 
 ## Usage
 
-### 1. Set up Polar webhooks
+### Set up Polar webhooks
 
 The Polar component uses webhooks to keep subscription data in sync. You'll need to:
 
 1. Create a webhook and webhook secret in the Polar dashboard, using your
    [Convex site
-   URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) + `/polar/events` as the webhook endpoint. Enable the following events:
-     - `product.created`
-     - `product.updated`
-     - `subscription.created`
-     - `subscription.updated`
+   URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) + `/polar/events` as the webhook endpoint. It should look like this:
+   `https://verb-noun-123.convex.cloud/polar/events`
+
+   Enable the following events:
+
+   - `product.created`
+   - `product.updated`
+   - `subscription.created`
+   - `subscription.updated`
+
 2. Set the webhook secret in your Convex environment:
+
 ```sh
 npx convex env set POLAR_WEBHOOK_SECRET xxxxx
 ```
 
 3. Register the webhook handler in your `convex/http.ts`:
+
 ```ts
 import { httpRouter } from "convex/server";
 import { polar } from "./example";
@@ -137,7 +154,7 @@ polar.registerRoutes(http, {
    component enabled, which will deploy the webhook handler to your Convex
    instance.
 
-### 2. Create products in Polar
+### Create products in Polar
 
 Create a product in the Polar dashboard for each pricing plan that you want to
 offer. The product data will be synced to your Convex app automatically.
@@ -150,8 +167,7 @@ subscriptions, and may not work as expected with one-time payments. Please
 [open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
 if you run into any issues.
 
-
-### 3. Initialize the Polar client
+### Initialize the Polar client
 
 Create a Polar client in your Convex backend:
 
@@ -162,19 +178,10 @@ import { api, components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 
 export const polar = new Polar(components.polar, {
-  // Optional: Configure static keys for referencing your products.
-  // Alternatively you can use the `listAllProducts` function to get
-  // the product data and sort it out in your UI however you like
-  // (eg., by price, name, recurrence, etc.).
-  // Map your product keys to Polar product IDs (you can also use env vars for this)
-  // Replace these with whatever your products are (eg., "pro", "pro_monthly", whatever you want)
-  products: {
-    premiumMonthly: "product_id_from_polar",
-    premiumYearly: "product_id_from_polar",
-    premiumPlusMonthly: "product_id_from_polar",
-    premiumPlusYearly: "product_id_from_polar",
-  },
-  // Provide a function the component can use to get the current user's ID and email
+  // Required: provide a function the component can use to get the current user's ID and
+  // email - this will be used for retrieving the correct subscription data for the
+  // current user. The function should return an object with `userId` and `email`
+  // properties.
   getUserInfo: async (ctx) => {
     const user = await ctx.runQuery(api.example.getCurrentUser);
     return {
@@ -182,39 +189,48 @@ export const polar = new Polar(components.polar, {
       email: user.email,
     };
   },
-  // Optional: Configure Polar settings directly in code
-  // organizationToken: "your_organization_token", // Optional: Falls back to POLAR_ORGANIZATION_TOKEN env var
-  // webhookSecret: "your_webhook_secret", // Optional: Falls back to POLAR_WEBHOOK_SECRET env var
-  // server: "sandbox", // Optional: "sandbox" or "production", falls back to POLAR_SERVER env var
+  // Optional: Configure static keys for referencing your products.
+  // Alternatively you can use the `listAllProducts` function to get
+  // the product data and sort it out in your UI however you like
+  // (eg., by price, name, recurrence, etc.).
+  // Map your product keys to Polar product IDs (you can also use env vars for this)
+  // Replace these keys with whatever is useful for your app (eg., "pro", "proMonthly",
+  // whatever you want), and replace the values with the actual product IDs from your
+  // Polar dashboard
+  products: {
+    premiumMonthly: "product_id_from_polar",
+    premiumYearly: "product_id_from_polar",
+    premiumPlusMonthly: "product_id_from_polar",
+    premiumPlusYearly: "product_id_from_polar",
+  },
+  // Optional: Set Polar configuration directly in code
+  organizationToken: "your_organization_token", // Defaults to POLAR_ORGANIZATION_TOKEN env var
+  webhookSecret: "your_webhook_secret", // Defaults to POLAR_WEBHOOK_SECRET env var
+  server: "sandbox", // Optional: "sandbox" or "production", defaults to POLAR_SERVER env var
 });
 
-// Export the API functions
+// Export API functions from the Polar client
 export const {
   changeCurrentSubscription,
   cancelCurrentSubscription,
-  getProducts,
+  getConfiguredProducts,
   listAllProducts,
-} = polar.api();
-
-export const {
   generateCheckoutLink,
   generateCustomerPortalUrl,
-} = polar.checkoutApi();
-
-export const _ = query(
+} = polar.api();
 ```
 
-### 4. Display products and prices
+### Display products and prices
 
-Use the exported `getProducts` or `listAllProducts`function to display your products and their prices:
+Use the exported `getConfiguredProducts` or `listAllProducts`function to display your products and their prices:
+
+#### `getConfiguredProducts`
 
 ```tsx
-// React component
-const products = useQuery(api.example.getProducts);
-
-// Simple example of displaying products and prices
+// Simple example of displaying products and prices if you've configured
+// products by key in the Polar constructor
 function PricingTable() {
-  const products = useQuery(api.example.getProducts);
+  const products = useQuery(api.example.getConfiguredProducts);
   if (!products) return null;
 
   return (
@@ -240,7 +256,48 @@ function PricingTable() {
 }
 ```
 
+#### `listAllProducts`
+
+```tsx
+// Simple example of displaying products and prices if you haven't configured
+// products by key in the Polar constructor
+function PricingTable() {
+  const products = useQuery(api.example.listAllProducts);
+  if (!products) return null;
+
+  // You can sort through products in the client as below, or you can use
+  // `polar.listAllProducts` in your own Convex query and return your desired
+  // products to display in the UI.
+  const proMonthly = products.find(
+    (p) => p.prices[0].recurringInterval === "month"
+  );
+  const proYearly = products.find(
+    (p) => p.prices[0].recurringInterval === "year"
+  );
+  return (
+    <div>
+      {proMonthly && (
+        <div>
+          <h3>{proMonthly.name}</h3>
+          <p>
+            ${(proMonthly.prices[0].priceAmount ?? 0) / 100}/
+            {proMonthly.prices[0].recurringInterval}
+          </p>
+        </div>
+      )}
+      {proYearly && (
+        <div>
+          <h3>{proYearly.name}</h3>
+          <p>${(proYearly.prices[0].priceAmount ?? 0) / 100}/year</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
 Each product includes:
+
 - `id`: The Polar product ID
 - `name`: The product name
 - `prices`: Array of prices with:
@@ -248,7 +305,7 @@ Each product includes:
   - `priceCurrency`: Currency code (e.g., "USD")
   - `recurringInterval`: "month" or "year"
 
-### 4. Add subscription UI components
+### Add subscription UI components
 
 Use the provided React components to add subscription functionality to your app:
 
@@ -258,9 +315,9 @@ import { api } from "../convex/_generated/api";
 
 // For new subscriptions
 <CheckoutLink
-  polarApi={{
-    generateCheckoutLink: api.example.generateCheckoutLink,
-  }}
+  // For our example, the api.example object includes the generateCheckoutLink
+  // function. You can also pass any object that includes this function.
+  polarApi={api.example}
   productIds={[products.premiumMonthly.id, products.premiumYearly.id]}
   // Optional: turn off embedding to link to a checkout page
   embed={false}
@@ -278,7 +335,7 @@ import { api } from "../convex/_generated/api";
 </CustomerPortalLink>
 ```
 
-### 5. Handle subscription changes
+### Handle subscription changes
 
 The Polar component provides functions to handle subscription changes for the
 current user.
@@ -296,7 +353,7 @@ const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
 await cancelSubscription({ revokeImmediately: true });
 ```
 
-### 6. Access subscription data
+### Access subscription data
 
 Query subscription information in your app:
 
@@ -308,39 +365,31 @@ export const getCurrentUser = query({
   handler: async (ctx) => {
     const user = await ctx.db.query("users").first();
     if (!user) throw new Error("No user found");
-    
+
     const subscription = await polar.getCurrentSubscription(ctx, {
       userId: user._id,
     });
-    
+
     return {
       ...user,
       subscription,
       isFree: !subscription,
-      isPremium: subscription?.productKey === "premiumMonthly" || 
-                subscription?.productKey === "premiumYearly",
+      isPremium:
+        subscription?.productKey === "premiumMonthly" ||
+        subscription?.productKey === "premiumYearly",
     };
   },
 });
 ```
-
-## Example App Features
-
-The example app demonstrates:
-- Free and paid subscription tiers
-- Monthly and yearly billing options
-- Upgrade/downgrade between plans
-- Subscription management portal
-- Usage limits based on subscription tier
-- Prorated billing for plan changes
 
 ## API Reference
 
 ### Polar Client
 
 The `Polar` class accepts a configuration object with:
-- `products`: Map of product keys to Polar product IDs
+
 - `getUserInfo`: Function to get the current user's ID and email
+- `products`: (Optional) Map of arbitrarily named keys to Polar product IDs
 - `organizationToken`: (Optional) Your Polar organization token. Falls back to `POLAR_ORGANIZATION_TOKEN` env var
 - `webhookSecret`: (Optional) Your Polar webhook secret. Falls back to `POLAR_WEBHOOK_SECRET` env var
 - `server`: (Optional) Polar server environment: "sandbox" or "production". Falls back to `POLAR_SERVER` env var
@@ -348,46 +397,61 @@ The `Polar` class accepts a configuration object with:
 ### React Components
 
 #### CheckoutLink
+
 Props:
+
 - `polarApi`: Object containing `generateCheckoutLink` function
 - `productIds`: Array of product IDs to show in the checkout
+- `children`: React children (button content)
 - `embed`: (Optional) Whether to embed the checkout link. Defaults to `true`.
-- `className`: Optional CSS class name
-- `children`: React children (button content)
+- `className`: (Optional) CSS class name
+
 #### CustomerPortalLink
+
 Props:
+
 - `polarApi`: Object containing `generateCustomerPortalUrl` function
-- `className`: Optional CSS class name
 - `children`: React children (button content)
+- `className`: (Optional) CSS class name
 
 ### API Functions
 
 #### changeCurrentSubscription
+
 Change an existing subscription to a new plan:
+
 ```ts
 await changeSubscription({ productId: "new_product_id" });
 ```
 
 #### cancelCurrentSubscription
+
 Cancel an existing subscription:
+
 ```ts
 await cancelSubscription({ revokeImmediately: true });
 ```
 
 #### getCurrentSubscription
+
 Get the current user's subscription details:
+
 ```ts
 const subscription = await polar.getCurrentSubscription(ctx, { userId });
 ```
 
 #### getProducts
+
 List all available products and their prices:
+
 ```ts
 const products = await polar.listProducts(ctx);
 ```
 
 #### registerRoutes
+
 Register webhook handlers for the Polar component:
+
 ```ts
 polar.registerRoutes(http, {
   // Optional: customize the webhook endpoint path (defaults to "/polar/events")

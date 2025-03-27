@@ -10,7 +10,6 @@ import {
   validateEvent,
 } from "@polar-sh/sdk/webhooks";
 import {
-  type ApiFromModules,
   type FunctionReference,
   type GenericActionCtx,
   type GenericDataModel,
@@ -18,6 +17,7 @@ import {
   actionGeneric,
   httpActionGeneric,
   queryGeneric,
+  ApiFromModules,
 } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
@@ -40,11 +40,8 @@ export type SubscriptionHandler = FunctionReference<
   { subscription: Subscription }
 >;
 
-export type CheckoutApi<
-  DataModel extends GenericDataModel = GenericDataModel,
-  Products extends Record<string, string> = Record<string, string>,
-> = ApiFromModules<{
-  checkout: ReturnType<Polar<DataModel, Products>["checkoutApi"]>;
+export type PolarComponentApi = ApiFromModules<{
+  checkout: ReturnType<Polar["api"]>;
 }>["checkout"];
 
 export class Polar<
@@ -270,13 +267,15 @@ export class Polar<
           return await this.listProducts(ctx);
         },
       }),
-    };
-  }
-  checkoutApi() {
-    return {
       generateCheckoutLink: actionGeneric({
         args: {
-          productIds: v.array(v.string()),
+          productIds: v.array(
+            v.union(
+              ...Object.keys(this.products).map((productKey) =>
+                v.literal(productKey)
+              )
+            )
+          ),
           origin: v.string(),
           successUrl: v.string(),
         },

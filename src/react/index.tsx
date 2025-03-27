@@ -1,14 +1,13 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { PropsWithChildren, useEffect, useState } from "react";
-import { CheckoutApi } from "../client";
 import { useAction } from "convex/react";
-
+import { PolarComponentApi } from "../client";
 export const CustomerPortalLink = ({
   polarApi,
   children,
   className,
 }: PropsWithChildren<{
-  polarApi: Pick<CheckoutApi, "generateCustomerPortalUrl">;
+  polarApi: Pick<PolarComponentApi, "generateCustomerPortalUrl">;
   className?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
@@ -43,7 +42,7 @@ export const CheckoutLink = ({
   theme = "dark",
   embed = true,
 }: PropsWithChildren<{
-  polarApi: Pick<CheckoutApi, "generateCheckoutLink">;
+  polarApi: Pick<PolarComponentApi, "generateCheckoutLink">;
   productIds: string[];
   className?: string;
   theme?: "dark" | "light";
