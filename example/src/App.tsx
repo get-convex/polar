@@ -245,6 +245,7 @@ export default function TodoList() {
                         </div>
                       </div>
                       {user?.subscription?.productId !== premiumMonthly.id &&
+                        user?.subscription?.productId !== premiumYearly?.id &&
                         (user?.isFree ? (
                           <CheckoutLink
                             polarApi={{
@@ -301,6 +302,8 @@ export default function TodoList() {
                       </div>
                       {user?.subscription?.productId !==
                         premiumPlusMonthly.id &&
+                        user?.subscription?.productId !==
+                          premiumPlusYearly?.id &&
                         (user?.isFree ? (
                           <CheckoutLink
                             polarApi={{

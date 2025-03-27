@@ -269,13 +269,7 @@ export class Polar<
       }),
       generateCheckoutLink: actionGeneric({
         args: {
-          productIds: v.array(
-            v.union(
-              ...Object.keys(this.products).map((productKey) =>
-                v.literal(productKey)
-              )
-            )
-          ),
+          productIds: v.array(v.string()),
           origin: v.string(),
           successUrl: v.string(),
         },
