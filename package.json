@@ -1,17 +1,23 @@
 {
-  "name": "@erquhart/convex-polar",
+  "name": "@convex-dev/polar",
   "description": "A Polar component for Convex.",
-  "repository": "github:erquhart/convex-polar",
-  "homepage": "https://github.com/erquhart/convex-polar#readme",
+  "repository": "github:get-convex/polar",
+  "homepage": "https://github.com/get-convex/polar#readme",
   "bugs": {
     "email": "support@convex.dev",
-    "url": "https://github.com/erquhart/convex-polar/issues"
+    "url": "https://github.com/get-convex/polar/issues"
   },
   "version": "0.4.1",
   "license": "Apache-2.0",
   "keywords": [
     "convex",
-    "component"
+    "component",
+    "polar",
+    "stripe",
+    "subscription",
+    "billing",
+    "payments",
+    "checkout"
   ],
   "type": "module",
   "scripts": {

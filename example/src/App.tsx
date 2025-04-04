@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { CheckoutLink, CustomerPortalLink } from "../../src/react";
+import { CheckoutLink, CustomerPortalLink } from "@convex-dev/polar/react";
 import {
   insertTodoOptimistic,
   completeTodoOptimistic,
