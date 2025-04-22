@@ -129,7 +129,7 @@ export class Polar<
       embedOrigin: origin,
       successUrl,
       ...(productIds.length === 1
-        ? { productId: productIds[0] }
+        ? { products: productIds }
         : { products: productIds }),
     });
   }
@@ -225,8 +225,8 @@ export class Polar<
     await this.sdk.subscriptions.update({
       id: subscription.id,
       subscriptionUpdate: {
-        cancelAtPeriodEnd: revokeImmediately ? null : true,
-        revoke: revokeImmediately ? true : null,
+        cancelAtPeriodEnd: revokeImmediately ? undefined : true,
+        revoke: revokeImmediately ? true : undefined,
       },
     });
   }

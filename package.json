@@ -93,8 +93,8 @@
   "types": "./dist/commonjs/client/index.d.ts",
   "module": "./dist/esm/client/index.js",
   "dependencies": {
-    "@polar-sh/checkout": "^0.1.10",
-    "@polar-sh/sdk": "^0.32.3",
+    "@polar-sh/checkout": "0.1.10",
+    "@polar-sh/sdk": "0.32.11",
     "buffer": "^6.0.3",
     "convex-helpers": "^0.1.63",
     "remeda": "^2.20.2",

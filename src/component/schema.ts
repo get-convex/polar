@@ -82,7 +82,7 @@ export default defineSchema(
       startedAt: v.union(v.string(), v.null()),
       endedAt: v.union(v.string(), v.null()),
       productId: v.string(),
-      priceId: v.string(),
+      priceId: v.optional(v.string()),
       checkoutId: v.union(v.string(), v.null()),
       metadata: v.record(v.string(), v.any()),
       customerCancellationReason: v.optional(v.union(v.string(), v.null())),

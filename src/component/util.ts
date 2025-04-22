@@ -80,7 +80,6 @@ export const convertToDatabaseSubscription = (
     createdAt: subscription.createdAt.toISOString(),
     modifiedAt: subscription.modifiedAt?.toISOString() ?? null,
     productId: subscription.productId,
-    priceId: subscription.priceId,
     checkoutId: subscription.checkoutId,
     amount: subscription.amount,
     currency: subscription.currency,
