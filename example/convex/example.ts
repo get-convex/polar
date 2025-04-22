@@ -88,7 +88,7 @@ const currentUser = async (ctx: QueryCtx) => {
     isPremiumPlus,
     subscription,
     maxTodos: isPremiumPlus
-      ? MAX_PREMIUM_TODOS
+      ? undefined
       : isPremium
         ? MAX_PREMIUM_TODOS
         : MAX_FREE_TODOS,
@@ -137,8 +137,7 @@ export const insertTodo = mutation({
       throw new Error("Reached maximum number of todos for free plan");
     }
     if (
-      (productKey === "premiumMonthly" ||
-        productKey === "premiumPlusMonthly") &&
+      (productKey === "premiumMonthly" || productKey === "premiumYearly") &&
       todoCount >= MAX_PREMIUM_TODOS
     ) {
       throw new Error("Reached maximum number of todos for premium plan");

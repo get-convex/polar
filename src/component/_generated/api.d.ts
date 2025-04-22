@@ -99,7 +99,7 @@ export type Mounts = {
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           productId: string;
           recurringInterval: "month" | "year" | null;
           startedAt: string | null;
@@ -127,7 +127,7 @@ export type Mounts = {
         id: string;
         metadata: Record<string, any>;
         modifiedAt: string | null;
-        priceId: string;
+        priceId?: string;
         product: {
           createdAt: string;
           description: string | null;
@@ -250,7 +250,7 @@ export type Mounts = {
         id: string;
         metadata: Record<string, any>;
         modifiedAt: string | null;
-        priceId: string;
+        priceId?: string;
         productId: string;
         recurringInterval: "month" | "year" | null;
         startedAt: string | null;
@@ -282,7 +282,7 @@ export type Mounts = {
         id: string;
         metadata: Record<string, any>;
         modifiedAt: string | null;
-        priceId: string;
+        priceId?: string;
         productId: string;
         recurringInterval: "month" | "year" | null;
         startedAt: string | null;
@@ -357,7 +357,7 @@ export type Mounts = {
         id: string;
         metadata: Record<string, any>;
         modifiedAt: string | null;
-        priceId: string;
+        priceId?: string;
         product: {
           createdAt: string;
           description: string | null;
@@ -476,7 +476,7 @@ export type Mounts = {
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           productId: string;
           recurringInterval: "month" | "year" | null;
           startedAt: string | null;
