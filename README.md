@@ -6,6 +6,9 @@ Add subscriptions and billing to your Convex app with [Polar](https://polar.sh).
 
 ```tsx
 // Get subscription details for the current user
+// Note: getCurrentSubscription is for apps that only allow one active
+// subscription per user. If you need to support multiple active
+// subscriptions, use listUserSubscriptions instead.
 const {
   productKey,
   status,
@@ -438,6 +441,15 @@ Get the current user's subscription details:
 
 ```ts
 const subscription = await polar.getCurrentSubscription(ctx, { userId });
+```
+
+#### listUserSubscriptions
+
+For apps that support multiple active subscriptions per user,
+get all subscriptions for a user:
+
+```ts
+const subscriptions = await polar.listUserSubscriptions(ctx, { userId });
 ```
 
 #### getProducts
