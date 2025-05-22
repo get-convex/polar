@@ -96,7 +96,7 @@ The Polar component uses webhooks to keep subscription data in sync. You'll need
 1. Create a webhook and webhook secret in the Polar dashboard, using your
    [Convex site
    URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) + `/polar/events` as the webhook endpoint. It should look like this:
-   `https://verb-noun-123.convex.cloud/polar/events`
+   `https://verb-noun-123.convex.site/polar/events`
 
    Enable the following events:
 
