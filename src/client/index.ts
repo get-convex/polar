@@ -311,6 +311,10 @@ export class Polar<
     http: HttpRouter,
     {
       path = "/polar/events",
+      onSubscriptionCreated,
+      onSubscriptionUpdated,
+      onProductCreated,
+      onProductUpdated,
     }: {
       path?: string;
       onSubscriptionCreated?: (
@@ -347,24 +351,28 @@ export class Polar<
               await ctx.runMutation(this.component.lib.createSubscription, {
                 subscription: convertToDatabaseSubscription(event.data),
               });
+              await onSubscriptionCreated?.(ctx, event);
               break;
             }
             case "subscription.updated": {
               await ctx.runMutation(this.component.lib.updateSubscription, {
                 subscription: convertToDatabaseSubscription(event.data),
               });
+              await onSubscriptionUpdated?.(ctx, event);
               break;
             }
             case "product.created": {
               await ctx.runMutation(this.component.lib.createProduct, {
                 product: convertToDatabaseProduct(event.data),
               });
+              await onProductCreated?.(ctx, event);
               break;
             }
             case "product.updated": {
               await ctx.runMutation(this.component.lib.updateProduct, {
                 product: convertToDatabaseProduct(event.data),
               });
+              await onProductUpdated?.(ctx, event);
               break;
             }
           }
