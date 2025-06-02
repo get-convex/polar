@@ -129,8 +129,8 @@ You can also provide callbacks for webhook events:
 
 ```ts
 polar.registerRoutes(http, {
-  // Optional custom path, default is "/events/polar"
-  path: "/events/polar",
+  // Optional custom path, default is "/polar/events"
+  path: "/polar/events",
   // Optional callbacks for webhook events
   onSubscriptionUpdated: async (ctx, event) => {
     // Handle subscription updates, like cancellations.

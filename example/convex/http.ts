@@ -4,8 +4,8 @@ import { polar } from "./example";
 const http = httpRouter();
 
 polar.registerRoutes(http, {
-  // Optional custom path, default is "/events/polar"
-  path: "/events/polar",
+  // Optional custom path, default is "/polar/events"
+  path: "/polar/events",
   // Optional callback for when a subscription is updated
   onSubscriptionUpdated: async (ctx, event) => {
     console.log("Subscription updated", event);
