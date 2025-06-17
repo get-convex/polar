@@ -472,3 +472,16 @@ polar.registerRoutes(http, {
 ```
 
 The webhook handler uses the `webhookSecret` from the Polar client configuration or the `POLAR_WEBHOOK_SECRET` environment variable.
+
+#### syncProducts
+
+Sync existing products from Polar (must be run inside an action):
+
+```ts
+export const syncProducts = action({
+  args: {},
+  handler: async (ctx) => {
+    await polar.syncProducts(ctx);
+  },
+});
+```

@@ -407,6 +407,12 @@ export type Mounts = {
         status: string;
       }>
     >;
+    syncProducts: FunctionReference<
+      "action",
+      "public",
+      { polarAccessToken: string; server: "sandbox" | "production" },
+      any
+    >;
     updateProduct: FunctionReference<
       "mutation",
       "public",
@@ -454,6 +460,57 @@ export type Mounts = {
           }>;
           recurringInterval?: "month" | "year" | null;
         };
+      },
+      any
+    >;
+    updateProducts: FunctionReference<
+      "mutation",
+      "public",
+      {
+        polarAccessToken: string;
+        products: Array<{
+          createdAt: string;
+          description: string | null;
+          id: string;
+          isArchived: boolean;
+          isRecurring: boolean;
+          medias: Array<{
+            checksumEtag: string | null;
+            checksumSha256Base64: string | null;
+            checksumSha256Hex: string | null;
+            createdAt: string;
+            id: string;
+            isUploaded: boolean;
+            lastModifiedAt: string | null;
+            mimeType: string;
+            name: string;
+            organizationId: string;
+            path: string;
+            publicUrl: string;
+            service?: string;
+            size: number;
+            sizeReadable: string;
+            storageVersion: string | null;
+            version: string | null;
+          }>;
+          metadata?: Record<string, any>;
+          modifiedAt: string | null;
+          name: string;
+          organizationId: string;
+          prices: Array<{
+            amountType?: string;
+            createdAt: string;
+            id: string;
+            isArchived: boolean;
+            modifiedAt: string | null;
+            priceAmount?: number;
+            priceCurrency?: string;
+            productId: string;
+            recurringInterval?: "month" | "year" | null;
+            type?: string;
+          }>;
+          recurringInterval?: "month" | "year" | null;
+        }>;
       },
       any
     >;

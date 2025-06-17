@@ -1,8 +1,10 @@
+import { Polar as PolarSdk } from "@polar-sh/sdk";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
-import { omitSystemFields } from "./util";
+import { api } from "./_generated/api";
+import { convertToDatabaseProduct, omitSystemFields } from "./util";
 
 export const getCustomerByUserId = query({
   args: {
@@ -267,5 +269,52 @@ export const listCustomerSubscriptions = query({
       .withIndex("customerId", (q) => q.eq("customerId", args.customerId))
       .collect();
     return subscriptions.map(omitSystemFields);
+  },
+});
+
+export const syncProducts = action({
+  args: {
+    polarAccessToken: v.string(),
+    server: v.union(v.literal("sandbox"), v.literal("production")),
+  },
+  handler: async (ctx, args) => {
+    const sdk = new PolarSdk({
+      accessToken: args.polarAccessToken,
+      server: args.server,
+    });
+    let page = 1;
+    let maxPage;
+    do {
+      const products = await sdk.products.list({
+        page,
+        limit: 100,
+      });
+      page = page + 1;
+      maxPage = products.result.pagination.maxPage;
+      await ctx.runMutation(api.lib.updateProducts, {
+        polarAccessToken: args.polarAccessToken,
+        products: products.result.items.map(convertToDatabaseProduct),
+      });
+    } while (maxPage >= page);
+  },
+});
+
+export const updateProducts = mutation({
+  args: {
+    polarAccessToken: v.string(),
+    products: v.array(schema.tables.products.validator),
+  },
+  handler: async (ctx, args) => {
+    await asyncMap(args.products, async (product) => {
+      const existingProduct = await ctx.db
+        .query("products")
+        .withIndex("id", (q) => q.eq("id", product.id))
+        .unique();
+      if (existingProduct) {
+        await ctx.db.patch(existingProduct._id, product);
+        return;
+      }
+      await ctx.db.insert("products", product);
+    });
   },
 });

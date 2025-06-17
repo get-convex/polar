@@ -85,6 +85,12 @@ export class Polar<
   getCustomerByUserId(ctx: RunQueryCtx, userId: string) {
     return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
   }
+  async syncProducts(ctx: RunActionCtx) {
+    await ctx.runAction(this.component.lib.syncProducts, {
+      polarAccessToken: this.organizationToken,
+      server: this.server,
+    });
+  }
   async createCheckoutSession(
     ctx: RunMutationCtx,
     {
