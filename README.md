@@ -170,6 +170,8 @@ subscriptions, and may not work as expected with one-time payments. Please
 [open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
 if you run into any issues.
 
+Products created prior to using this component need to be synced with Convex using the `syncProducts` function.
+
 ### Initialize the Polar client
 
 Create a Polar client in your Convex backend:
