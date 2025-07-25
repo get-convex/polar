@@ -12,8 +12,8 @@ import type {
 import { GenericId } from "convex/values";
 import type { api } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
-import { Product } from "@polar-sh/sdk/models/components/product.js";
+import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
+import type { Product } from "@polar-sh/sdk/models/components/product.js";
 
 export const omitSystemFields = <
   T extends { _id: string; _creationTime: number } | null | undefined,

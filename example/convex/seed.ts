@@ -1,10 +1,12 @@
-import { Polar } from "@polar-sh/sdk";
+import { PolarCore } from "@polar-sh/sdk/core.js";
+import { productsCreate } from "@polar-sh/sdk/funcs/productsCreate.js";
+import { productsList } from "@polar-sh/sdk/funcs/productsList.js";
 import { internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 const accessToken = process.env.POLAR_ORGANIZATION_TOKEN;
 
-const polar = new Polar({
+const polar = new PolarCore({
   accessToken,
   server: "sandbox",
 });
@@ -36,7 +38,7 @@ const seed = internalAction({
         return items.length > 0;
       }
     }
-    const result = await polar.products.list({
+    const result = await productsList(polar, {
       isArchived: false,
       limit: 1,
     });
@@ -52,7 +54,7 @@ const seed = internalAction({
     // Create example products. In a real app you would likely create your
     // products in the Polar dashboard and reference them by id in your application.
     await Promise.all([
-      polar.products.create({
+      productsCreate(polar, {
         name: PREMIUM_PLAN_NAME,
         description: "All the things for one low monthly price.",
         recurringInterval: "month",
@@ -63,7 +65,7 @@ const seed = internalAction({
           },
         ],
       }),
-      polar.products.create({
+      productsCreate(polar, {
         name: PREMIUM_PLAN_NAME,
         description: "All the things for one low annual price.",
         recurringInterval: "year",
@@ -74,7 +76,7 @@ const seed = internalAction({
           },
         ],
       }),
-      polar.products.create({
+      productsCreate(polar, {
         name: PREMIUM_PLUS_PLAN_NAME,
         description: "All the things for one low monthly price.",
         recurringInterval: "month",
@@ -85,7 +87,7 @@ const seed = internalAction({
           },
         ],
       }),
-      polar.products.create({
+      productsCreate(polar, {
         name: PREMIUM_PLUS_PLAN_NAME,
         description: "All the things for one low annual price.",
         recurringInterval: "year",

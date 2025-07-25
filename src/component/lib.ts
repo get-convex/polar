@@ -1,4 +1,6 @@
-import { Polar as PolarSdk } from "@polar-sh/sdk";
+import { PolarCore } from "@polar-sh/sdk/core";
+import { productsList } from "@polar-sh/sdk/funcs/productsList.js";
+
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import schema from "./schema";
@@ -278,22 +280,25 @@ export const syncProducts = action({
     server: v.union(v.literal("sandbox"), v.literal("production")),
   },
   handler: async (ctx, args) => {
-    const sdk = new PolarSdk({
+    const polar = new PolarCore({
       accessToken: args.polarAccessToken,
       server: args.server,
     });
     let page = 1;
     let maxPage;
     do {
-      const products = await sdk.products.list({
+      const products = await productsList(polar, {
         page,
         limit: 100,
       });
+      if (!products.value) {
+        throw new Error("Failed to get products");
+      }
       page = page + 1;
-      maxPage = products.result.pagination.maxPage;
+      maxPage = products.value.result.pagination.maxPage;
       await ctx.runMutation(api.lib.updateProducts, {
         polarAccessToken: args.polarAccessToken,
-        products: products.result.items.map(convertToDatabaseProduct),
+        products: products.value.result.items.map(convertToDatabaseProduct),
       });
     } while (maxPage >= page);
   },

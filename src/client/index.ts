@@ -1,5 +1,10 @@
 import "./polyfill";
-import { Polar as PolarSdk } from "@polar-sh/sdk";
+import { PolarCore } from "@polar-sh/sdk/core.js";
+import { customersCreate } from "@polar-sh/sdk/funcs/customersCreate.js";
+import { checkoutsCreate } from "@polar-sh/sdk/funcs/checkoutsCreate.js";
+import { customerSessionsCreate } from "@polar-sh/sdk/funcs/customerSessionsCreate.js";
+import { subscriptionsUpdate } from "@polar-sh/sdk/funcs/subscriptionsUpdate.js";
+
 import type { Checkout } from "@polar-sh/sdk/models/components/checkout.js";
 import type { WebhookProductCreatedPayload } from "@polar-sh/sdk/models/components/webhookproductcreatedpayload.js";
 import type { WebhookProductUpdatedPayload } from "@polar-sh/sdk/models/components/webhookproductupdatedpayload.js";
@@ -48,7 +53,7 @@ export class Polar<
   DataModel extends GenericDataModel = GenericDataModel,
   Products extends Record<string, string> = Record<string, string>,
 > {
-  public sdk: PolarSdk;
+  public polar: PolarCore;
   public products: Products;
   private organizationToken: string;
   private webhookSecret: string;
@@ -77,7 +82,7 @@ export class Polar<
       (process.env["POLAR_SERVER"] as "sandbox" | "production") ??
       "sandbox";
 
-    this.sdk = new PolarSdk({
+    this.polar = new PolarCore({
       accessToken: this.organizationToken,
       server: this.server,
     });
@@ -116,20 +121,23 @@ export class Polar<
     const customerId =
       dbCustomer?.id ||
       (
-        await this.sdk.customers.create({
+        await customersCreate(this.polar, {
           email,
           metadata: {
             userId,
           },
         })
-      ).id;
+      ).value?.id;
+    if (!customerId) {
+      throw new Error("Customer not created");
+    }
     if (!dbCustomer) {
       await ctx.runMutation(this.component.lib.insertCustomer, {
         id: customerId,
         userId,
       });
     }
-    return this.sdk.checkouts.create({
+    const checkout = await checkoutsCreate(this.polar, {
       allowDiscountCodes: true,
       customerId,
       embedOrigin: origin,
@@ -138,6 +146,10 @@ export class Polar<
         ? { products: productIds }
         : { products: productIds }),
     });
+    if (!checkout.value) {
+      throw new Error("Checkout not created");
+    }
+    return checkout.value;
   }
   async createCustomerPortalSession(
     ctx: GenericActionCtx<DataModel>,
@@ -152,11 +164,14 @@ export class Polar<
       throw new Error("Customer not found");
     }
 
-    const session = await this.sdk.customerSessions.create({
+    const session = await customerSessionsCreate(this.polar, {
       customerId: customer.id,
     });
+    if (!session.value) {
+      throw new Error("Customer session not created");
+    }
 
-    return { url: session.customerPortalUrl };
+    return { url: session.value.customerPortalUrl };
   }
   listProducts(
     ctx: RunQueryCtx,
@@ -209,12 +224,16 @@ export class Polar<
     if (subscription.productId === productId) {
       throw new Error("Subscription already on this product");
     }
-    await this.sdk.subscriptions.update({
+    const updatedSubscription = await subscriptionsUpdate(this.polar, {
       id: subscription.id,
       subscriptionUpdate: {
         productId,
       },
     });
+    if (!updatedSubscription.value) {
+      throw new Error("Subscription not updated");
+    }
+    return updatedSubscription.value;
   }
   async cancelSubscription(
     ctx: RunActionCtx,
@@ -228,13 +247,17 @@ export class Polar<
     if (subscription.status !== "active") {
       throw new Error("Subscription is not active");
     }
-    await this.sdk.subscriptions.update({
+    const updatedSubscription = await subscriptionsUpdate(this.polar, {
       id: subscription.id,
       subscriptionUpdate: {
         cancelAtPeriodEnd: revokeImmediately ? undefined : true,
         revoke: revokeImmediately ? true : undefined,
       },
     });
+    if (!updatedSubscription.value) {
+      throw new Error("Subscription not updated");
+    }
+    return updatedSubscription.value;
   }
   api() {
     return {

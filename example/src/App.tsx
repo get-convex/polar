@@ -41,14 +41,16 @@ export default function TodoList() {
 
   const getButtonText = (targetProductId: string) => {
     if (!user?.subscription) return "Upgrade";
-    const currentAmount = user.subscription.amount ?? 0;
-    const targetProduct = Object.values(products ?? {}).find(
-      (p) => p?.id === targetProductId
-    );
-    const targetAmount = targetProduct?.prices[0].priceAmount ?? 0;
-    if (targetAmount > currentAmount) return "Upgrade";
-    if (targetAmount < currentAmount) return "Downgrade";
-    return "Switch";
+    const isPremium =
+      user.subscription.productId === premiumMonthly?.id ||
+      user.subscription.productId === premiumYearly?.id;
+    const targetIsPremiumPlus =
+      targetProductId === premiumPlusMonthly?.id ||
+      targetProductId === premiumPlusYearly?.id;
+    if (isPremium && targetIsPremiumPlus) {
+      return "Upgrade";
+    }
+    return "Downgrade";
   };
 
   const handlePlanChange = async (productId: string) => {
