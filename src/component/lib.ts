@@ -26,6 +26,13 @@ export const insertCustomer = mutation({
   args: schema.tables.customers.validator,
   returns: v.id("customers"),
   handler: async (ctx, args) => {
+    const existingCustomer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (existingCustomer) {
+      throw new Error(`Customer already exists for user: ${args.userId}`);
+    }
     return ctx.db.insert("customers", {
       id: args.id,
       userId: args.userId,
@@ -203,6 +210,13 @@ export const createSubscription = mutation({
     subscription: schema.tables.subscriptions.validator,
   },
   handler: async (ctx, args) => {
+    const existingSubscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("id", (q) => q.eq("id", args.subscription.id))
+      .unique();
+    if (existingSubscription) {
+      throw new Error(`Subscription already exists: ${args.subscription.id}`);
+    }
     await ctx.db.insert("subscriptions", {
       ...args.subscription,
       metadata: args.subscription.metadata,
@@ -234,6 +248,13 @@ export const createProduct = mutation({
     product: schema.tables.products.validator,
   },
   handler: async (ctx, args) => {
+    const existingProduct = await ctx.db
+      .query("products")
+      .withIndex("id", (q) => q.eq("id", args.product.id))
+      .unique();
+    if (existingProduct) {
+      throw new Error(`Product already exists: ${args.product.id}`);
+    }
     await ctx.db.insert("products", {
       ...args.product,
       metadata: args.product.metadata,
