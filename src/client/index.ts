@@ -147,6 +147,7 @@ export class Polar<
         : { products: productIds }),
     });
     if (!checkout.value) {
+      console.error(checkout);
       throw new Error("Checkout not created");
     }
     return checkout.value;
