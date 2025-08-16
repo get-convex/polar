@@ -118,19 +118,20 @@ export class Polar<
         userId,
       }
     );
-    const customerId =
-      dbCustomer?.id ||
-      (
-        await customersCreate(this.polar, {
-          email,
-          metadata: {
-            userId,
-          },
-        })
-      ).value?.id;
-    if (!customerId) {
-      throw new Error("Customer not created");
-    }
+    const createCustomer = async () => {
+      const customer = await customersCreate(this.polar, {
+        email,
+        metadata: {
+          userId,
+        },
+      });
+      if (!customer.value) {
+        console.error(customer);
+        throw new Error("Customer not created");
+      }
+      return customer.value;
+    };
+    const customerId = dbCustomer?.id || (await createCustomer()).id;
     if (!dbCustomer) {
       await ctx.runMutation(this.component.lib.insertCustomer, {
         id: customerId,
@@ -169,6 +170,7 @@ export class Polar<
       customerId: customer.id,
     });
     if (!session.value) {
+      console.error(session);
       throw new Error("Customer session not created");
     }
 
@@ -232,6 +234,7 @@ export class Polar<
       },
     });
     if (!updatedSubscription.value) {
+      console.error(updatedSubscription);
       throw new Error("Subscription not updated");
     }
     return updatedSubscription.value;
@@ -256,6 +259,7 @@ export class Polar<
       },
     });
     if (!updatedSubscription.value) {
+      console.error(updatedSubscription);
       throw new Error("Subscription not updated");
     }
     return updatedSubscription.value;
