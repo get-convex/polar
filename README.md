@@ -410,6 +410,7 @@ Props:
 - `children`: React children (button content)
 - `embed`: (Optional) Whether to embed the checkout link. Defaults to `true`.
 - `className`: (Optional) CSS class name
+- `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a free pricing.
 
 #### CustomerPortalLink
 

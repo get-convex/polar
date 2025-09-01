@@ -104,12 +104,14 @@ export class Polar<
       email,
       origin,
       successUrl,
+      subscriptionId
     }: {
       productIds: string[];
       userId: string;
       email: string;
       origin: string;
       successUrl: string;
+      subscriptionId?: string;
     }
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
@@ -141,6 +143,7 @@ export class Polar<
     const checkout = await checkoutsCreate(this.polar, {
       allowDiscountCodes: true,
       customerId,
+      subscriptionId,
       embedOrigin: origin,
       successUrl,
       ...(productIds.length === 1
@@ -306,6 +309,7 @@ export class Polar<
           productIds: v.array(v.string()),
           origin: v.string(),
           successUrl: v.string(),
+          subscriptionId: v.optional(v.string())
         },
         returns: v.object({
           url: v.string(),
@@ -316,6 +320,7 @@ export class Polar<
             productIds: args.productIds,
             userId,
             email,
+            subscriptionId: args.subscriptionId,
             origin: args.origin,
             successUrl: args.successUrl,
           });
