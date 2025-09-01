@@ -107,11 +107,11 @@ export class Polar<
       subscriptionId
     }: {
       productIds: string[];
-      subscriptionId?: string;
       userId: string;
       email: string;
       origin: string;
       successUrl: string;
+      subscriptionId?: string;
     }
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
