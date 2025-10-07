@@ -344,3 +344,51 @@ export const updateProducts = mutation({
     });
   },
 });
+
+export const deleteCustomer = mutation({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      throw new Error(`Customer not found for user: ${args.userId}`);
+    }
+    await ctx.db.delete(customer._id);
+  },
+});
+
+export const deleteSubscription = mutation({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("id", (q) => q.eq("id", args.id))
+      .unique();
+    if (!subscription) {
+      throw new Error(`Subscription not found: ${args.id}`);
+    }
+    await ctx.db.delete(subscription._id);
+  },
+});
+
+export const deleteProduct = mutation({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const product = await ctx.db
+      .query("products")
+      .withIndex("id", (q) => q.eq("id", args.id))
+      .unique();
+    if (!product) {
+      throw new Error(`Product not found: ${args.id}`);
+    }
+    await ctx.db.delete(product._id);
+  },
+});
