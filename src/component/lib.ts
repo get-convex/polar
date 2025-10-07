@@ -205,6 +205,31 @@ export const listProducts = query({
   },
 });
 
+export const listCustomers = query({
+  args: {},
+  returns: v.array(schema.tables.customers.validator),
+  handler: async (ctx) => {
+    const customers = await ctx.db.query("customers").collect();
+    return customers.map((customer) => omitSystemFields(customer));
+  },
+});
+
+export const listSubscriptions = query({
+  args: {
+    includeEnded: v.optional(v.boolean()),
+  },
+  returns: v.array(schema.tables.subscriptions.validator),
+  handler: async (ctx, args) => {
+    const subscriptions = await ctx.db.query("subscriptions").collect();
+    const filtered = args.includeEnded
+      ? subscriptions
+      : subscriptions.filter(
+          (sub) => !sub.endedAt || sub.endedAt > new Date().toISOString()
+        );
+    return filtered.map((sub) => omitSystemFields(sub));
+  },
+});
+
 export const createSubscription = mutation({
   args: {
     subscription: schema.tables.subscriptions.validator,
@@ -342,5 +367,53 @@ export const updateProducts = mutation({
       }
       await ctx.db.insert("products", product);
     });
+  },
+});
+
+export const deleteCustomer = mutation({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      throw new Error(`Customer not found for user: ${args.userId}`);
+    }
+    await ctx.db.delete(customer._id);
+  },
+});
+
+export const deleteSubscription = mutation({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("id", (q) => q.eq("id", args.id))
+      .unique();
+    if (!subscription) {
+      throw new Error(`Subscription not found: ${args.id}`);
+    }
+    await ctx.db.delete(subscription._id);
+  },
+});
+
+export const deleteProduct = mutation({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const product = await ctx.db
+      .query("products")
+      .withIndex("id", (q) => q.eq("id", args.id))
+      .unique();
+    if (!product) {
+      throw new Error(`Product not found: ${args.id}`);
+    }
+    await ctx.db.delete(product._id);
   },
 });
