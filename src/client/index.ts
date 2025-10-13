@@ -150,7 +150,6 @@ export class Polar<
       subscriptionId,
       embedOrigin: origin,
       successUrl,
-      subscriptionId,
       trialInterval,
       trialIntervalCount,
       ...(productIds.length === 1
