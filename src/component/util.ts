@@ -68,6 +68,8 @@ export const convertToDatabaseProduct = (
     createdAt: product.createdAt.toISOString(),
     modifiedAt: product.modifiedAt?.toISOString() ?? null,
     recurringInterval: product.recurringInterval,
+    trialInterval: product.trialInterval,
+    trialIntervalCount: product.trialIntervalCount,
     metadata: product.metadata,
     trialInterval: product.trialInterval,
     trialIntervalCount: product.trialIntervalCount,
