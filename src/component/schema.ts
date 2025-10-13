@@ -20,6 +20,16 @@ export default defineSchema(
         v.union(v.literal("month"), v.literal("year"), v.null())
       ),
       isRecurring: v.boolean(),
+      trialInterval: v.optional(
+        v.union(
+          v.literal("day"),
+          v.literal("week"),
+          v.literal("month"),
+          v.literal("year"),
+          v.null()
+        )
+      ),
+      trialIntervalCount: v.optional(v.union(v.number(), v.null())),
       isArchived: v.boolean(),
       organizationId: v.string(),
       metadata: v.optional(v.record(v.string(), v.any())),
@@ -79,6 +89,8 @@ export default defineSchema(
       currentPeriodStart: v.string(),
       currentPeriodEnd: v.union(v.string(), v.null()),
       cancelAtPeriodEnd: v.boolean(),
+      trialStart: v.optional(v.union(v.string(), v.null())),
+      trialEnd: v.optional(v.union(v.string(), v.null())),
       startedAt: v.union(v.string(), v.null()),
       endedAt: v.union(v.string(), v.null()),
       productId: v.string(),

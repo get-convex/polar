@@ -161,8 +161,11 @@ export const listUserSubscriptions = query({
         .collect(),
       async (subscription) => {
         if (
-          subscription.endedAt &&
-          subscription.endedAt <= new Date().toISOString()
+          (subscription.endedAt &&
+            subscription.endedAt <= new Date().toISOString()) ||
+          (subscription.status === "trialing" &&
+            subscription.trialEnd &&
+            subscription.trialEnd <= new Date().toISOString())
         ) {
           return;
         }
