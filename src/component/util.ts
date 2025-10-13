@@ -85,6 +85,8 @@ export const convertToDatabaseSubscription = (
     currency: subscription.currency,
     recurringInterval: subscription.recurringInterval,
     status: subscription.status,
+    trialStart: subscription.trialStart?.toISOString() ?? null,
+    trialEnd: subscription.trialEnd?.toISOString() ?? null,
     currentPeriodStart: subscription.currentPeriodStart.toISOString(),
     currentPeriodEnd: subscription.currentPeriodEnd?.toISOString() ?? null,
     cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
@@ -109,6 +111,8 @@ export const convertToDatabaseProduct = (
     createdAt: product.createdAt.toISOString(),
     modifiedAt: product.modifiedAt?.toISOString() ?? null,
     recurringInterval: product.recurringInterval,
+    trialInterval: product.trialInterval,
+    trialIntervalCount: product.trialIntervalCount,
     metadata: product.metadata,
     prices: product.prices.map((price) => ({
       id: price.id,
