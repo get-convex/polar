@@ -1,4 +1,4 @@
-import "./polyfill";
+import "./polyfill.js";
 import { PolarCore } from "@polar-sh/sdk/core.js";
 import { customersCreate } from "@polar-sh/sdk/funcs/customersCreate.js";
 import { checkoutsCreate } from "@polar-sh/sdk/funcs/checkoutsCreate.js";
@@ -26,7 +26,7 @@ import {
 } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
-import schema from "../component/schema";
+import schema from "../component/schema.js";
 import {
   type ComponentApi,
   type RunMutationCtx,
@@ -34,7 +34,7 @@ import {
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
   RunActionCtx,
-} from "../component/util";
+} from "../component/util.js";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
