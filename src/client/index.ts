@@ -28,13 +28,13 @@ import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
 import schema from "../component/schema";
 import {
-  type ComponentApi,
   type RunMutationCtx,
   type RunQueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
   RunActionCtx,
 } from "../component/util";
+import type { ComponentApi } from "../component/_generated/component.js";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
 export type Subscription = Infer<typeof subscriptionValidator>;
@@ -104,7 +104,7 @@ export class Polar<
       email,
       origin,
       successUrl,
-      subscriptionId
+      subscriptionId,
     }: {
       productIds: string[];
       userId: string;
@@ -256,10 +256,9 @@ export class Polar<
     }
     const updatedSubscription = await subscriptionsUpdate(this.polar, {
       id: subscription.id,
-      subscriptionUpdate: {
-        cancelAtPeriodEnd: revokeImmediately ? undefined : true,
-        revoke: revokeImmediately ? true : undefined,
-      },
+      subscriptionUpdate: revokeImmediately
+        ? { revoke: true }
+        : { cancelAtPeriodEnd: true },
     });
     if (!updatedSubscription.value) {
       console.error(updatedSubscription);
@@ -309,7 +308,7 @@ export class Polar<
           productIds: v.array(v.string()),
           origin: v.string(),
           successUrl: v.string(),
-          subscriptionId: v.optional(v.string())
+          subscriptionId: v.optional(v.string()),
         },
         returns: v.object({
           url: v.string(),
