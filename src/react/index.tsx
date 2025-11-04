@@ -11,7 +11,7 @@ export const CustomerPortalLink = ({
   className?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
-    polarApi.generateCustomerPortalUrl
+    polarApi.generateCustomerPortalUrl,
   );
   const [portalUrl, setPortalUrl] = useState<string>();
 
@@ -21,7 +21,7 @@ export const CustomerPortalLink = ({
         setPortalUrl(result.url);
       }
     });
-  }, []);
+  }, [generateCustomerPortalUrl]);
 
   if (!portalUrl) {
     return null;
@@ -63,7 +63,7 @@ export const CheckoutLink = ({
       origin: window.location.origin,
       successUrl: window.location.href,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId]);
+  }, [productIds, subscriptionId, embed, generateCheckoutLink]);
 
   return (
     <a

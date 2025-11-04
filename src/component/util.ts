@@ -70,7 +70,7 @@ export const convertToDatabaseProduct = (
       modifiedAt: price.modifiedAt?.toISOString() ?? null,
       recurringInterval:
         price.type === "recurring"
-          ? price.recurringInterval ?? undefined
+          ? (price.recurringInterval ?? undefined)
           : undefined,
       priceAmount: price.amountType === "fixed" ? price.priceAmount : undefined,
       priceCurrency:

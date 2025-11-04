@@ -8,8 +8,8 @@ export default [
   {
     ignores: [
       "dist/**",
-      "eslint.config.js",
-      "vitest.config.ts",
+      "*.config.{js,mjs,cjs,ts,tsx}",
+      "example/**/*.config.{js,mjs,cjs,ts,tsx}",
       "**/_generated/",
       "node10stubs.mjs",
     ],
