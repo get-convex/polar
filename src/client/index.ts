@@ -22,7 +22,7 @@ import {
   actionGeneric,
   httpActionGeneric,
   queryGeneric,
-  ApiFromModules,
+  type ApiFromModules,
 } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
@@ -32,7 +32,7 @@ import {
   type RunQueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
-  RunActionCtx,
+  type RunActionCtx,
 } from "../component/util";
 import type { ComponentApi } from "../component/_generated/component.js";
 

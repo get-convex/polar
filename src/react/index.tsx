@@ -1,7 +1,7 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState, type PropsWithChildren } from "react";
 import { useAction } from "convex/react";
-import { PolarComponentApi } from "../client";
+import type { PolarComponentApi } from "../client";
 export const CustomerPortalLink = ({
   polarApi,
   children,
