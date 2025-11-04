@@ -18,27 +18,35 @@ import type {
   FunctionReference,
 } from "convex/server";
 
+declare const fullApi: ApiFromModules<{
+  example: typeof example;
+  http: typeof http;
+  seed: typeof seed;
+}>;
+
 /**
- * A utility for referencing Convex functions in your app's API.
+ * A utility for referencing Convex functions in your app's public API.
  *
  * Usage:
  * ```js
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const fullApi: ApiFromModules<{
-  example: typeof example;
-  http: typeof http;
-  seed: typeof seed;
-}>;
-declare const fullApiWithMounts: typeof fullApi;
-
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
 
@@ -87,10 +95,10 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "month" | "year" | null;
+              recurringInterval?: "day" | "week" | "month" | "year" | null;
               type?: string;
             }>;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
         },
         any
@@ -116,7 +124,7 @@ export declare const components: {
             modifiedAt: string | null;
             priceId?: string;
             productId: string;
-            recurringInterval: "month" | "year" | null;
+            recurringInterval: "day" | "week" | "month" | "year" | null;
             startedAt: string | null;
             status: string;
           };
@@ -181,13 +189,13 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "month" | "year" | null;
+              recurringInterval?: "day" | "week" | "month" | "year" | null;
               type?: string;
             }>;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
           productId: string;
-          recurringInterval: "month" | "year" | null;
+          recurringInterval: "day" | "week" | "month" | "year" | null;
           startedAt: string | null;
           status: string;
         } | null
@@ -240,10 +248,10 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
             type?: string;
           }>;
-          recurringInterval?: "month" | "year" | null;
+          recurringInterval?: "day" | "week" | "month" | "year" | null;
         } | null
       >;
       getSubscription: FunctionReference<
@@ -267,7 +275,7 @@ export declare const components: {
           modifiedAt: string | null;
           priceId?: string;
           productId: string;
-          recurringInterval: "month" | "year" | null;
+          recurringInterval: "day" | "week" | "month" | "year" | null;
           startedAt: string | null;
           status: string;
         } | null
@@ -299,7 +307,7 @@ export declare const components: {
           modifiedAt: string | null;
           priceId?: string;
           productId: string;
-          recurringInterval: "month" | "year" | null;
+          recurringInterval: "day" | "week" | "month" | "year" | null;
           startedAt: string | null;
           status: string;
         }>
@@ -347,10 +355,10 @@ export declare const components: {
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
             type?: string;
           }>;
-          recurringInterval?: "month" | "year" | null;
+          recurringInterval?: "day" | "week" | "month" | "year" | null;
         }>
       >;
       listUserSubscriptions: FunctionReference<
@@ -411,13 +419,13 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "month" | "year" | null;
+              recurringInterval?: "day" | "week" | "month" | "year" | null;
               type?: string;
             }>;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
           } | null;
           productId: string;
-          recurringInterval: "month" | "year" | null;
+          recurringInterval: "day" | "week" | "month" | "year" | null;
           startedAt: string | null;
           status: string;
         }>
@@ -470,10 +478,10 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "month" | "year" | null;
+              recurringInterval?: "day" | "week" | "month" | "year" | null;
               type?: string;
             }>;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
         },
         any
@@ -521,10 +529,10 @@ export declare const components: {
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "month" | "year" | null;
+              recurringInterval?: "day" | "week" | "month" | "year" | null;
               type?: string;
             }>;
-            recurringInterval?: "month" | "year" | null;
+            recurringInterval?: "day" | "week" | "month" | "year" | null;
           }>;
         },
         any
@@ -550,7 +558,7 @@ export declare const components: {
             modifiedAt: string | null;
             priceId?: string;
             productId: string;
-            recurringInterval: "month" | "year" | null;
+            recurringInterval: "day" | "week" | "month" | "year" | null;
             startedAt: string | null;
             status: string;
           };
