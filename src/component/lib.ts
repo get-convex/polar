@@ -6,7 +6,7 @@ import { action, mutation, query } from "./_generated/server";
 import schema from "./schema";
 import { asyncMap } from "convex-helpers";
 import { api } from "./_generated/api";
-import { convertToDatabaseProduct, omitSystemFields } from "./util";
+import { convertToDatabaseProduct } from "./util";
 
 export const getCustomerByUserId = query({
   args: {
@@ -344,3 +344,15 @@ export const updateProducts = mutation({
     });
   },
 });
+
+export const omitSystemFields = <
+  T extends { _id: string; _creationTime: number } | null | undefined,
+>(
+  doc: T
+) => {
+  if (!doc) {
+    return doc;
+  }
+  const { _id, _creationTime, ...rest } = doc;
+  return rest;
+};

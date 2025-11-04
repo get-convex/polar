@@ -1,24 +1,13 @@
 import type {
-  WithoutSystemFields,
   GenericMutationCtx,
   GenericActionCtx,
   GenericQueryCtx,
   GenericDataModel,
 } from "convex/server";
-import type { Doc } from "./_generated/dataModel";
 import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 import type { Product } from "@polar-sh/sdk/models/components/product.js";
-export const omitSystemFields = <
-  T extends { _id: string; _creationTime: number } | null | undefined,
->(
-  doc: T
-) => {
-  if (!doc) {
-    return doc;
-  }
-  const { _id, _creationTime, ...rest } = doc;
-  return rest;
-};
+import type { Infer } from "convex/values";
+import type schema from "./schema";
 
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
@@ -35,7 +24,7 @@ export type RunActionCtx = {
 
 export const convertToDatabaseSubscription = (
   subscription: Subscription
-): WithoutSystemFields<Doc<"subscriptions">> => {
+): Infer<typeof schema.tables.subscriptions.validator> => {
   return {
     id: subscription.id,
     customerId: subscription.customerId,
@@ -60,7 +49,7 @@ export const convertToDatabaseSubscription = (
 
 export const convertToDatabaseProduct = (
   product: Product
-): WithoutSystemFields<Doc<"products">> => {
+): Infer<typeof schema.tables.products.validator> => {
   return {
     id: product.id,
     organizationId: product.organizationId,
