@@ -7,7 +7,7 @@ import type {
 import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 import type { Product } from "@polar-sh/sdk/models/components/product.js";
 import type { Infer } from "convex/values";
-import type schema from "./schema";
+import type schema from "./schema.js";
 
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
@@ -23,7 +23,7 @@ export type RunActionCtx = {
 };
 
 export const convertToDatabaseSubscription = (
-  subscription: Subscription
+  subscription: Subscription,
 ): Infer<typeof schema.tables.subscriptions.validator> => {
   return {
     id: subscription.id,
@@ -48,7 +48,7 @@ export const convertToDatabaseSubscription = (
 };
 
 export const convertToDatabaseProduct = (
-  product: Product
+  product: Product,
 ): Infer<typeof schema.tables.products.validator> => {
   return {
     id: product.id,
@@ -70,7 +70,7 @@ export const convertToDatabaseProduct = (
       modifiedAt: price.modifiedAt?.toISOString() ?? null,
       recurringInterval:
         price.type === "recurring"
-          ? (price.recurringInterval ?? undefined)
+          ? price.recurringInterval ?? undefined
           : undefined,
       priceAmount: price.amountType === "fixed" ? price.priceAmount : undefined,
       priceCurrency:

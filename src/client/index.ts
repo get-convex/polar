@@ -1,4 +1,4 @@
-import "./polyfill";
+import "./polyfill.js";
 import { PolarCore } from "@polar-sh/sdk/core.js";
 import { customersCreate } from "@polar-sh/sdk/funcs/customersCreate.js";
 import { checkoutsCreate } from "@polar-sh/sdk/funcs/checkoutsCreate.js";
@@ -26,14 +26,14 @@ import {
 } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
-import schema from "../component/schema";
+import schema from "../component/schema.js";
 import {
   type RunMutationCtx,
   type RunQueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
   type RunActionCtx,
-} from "../component/util";
+} from "../component/util.js";
 import type { ComponentApi } from "../component/_generated/component.js";
 
 export const subscriptionValidator = schema.tables.subscriptions.validator;
@@ -70,7 +70,7 @@ export class Polar<
       organizationToken?: string;
       webhookSecret?: string;
       server?: "sandbox" | "production";
-    }
+    },
   ) {
     this.products = config.products ?? ({} as Products);
     this.organizationToken =
@@ -112,13 +112,13 @@ export class Polar<
       origin: string;
       successUrl: string;
       subscriptionId?: string;
-    }
+    },
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
       {
         userId,
-      }
+      },
     );
     const createCustomer = async () => {
       const customer = await customersCreate(this.polar, {
@@ -158,11 +158,11 @@ export class Polar<
   }
   async createCustomerPortalSession(
     ctx: GenericActionCtx<DataModel>,
-    { userId }: { userId: string }
+    { userId }: { userId: string },
   ) {
     const customer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
-      { userId }
+      { userId },
     );
 
     if (!customer) {
@@ -181,7 +181,7 @@ export class Polar<
   }
   listProducts(
     ctx: RunQueryCtx,
-    { includeArchived }: { includeArchived?: boolean } = {}
+    { includeArchived }: { includeArchived?: boolean } = {},
   ) {
     return ctx.runQuery(this.component.lib.listProducts, {
       includeArchived,
@@ -189,13 +189,13 @@ export class Polar<
   }
   async getCurrentSubscription(
     ctx: RunQueryCtx,
-    { userId }: { userId: string }
+    { userId }: { userId: string },
   ) {
     const subscription = await ctx.runQuery(
       this.component.lib.getCurrentSubscription,
       {
         userId,
-      }
+      },
     );
     if (!subscription) {
       return null;
@@ -220,7 +220,7 @@ export class Polar<
   }
   async changeSubscription(
     ctx: GenericActionCtx<DataModel>,
-    { productId }: { productId: string }
+    { productId }: { productId: string },
   ) {
     const { userId } = await this.config.getUserInfo(ctx);
     const subscription = await this.getCurrentSubscription(ctx, { userId });
@@ -244,7 +244,7 @@ export class Polar<
   }
   async cancelSubscription(
     ctx: RunActionCtx,
-    { revokeImmediately }: { revokeImmediately?: boolean } = {}
+    { revokeImmediately }: { revokeImmediately?: boolean } = {},
   ) {
     const { userId } = await this.config.getUserInfo(ctx);
     const subscription = await this.getCurrentSubscription(ctx, { userId });
@@ -293,7 +293,7 @@ export class Polar<
         handler: async (ctx) => {
           const products = await this.listProducts(ctx);
           return mapValues(this.products, (productId) =>
-            products.find((p) => p.id === productId)
+            products.find((p) => p.id === productId),
           );
         },
       }),
@@ -357,21 +357,21 @@ export class Polar<
       path?: string;
       onSubscriptionCreated?: (
         ctx: RunMutationCtx,
-        event: WebhookSubscriptionCreatedPayload
+        event: WebhookSubscriptionCreatedPayload,
       ) => Promise<void>;
       onSubscriptionUpdated?: (
         ctx: RunMutationCtx,
-        event: WebhookSubscriptionUpdatedPayload
+        event: WebhookSubscriptionUpdatedPayload,
       ) => Promise<void>;
       onProductCreated?: (
         ctx: RunMutationCtx,
-        event: WebhookProductCreatedPayload
+        event: WebhookProductCreatedPayload,
       ) => Promise<void>;
       onProductUpdated?: (
         ctx: RunMutationCtx,
-        event: WebhookProductUpdatedPayload
+        event: WebhookProductUpdatedPayload,
       ) => Promise<void>;
-    } = {}
+    } = {},
   ) {
     http.route({
       path,
