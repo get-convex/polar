@@ -39,7 +39,8 @@ const {
 
 ### Convex App
 
-You'll need a Convex App to use the component. Follow any of the [Convex quickstarts](https://docs.convex.dev/home) to set one up.
+You'll need a Convex App to use the component. Follow any of the
+[Convex quickstarts](https://docs.convex.dev/home) to set one up.
 
 ### Polar Account
 
@@ -73,7 +74,7 @@ component by calling `app.use`:
 ```ts
 // convex/convex.config.ts
 import { defineApp } from "convex/server";
-import polar from "@convex-dev/polar/convex.config";
+import polar from "@convex-dev/polar/convex.config.js";
 
 const app = defineApp();
 app.use(polar);
@@ -91,11 +92,12 @@ npx convex env set POLAR_ORGANIZATION_TOKEN xxxxx
 
 ### Set up Polar webhooks
 
-The Polar component uses webhooks to keep subscription data in sync. You'll need to:
+The Polar component uses webhooks to keep subscription data in sync. You'll need
+to:
 
 1. Create a webhook and webhook secret in the Polar dashboard, using your
-   [Convex site
-   URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) + `/polar/events` as the webhook endpoint. It should look like this:
+   [Convex site URL](https://docs.convex.dev/production/environment-variables#system-environment-variables) +
+   `/polar/events` as the webhook endpoint. It should look like this:
    `https://verb-noun-123.convex.site/polar/events`
 
    Enable the following events:
@@ -167,10 +169,11 @@ pricing requires two products in Polar.
 
 **Note:** The Convex Polar component is currently built to support recurring
 subscriptions, and may not work as expected with one-time payments. Please
-[open an issue](https://github.com/convex-dev/polar/issues) or [reach out on Discord](https://discord.gg/convex)
-if you run into any issues.
+[open an issue](https://github.com/convex-dev/polar/issues) or
+[reach out on Discord](https://discord.gg/convex) if you run into any issues.
 
-Products created prior to using this component need to be synced with Convex using the `syncProducts` function.
+Products created prior to using this component need to be synced with Convex
+using the `syncProducts` function.
 
 ### Initialize the Polar client
 
@@ -227,7 +230,8 @@ export const {
 
 ### Display products and prices
 
-Use the exported `getConfiguredProducts` or `listAllProducts`function to display your products and their prices:
+Use the exported `getConfiguredProducts` or `listAllProducts`function to display
+your products and their prices:
 
 #### `getConfiguredProducts`
 
@@ -274,10 +278,10 @@ function PricingTable() {
   // `polar.listAllProducts` in your own Convex query and return your desired
   // products to display in the UI.
   const proMonthly = products.find(
-    (p) => p.prices[0].recurringInterval === "month"
+    (p) => p.prices[0].recurringInterval === "month",
   );
   const proYearly = products.find(
-    (p) => p.prices[0].recurringInterval === "year"
+    (p) => p.prices[0].recurringInterval === "year",
   );
   return (
     <div>
@@ -395,9 +399,12 @@ The `Polar` class accepts a configuration object with:
 
 - `getUserInfo`: Function to get the current user's ID and email
 - `products`: (Optional) Map of arbitrarily named keys to Polar product IDs
-- `organizationToken`: (Optional) Your Polar organization token. Falls back to `POLAR_ORGANIZATION_TOKEN` env var
-- `webhookSecret`: (Optional) Your Polar webhook secret. Falls back to `POLAR_WEBHOOK_SECRET` env var
-- `server`: (Optional) Polar server environment: "sandbox" or "production". Falls back to `POLAR_SERVER` env var
+- `organizationToken`: (Optional) Your Polar organization token. Falls back to
+  `POLAR_ORGANIZATION_TOKEN` env var
+- `webhookSecret`: (Optional) Your Polar webhook secret. Falls back to
+  `POLAR_WEBHOOK_SECRET` env var
+- `server`: (Optional) Polar server environment: "sandbox" or "production".
+  Falls back to `POLAR_SERVER` env var
 
 ### React Components
 
@@ -410,7 +417,8 @@ Props:
 - `children`: React children (button content)
 - `embed`: (Optional) Whether to embed the checkout link. Defaults to `true`.
 - `className`: (Optional) CSS class name
-- `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a free pricing.
+- `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a
+  free pricing.
 
 #### CustomerPortalLink
 
@@ -448,8 +456,8 @@ const subscription = await polar.getCurrentSubscription(ctx, { userId });
 
 #### listUserSubscriptions
 
-For apps that support multiple active subscriptions per user,
-get all subscriptions for a user:
+For apps that support multiple active subscriptions per user, get all
+subscriptions for a user:
 
 ```ts
 const subscriptions = await polar.listUserSubscriptions(ctx, { userId });
@@ -474,7 +482,8 @@ polar.registerRoutes(http, {
 });
 ```
 
-The webhook handler uses the `webhookSecret` from the Polar client configuration or the `POLAR_WEBHOOK_SECRET` environment variable.
+The webhook handler uses the `webhookSecret` from the Polar client configuration
+or the `POLAR_WEBHOOK_SECRET` environment variable.
 
 #### syncProducts
 
