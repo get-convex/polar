@@ -92,6 +92,7 @@
     "autoprefixer": "^10.4.21",
     "chokidar-cli": "3.0.0",
     "class-variance-authority": "^0.7.1",
+    "convex": "1.29.0",
     "convex-helpers": "^0.1.104",
     "convex-test": "^0.0.33",
     "eslint": "^9.38.0",
