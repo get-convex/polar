@@ -8,21 +8,20 @@
  * @module
  */
 
-import type * as example from "../example.js";
-import type * as http from "../http.js";
-import type * as seed from "../seed.js";
+import type * as lib from "../lib.js";
+import type * as util from "../util.js";
 
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import { anyApi, componentsGeneric } from "convex/server";
 
-declare const fullApi: ApiFromModules<{
-  example: typeof example;
-  http: typeof http;
-  seed: typeof seed;
-}>;
+const fullApi: ApiFromModules<{
+  lib: typeof lib;
+  util: typeof util;
+}> = anyApi as any;
 
 /**
  * A utility for referencing Convex functions in your app's public API.
@@ -32,10 +31,10 @@ declare const fullApi: ApiFromModules<{
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-export declare const api: FilterApi<
+export const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
->;
+> = anyApi as any;
 
 /**
  * A utility for referencing Convex functions in your app's internal API.
@@ -45,11 +44,9 @@ export declare const api: FilterApi<
  * const myFunctionReference = internal.myModule.myFunction;
  * ```
  */
-export declare const internal: FilterApi<
+export const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">
->;
+> = anyApi as any;
 
-export declare const components: {
-  polar: import("@convex-dev/polar/_generated/component.js").ComponentApi<"polar">;
-};
+export const components = componentsGeneric() as unknown as {};

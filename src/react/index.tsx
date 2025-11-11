@@ -1,7 +1,7 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState, type PropsWithChildren } from "react";
 import { useAction } from "convex/react";
-import { PolarComponentApi } from "../client";
+import type { PolarComponentApi } from "../client/index.js";
 export const CustomerPortalLink = ({
   polarApi,
   children,
@@ -11,7 +11,7 @@ export const CustomerPortalLink = ({
   className?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
-    polarApi.generateCustomerPortalUrl
+    polarApi.generateCustomerPortalUrl,
   );
   const [portalUrl, setPortalUrl] = useState<string>();
 
@@ -21,7 +21,7 @@ export const CustomerPortalLink = ({
         setPortalUrl(result.url);
       }
     });
-  }, []);
+  }, [generateCustomerPortalUrl]);
 
   if (!portalUrl) {
     return null;
@@ -63,7 +63,7 @@ export const CheckoutLink = ({
       origin: window.location.origin,
       successUrl: window.location.href,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId]);
+  }, [productIds, subscriptionId, embed, generateCheckoutLink]);
 
   return (
     <a

@@ -1,12 +1,12 @@
-import { PolarCore } from "@polar-sh/sdk/core";
+import { PolarCore } from "@polar-sh/sdk/core.js";
 import { productsList } from "@polar-sh/sdk/funcs/productsList.js";
 
 import { v } from "convex/values";
-import { action, mutation, query } from "./_generated/server";
-import schema from "./schema";
+import { action, mutation, query } from "./_generated/server.js";
+import schema from "./schema.js";
 import { asyncMap } from "convex-helpers";
-import { api } from "./_generated/api";
-import { convertToDatabaseProduct, omitSystemFields } from "./util";
+import { api } from "./_generated/api.js";
+import { convertToDatabaseProduct } from "./util.js";
 
 export const getCustomerByUserId = query({
   args: {
@@ -103,7 +103,7 @@ export const getCurrentSubscription = query({
       ...schema.tables.subscriptions.validator.fields,
       product: schema.tables.products.validator,
     }),
-    v.null()
+    v.null(),
   ),
   handler: async (ctx, args) => {
     const customer = await ctx.db
@@ -116,7 +116,7 @@ export const getCurrentSubscription = query({
     const subscription = await ctx.db
       .query("subscriptions")
       .withIndex("customerId_endedAt", (q) =>
-        q.eq("customerId", customer.id).eq("endedAt", null)
+        q.eq("customerId", customer.id).eq("endedAt", null),
       )
       .unique();
     if (!subscription) {
@@ -144,7 +144,7 @@ export const listUserSubscriptions = query({
     v.object({
       ...schema.tables.subscriptions.validator.fields,
       product: v.union(schema.tables.products.validator, v.null()),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     const customer = await ctx.db
@@ -176,10 +176,10 @@ export const listUserSubscriptions = query({
           ...omitSystemFields(subscription),
           product: omitSystemFields(product),
         };
-      }
+      },
     );
     return subscriptions.flatMap((subscription) =>
-      subscription ? [subscription] : []
+      subscription ? [subscription] : [],
     );
   },
 });
@@ -192,7 +192,7 @@ export const listProducts = query({
     v.object({
       ...schema.tables.products.validator.fields,
       priceAmount: v.optional(v.number()),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     const q = ctx.db.query("products");
@@ -344,3 +344,15 @@ export const updateProducts = mutation({
     });
   },
 });
+
+export const omitSystemFields = <
+  T extends { _id: string; _creationTime: number } | null | undefined,
+>(
+  doc: T,
+) => {
+  if (!doc) {
+    return doc;
+  }
+  const { _id, _creationTime, ...rest } = doc;
+  return rest;
+};
