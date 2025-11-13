@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+- update dependencies and build output
+
 ## 0.7.0
 
 - Adds /test and /\_generated/component.js entrypoints
