@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 /* To change the theme colors, change the values below
   or use the "Copy code" button at https://ui.shadcn.com/themes */
@@ -76,8 +75,6 @@
     @apply bg-background text-foreground;
   }
 }
-
-
 
 @layer base {
   * {
