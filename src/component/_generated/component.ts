@@ -62,7 +62,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               createdAt: string;
               id: string;
               isArchived: boolean;
+              maximumAmount?: number | null;
+              minimumAmount?: number | null;
               modifiedAt: string | null;
+              presetAmount?: number | null;
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
@@ -158,7 +161,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               createdAt: string;
               id: string;
               isArchived: boolean;
+              maximumAmount?: number | null;
+              minimumAmount?: number | null;
               modifiedAt: string | null;
+              presetAmount?: number | null;
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
@@ -219,7 +225,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             createdAt: string;
             id: string;
             isArchived: boolean;
+            maximumAmount?: number | null;
+            minimumAmount?: number | null;
             modifiedAt: string | null;
+            presetAmount?: number | null;
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
@@ -330,7 +339,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             createdAt: string;
             id: string;
             isArchived: boolean;
+            maximumAmount?: number | null;
+            minimumAmount?: number | null;
             modifiedAt: string | null;
+            presetAmount?: number | null;
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
@@ -395,7 +407,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               createdAt: string;
               id: string;
               isArchived: boolean;
+              maximumAmount?: number | null;
+              minimumAmount?: number | null;
               modifiedAt: string | null;
+              presetAmount?: number | null;
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
@@ -456,7 +471,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               createdAt: string;
               id: string;
               isArchived: boolean;
+              maximumAmount?: number | null;
+              minimumAmount?: number | null;
               modifiedAt: string | null;
+              presetAmount?: number | null;
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
@@ -508,7 +526,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               createdAt: string;
               id: string;
               isArchived: boolean;
+              maximumAmount?: number | null;
+              minimumAmount?: number | null;
               modifiedAt: string | null;
+              presetAmount?: number | null;
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;

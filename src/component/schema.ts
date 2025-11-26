@@ -6,7 +6,7 @@ const vRecurringInterval = v.union(
   v.literal("week"),
   v.literal("month"),
   v.literal("year"),
-  v.null()
+  v.null(),
 );
 
 export default defineSchema(
@@ -41,7 +41,10 @@ export default defineSchema(
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
           recurringInterval: v.optional(vRecurringInterval),
-        })
+          maximumAmount: v.optional(v.union(v.number(), v.null())),
+          minimumAmount: v.optional(v.union(v.number(), v.null())),
+          presetAmount: v.optional(v.union(v.number(), v.null())),
+        }),
       ),
       medias: v.array(
         v.object({
@@ -62,7 +65,7 @@ export default defineSchema(
           isUploaded: v.boolean(),
           sizeReadable: v.string(),
           publicUrl: v.string(),
-        })
+        }),
       ),
     })
       .index("id", ["id"])
@@ -95,5 +98,5 @@ export default defineSchema(
   },
   {
     schemaValidation: true,
-  }
+  },
 );
