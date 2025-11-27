@@ -8,9 +8,11 @@ export default [
   {
     ignores: [
       "dist/**",
+      "example/dist/**",
       "*.config.{js,mjs,cjs,ts,tsx}",
       "example/**/*.config.{js,mjs,cjs,ts,tsx}",
       "**/_generated/",
+      "initTemplate.mjs",
     ],
   },
   {
@@ -83,16 +85,6 @@ export default [
           varsIgnorePattern: "^_",
         },
       ],
-    },
-  },
-  // Example config files (vite.config.ts, etc.) - Node environment
-  {
-    files: ["example/vite.config.ts", "example/**/*.config.{js,ts}"],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.browser,
-      },
     },
   },
 ];
