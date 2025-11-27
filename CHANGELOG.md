@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+
+- Improve schema parsing, adding extra fields in new version
+
 ## 0.7.1
 
 - update dependencies and build output
