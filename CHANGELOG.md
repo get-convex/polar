@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+
+- update scripts and config files
+
 ## 0.7.1
 
 - update dependencies and build output
