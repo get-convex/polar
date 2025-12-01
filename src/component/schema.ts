@@ -1,6 +1,14 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const vRecurringInterval = v.union(
+  v.literal("day"),
+  v.literal("week"),
+  v.literal("month"),
+  v.literal("year"),
+  v.null(),
+);
+
 export default defineSchema(
   {
     customers: defineTable({
@@ -16,9 +24,7 @@ export default defineSchema(
       modifiedAt: v.union(v.string(), v.null()),
       name: v.string(),
       description: v.union(v.string(), v.null()),
-      recurringInterval: v.optional(
-        v.union(v.literal("month"), v.literal("year"), v.null())
-      ),
+      recurringInterval: v.optional(vRecurringInterval),
       isRecurring: v.boolean(),
       trialInterval: v.optional(
         v.union(
@@ -44,10 +50,11 @@ export default defineSchema(
           priceCurrency: v.optional(v.string()),
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
-          recurringInterval: v.optional(
-            v.union(v.literal("month"), v.literal("year"), v.null())
-          ),
-        })
+          recurringInterval: v.optional(vRecurringInterval),
+          maximumAmount: v.optional(v.union(v.number(), v.null())),
+          minimumAmount: v.optional(v.union(v.number(), v.null())),
+          presetAmount: v.optional(v.union(v.number(), v.null())),
+        }),
       ),
       medias: v.array(
         v.object({
@@ -68,7 +75,7 @@ export default defineSchema(
           isUploaded: v.boolean(),
           sizeReadable: v.string(),
           publicUrl: v.string(),
-        })
+        }),
       ),
     })
       .index("id", ["id"])
@@ -80,11 +87,7 @@ export default defineSchema(
       modifiedAt: v.union(v.string(), v.null()),
       amount: v.union(v.number(), v.null()),
       currency: v.union(v.string(), v.null()),
-      recurringInterval: v.union(
-        v.literal("month"),
-        v.literal("year"),
-        v.null()
-      ),
+      recurringInterval: vRecurringInterval,
       status: v.string(),
       currentPeriodStart: v.string(),
       currentPeriodEnd: v.union(v.string(), v.null()),
@@ -107,5 +110,5 @@ export default defineSchema(
   },
   {
     schemaValidation: true,
-  }
+  },
 );

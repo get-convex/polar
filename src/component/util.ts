@@ -1,31 +1,13 @@
 import type {
-  FunctionHandle,
-  FunctionType,
-  WithoutSystemFields,
-  Expand,
-  FunctionReference,
   GenericMutationCtx,
   GenericActionCtx,
   GenericQueryCtx,
   GenericDataModel,
 } from "convex/server";
-import { GenericId } from "convex/values";
-import type { api } from "./_generated/api";
-import type { Doc } from "./_generated/dataModel";
 import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 import type { Product } from "@polar-sh/sdk/models/components/product.js";
-
-export const omitSystemFields = <
-  T extends { _id: string; _creationTime: number } | null | undefined,
->(
-  doc: T
-) => {
-  if (!doc) {
-    return doc;
-  }
-  const { _id, _creationTime, ...rest } = doc;
-  return rest;
-};
+import type { Infer } from "convex/values";
+import type schema from "./schema.js";
 
 export type RunQueryCtx = {
   runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
@@ -40,40 +22,9 @@ export type RunActionCtx = {
   runAction: GenericActionCtx<GenericDataModel>["runAction"];
 };
 
-export type OpaqueIds<T> =
-  T extends GenericId<infer _T>
-    ? string
-    : T extends FunctionHandle<FunctionType>
-      ? string
-      : T extends (infer U)[]
-        ? OpaqueIds<U>[]
-        : T extends object
-          ? { [K in keyof T]: OpaqueIds<T[K]> }
-          : T;
-
-export type UseApi<API> = Expand<{
-  [mod in keyof API]: API[mod] extends FunctionReference<
-    infer FType,
-    "public",
-    infer FArgs,
-    infer FReturnType,
-    infer FComponentPath
-  >
-    ? FunctionReference<
-        FType,
-        "internal",
-        OpaqueIds<FArgs>,
-        OpaqueIds<FReturnType>,
-        FComponentPath
-      >
-    : UseApi<API[mod]>;
-}>;
-
-export type ComponentApi = UseApi<typeof api>;
-
 export const convertToDatabaseSubscription = (
-  subscription: Subscription
-): WithoutSystemFields<Doc<"subscriptions">> => {
+  subscription: Subscription,
+): Infer<typeof schema.tables.subscriptions.validator> => {
   return {
     id: subscription.id,
     customerId: subscription.customerId,
@@ -99,8 +50,8 @@ export const convertToDatabaseSubscription = (
 };
 
 export const convertToDatabaseProduct = (
-  product: Product
-): WithoutSystemFields<Doc<"products">> => {
+  product: Product,
+): Infer<typeof schema.tables.products.validator> => {
   return {
     id: product.id,
     organizationId: product.organizationId,
