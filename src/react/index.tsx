@@ -40,12 +40,14 @@ export const CheckoutLink = ({
   children,
   className,
   subscriptionId,
+  metadata,
   theme = "dark",
   embed = true,
 }: PropsWithChildren<{
   polarApi: Pick<PolarComponentApi, "generateCheckoutLink">;
   productIds: string[];
   subscriptionId?: string;
+  metadata?: Record<string, string>;
   className?: string;
   theme?: "dark" | "light";
   embed?: boolean;
@@ -60,10 +62,11 @@ export const CheckoutLink = ({
     void generateCheckoutLink({
       productIds,
       subscriptionId,
+      metadata,
       origin: window.location.origin,
       successUrl: window.location.href,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId, embed, generateCheckoutLink]);
+  }, [productIds, subscriptionId, metadata, embed, generateCheckoutLink]);
 
   return (
     <a

@@ -105,6 +105,7 @@ export class Polar<
       origin,
       successUrl,
       subscriptionId,
+      metadata,
     }: {
       productIds: string[];
       userId: string;
@@ -112,6 +113,7 @@ export class Polar<
       origin: string;
       successUrl: string;
       subscriptionId?: string;
+      metadata?: Record<string, string>;
     },
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
@@ -146,6 +148,7 @@ export class Polar<
       subscriptionId,
       embedOrigin: origin,
       successUrl,
+      metadata,
       ...(productIds.length === 1
         ? { products: productIds }
         : { products: productIds }),
@@ -309,6 +312,7 @@ export class Polar<
           origin: v.string(),
           successUrl: v.string(),
           subscriptionId: v.optional(v.string()),
+          metadata: v.optional(v.record(v.string(), v.string())),
         },
         returns: v.object({
           url: v.string(),
@@ -322,6 +326,7 @@ export class Polar<
             subscriptionId: args.subscriptionId,
             origin: args.origin,
             successUrl: args.successUrl,
+            metadata: args.metadata,
           });
           return { url };
         },
