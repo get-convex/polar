@@ -44,6 +44,24 @@ export default defineSchema(
           maximumAmount: v.optional(v.union(v.number(), v.null())),
           minimumAmount: v.optional(v.union(v.number(), v.null())),
           presetAmount: v.optional(v.union(v.number(), v.null())),
+          seatTiers: v.optional(
+            v.array(
+              v.object({
+                minSeats: v.number(),
+                maxSeats: v.union(v.number(), v.null()),
+                pricePerSeat: v.number(),
+              }),
+            ),
+          ),
+          unitAmount: v.optional(v.string()),
+          capAmount: v.optional(v.union(v.number(), v.null())),
+          meterId: v.optional(v.string()),
+          meter: v.optional(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+            }),
+          ),
         }),
       ),
       medias: v.array(

@@ -59,10 +59,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -70,7 +73,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: "day" | "week" | "month" | "year" | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
@@ -158,10 +167,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -169,7 +181,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: "day" | "week" | "month" | "year" | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
@@ -222,10 +240,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           organizationId: string;
           prices: Array<{
             amountType?: string;
+            capAmount?: number | null;
             createdAt: string;
             id: string;
             isArchived: boolean;
             maximumAmount?: number | null;
+            meter?: { id: string; name: string };
+            meterId?: string;
             minimumAmount?: number | null;
             modifiedAt: string | null;
             presetAmount?: number | null;
@@ -233,7 +254,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceCurrency?: string;
             productId: string;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
+            seatTiers?: Array<{
+              maxSeats: number | null;
+              minSeats: number;
+              pricePerSeat: number;
+            }>;
             type?: string;
+            unitAmount?: string;
           }>;
           recurringInterval?: "day" | "week" | "month" | "year" | null;
         } | null,
@@ -336,10 +363,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           priceAmount?: number;
           prices: Array<{
             amountType?: string;
+            capAmount?: number | null;
             createdAt: string;
             id: string;
             isArchived: boolean;
             maximumAmount?: number | null;
+            meter?: { id: string; name: string };
+            meterId?: string;
             minimumAmount?: number | null;
             modifiedAt: string | null;
             presetAmount?: number | null;
@@ -347,7 +377,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceCurrency?: string;
             productId: string;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
+            seatTiers?: Array<{
+              maxSeats: number | null;
+              minSeats: number;
+              pricePerSeat: number;
+            }>;
             type?: string;
+            unitAmount?: string;
           }>;
           recurringInterval?: "day" | "week" | "month" | "year" | null;
         }>,
@@ -404,10 +440,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -415,7 +454,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: "day" | "week" | "month" | "year" | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
           } | null;
@@ -468,10 +513,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -479,7 +527,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: "day" | "week" | "month" | "year" | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
           };
@@ -523,10 +577,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -534,7 +591,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: "day" | "week" | "month" | "year" | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: "day" | "week" | "month" | "year" | null;
           }>;
