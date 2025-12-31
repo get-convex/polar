@@ -116,6 +116,18 @@ export const convertToDatabaseProduct = (
 
       return basePrice;
     }),
+    benefits: product.benefits.map((benefit) => ({
+      id: benefit.id,
+      createdAt: benefit.createdAt.toISOString(),
+      modifiedAt: benefit.modifiedAt?.toISOString() ?? null,
+      type: benefit.type,
+      description: benefit.description,
+      selectable: benefit.selectable,
+      deletable: benefit.deletable,
+      organizationId: benefit.organizationId,
+      metadata: benefit.metadata,
+      properties: benefit.properties,
+    })),
     medias: product.medias.map((media) => ({
       id: media.id,
       organizationId: media.organizationId,
