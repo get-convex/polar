@@ -29,6 +29,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
+            benefits: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -143,6 +155,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
+            benefits: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -214,6 +238,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { id: string },
         {
+          benefits: Array<{
+            createdAt: string;
+            deletable: boolean;
+            description: string;
+            id: string;
+            metadata?: Record<string, any>;
+            modifiedAt: string | null;
+            organizationId: string;
+            properties?: any;
+            selectable: boolean;
+            type: string;
+          }>;
           createdAt: string;
           description: string | null;
           id: string;
@@ -346,6 +382,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { includeArchived?: boolean },
         Array<{
+          benefits: Array<{
+            createdAt: string;
+            deletable: boolean;
+            description: string;
+            id: string;
+            metadata?: Record<string, any>;
+            modifiedAt: string | null;
+            organizationId: string;
+            properties?: any;
+            selectable: boolean;
+            type: string;
+          }>;
           createdAt: string;
           description: string | null;
           id: string;
@@ -422,6 +470,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
+            benefits: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -493,6 +553,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
+            benefits: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -551,6 +623,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         {
           polarAccessToken: string;
           products: Array<{
+            benefits: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;

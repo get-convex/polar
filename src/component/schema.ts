@@ -58,6 +58,20 @@ export default defineSchema(
           ),
         }),
       ),
+      benefits: v.array(
+        v.object({
+          id: v.string(),
+          createdAt: v.string(),
+          modifiedAt: v.union(v.string(), v.null()),
+          type: v.string(),
+          description: v.string(),
+          selectable: v.boolean(),
+          deletable: v.boolean(),
+          organizationId: v.string(),
+          metadata: v.optional(v.record(v.string(), v.any())),
+          properties: v.optional(v.any()),
+        }),
+      ),
       medias: v.array(
         v.object({
           id: v.string(),
