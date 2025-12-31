@@ -82,6 +82,7 @@ export const convertToDatabaseProduct = (
         modifiedAt: price.modifiedAt?.toISOString() ?? null,
         recurringInterval: product.recurringInterval,
         type: product.isRecurring ? "recurring" : "one_time",
+        source: price.source,
       };
 
       if (price.amountType === "fixed") {
@@ -100,6 +101,10 @@ export const convertToDatabaseProduct = (
           maximumAmount: price.maximumAmount,
           presetAmount: price.presetAmount,
         };
+      }
+
+      if (price.amountType === "free") {
+        return basePrice;
       }
 
       if (price.amountType === "seat_based") {
