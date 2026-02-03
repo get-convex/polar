@@ -31,37 +31,13 @@ export const insertCustomer = mutation({
       .withIndex("userId", (q) => q.eq("userId", args.userId))
       .unique();
     if (existingCustomer) {
-      throw new Error(`Customer already exists for user: ${args.userId}`);
+      return existingCustomer._id;
     }
     return ctx.db.insert("customers", {
       id: args.id,
       userId: args.userId,
       metadata: args.metadata,
     });
-  },
-});
-
-export const upsertCustomer = mutation({
-  args: schema.tables.customers.validator,
-  returns: v.string(),
-  handler: async (ctx, args) => {
-    const customer = await ctx.db
-      .query("customers")
-      .withIndex("userId", (q) => q.eq("userId", args.userId))
-      .unique();
-    if (!customer) {
-      const customerId = await ctx.db.insert("customers", {
-        id: args.id,
-        userId: args.userId,
-        metadata: args.metadata,
-      });
-      const newCustomer = await ctx.db.get(customerId);
-      if (!newCustomer) {
-        throw new Error("Failed to create customer");
-      }
-      return newCustomer.id;
-    }
-    return customer.id;
   },
 });
 
@@ -214,13 +190,17 @@ export const createSubscription = mutation({
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
       .unique();
-    if (existingSubscription) {
-      throw new Error(`Subscription already exists: ${args.subscription.id}`);
+    if (!existingSubscription) {
+      await ctx.db.insert("subscriptions", args.subscription);
+      return;
     }
-    await ctx.db.insert("subscriptions", {
-      ...args.subscription,
-      metadata: args.subscription.metadata,
-    });
+    // Timestamp guard: skip if existing record is newer
+    const incomingModifiedAt = args.subscription.modifiedAt ?? "";
+    const existingModifiedAt = existingSubscription.modifiedAt ?? "";
+    if (existingModifiedAt > incomingModifiedAt) {
+      return; // stale webhook, skip
+    }
+    await ctx.db.patch(existingSubscription._id, args.subscription);
   },
 });
 
@@ -234,12 +214,17 @@ export const updateSubscription = mutation({
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
       .unique();
     if (!existingSubscription) {
-      throw new Error(`Subscription not found: ${args.subscription.id}`);
+      // Subscription doesn't exist yet — insert instead of throwing
+      await ctx.db.insert("subscriptions", args.subscription);
+      return;
     }
-    await ctx.db.patch(existingSubscription._id, {
-      ...args.subscription,
-      metadata: args.subscription.metadata,
-    });
+    // Timestamp guard: skip if existing record is newer
+    const incomingModifiedAt = args.subscription.modifiedAt ?? "";
+    const existingModifiedAt = existingSubscription.modifiedAt ?? "";
+    if (existingModifiedAt > incomingModifiedAt) {
+      return; // stale webhook, skip
+    }
+    await ctx.db.patch(existingSubscription._id, args.subscription);
   },
 });
 
@@ -252,13 +237,17 @@ export const createProduct = mutation({
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.product.id))
       .unique();
-    if (existingProduct) {
-      throw new Error(`Product already exists: ${args.product.id}`);
+    if (!existingProduct) {
+      await ctx.db.insert("products", args.product);
+      return;
     }
-    await ctx.db.insert("products", {
-      ...args.product,
-      metadata: args.product.metadata,
-    });
+    // Timestamp guard: skip if existing record is newer
+    const incomingModifiedAt = args.product.modifiedAt ?? "";
+    const existingModifiedAt = existingProduct.modifiedAt ?? "";
+    if (existingModifiedAt > incomingModifiedAt) {
+      return; // stale webhook, skip
+    }
+    await ctx.db.patch(existingProduct._id, args.product);
   },
 });
 
@@ -272,12 +261,17 @@ export const updateProduct = mutation({
       .withIndex("id", (q) => q.eq("id", args.product.id))
       .unique();
     if (!existingProduct) {
-      throw new Error(`Product not found: ${args.product.id}`);
+      // Product doesn't exist yet — insert instead of throwing
+      await ctx.db.insert("products", args.product);
+      return;
     }
-    await ctx.db.patch(existingProduct._id, {
-      ...args.product,
-      metadata: args.product.metadata,
-    });
+    // Timestamp guard: skip if existing record is newer
+    const incomingModifiedAt = args.product.modifiedAt ?? "";
+    const existingModifiedAt = existingProduct.modifiedAt ?? "";
+    if (existingModifiedAt > incomingModifiedAt) {
+      return; // stale webhook, skip
+    }
+    await ctx.db.patch(existingProduct._id, args.product);
   },
 });
 
