@@ -29,7 +29,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
-            benefits: Array<{
+            benefits?: Array<{
               createdAt: string;
               deletable: boolean;
               description: string;
@@ -165,7 +165,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
-            benefits: Array<{
+            benefits?: Array<{
               createdAt: string;
               deletable: boolean;
               description: string;
@@ -258,7 +258,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { id: string },
         {
-          benefits: Array<{
+          benefits?: Array<{
             createdAt: string;
             deletable: boolean;
             description: string;
@@ -412,7 +412,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { includeArchived?: boolean },
         Array<{
-          benefits: Array<{
+          benefits?: Array<{
             createdAt: string;
             deletable: boolean;
             description: string;
@@ -510,7 +510,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
-            benefits: Array<{
+            benefits?: Array<{
               createdAt: string;
               deletable: boolean;
               description: string;
@@ -603,7 +603,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
-            benefits: Array<{
+            benefits?: Array<{
               createdAt: string;
               deletable: boolean;
               description: string;
@@ -683,7 +683,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         {
           polarAccessToken: string;
           products: Array<{
-            benefits: Array<{
+            benefits?: Array<{
               createdAt: string;
               deletable: boolean;
               description: string;

@@ -132,7 +132,7 @@ export const convertToDatabaseProduct = (
 
       return basePrice;
     }),
-    benefits: product.benefits.map((benefit) => ({
+    benefits: product.benefits?.map((benefit) => ({
       id: benefit.id,
       createdAt: benefit.createdAt.toISOString(),
       modifiedAt: benefit.modifiedAt?.toISOString() ?? null,
