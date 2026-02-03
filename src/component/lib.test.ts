@@ -2,94 +2,21 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { convexTest } from "convex-test";
 import type { TestConvex } from "convex-test";
+import type { Infer } from "convex/values";
 import schema from "./schema.js";
 import { api } from "./_generated/api.js";
 
 const modules = import.meta.glob("./**/*.ts");
 
-// Type definitions for test data
-type TestSubscription = {
-  id: string;
-  customerId: string;
-  productId: string;
-  checkoutId: string | null;
-  createdAt: string;
-  modifiedAt: string | null;
-  amount: number | null;
-  currency: string | null;
-  recurringInterval: string | null;
-  status: string;
-  currentPeriodStart: string;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-  startedAt: string | null;
-  endedAt: string | null;
-  metadata: Record<string, unknown>;
-};
-
-type TestPrice = {
-  id: string;
-  productId: string;
-  createdAt: string;
-  modifiedAt: string | null;
-  isArchived: boolean;
-  amountType?: string;
-  type?: string;
-  recurringInterval?: string | null;
-  priceCurrency?: string;
-  priceAmount?: number;
-  minimumAmount?: number | null;
-  maximumAmount?: number | null;
-  presetAmount?: number | null;
-};
-
-type TestMedia = {
-  id: string;
-  organizationId: string;
-  name: string;
-  path: string;
-  mimeType: string;
-  size: number;
-  storageVersion: string | null;
-  checksumEtag: string | null;
-  checksumSha256Base64: string | null;
-  checksumSha256Hex: string | null;
-  createdAt: string;
-  lastModifiedAt: string | null;
-  version: string | null;
-  isUploaded: boolean;
-  sizeReadable: string;
-  publicUrl: string;
-  service?: string;
-};
-
-type TestProduct = {
-  id: string;
-  organizationId: string;
-  name: string;
-  description: string | null;
-  isRecurring: boolean;
-  isArchived: boolean;
-  createdAt: string;
-  modifiedAt: string | null;
-  recurringInterval?: string | null;
-  metadata?: Record<string, unknown>;
-  prices: TestPrice[];
-  medias: TestMedia[];
-  trialInterval?: string | null;
-  trialIntervalCount?: number | null;
-  recurringIntervalCount?: number | null;
-};
-
-type TestCustomer = {
-  id: string;
-  userId: string;
-};
+// Types derived from schema validators
+type DbSubscription = Infer<typeof schema.tables.subscriptions.validator>;
+type DbProduct = Infer<typeof schema.tables.products.validator>;
+type DbCustomer = Infer<typeof schema.tables.customers.validator>;
 
 // Helper to create a minimal valid subscription for testing
 function createTestSubscription(
-  overrides: Partial<TestSubscription> = {},
-): TestSubscription {
+  overrides: Partial<DbSubscription> = {},
+): DbSubscription {
   return {
     id: "sub_123",
     customerId: "cust_456",
@@ -113,8 +40,8 @@ function createTestSubscription(
 
 // Helper to create a minimal valid product for testing
 function createTestProduct(
-  overrides: Partial<TestProduct> = {},
-): TestProduct {
+  overrides: Partial<DbProduct> = {},
+): DbProduct {
   return {
     id: "prod_123",
     organizationId: "org_456",
@@ -134,8 +61,8 @@ function createTestProduct(
 
 // Helper to create a minimal valid customer for testing
 function createTestCustomer(
-  overrides: Partial<TestCustomer> = {},
-): TestCustomer {
+  overrides: Partial<DbCustomer> = {},
+): DbCustomer {
   return {
     id: "cust_123",
     userId: "user_456",
