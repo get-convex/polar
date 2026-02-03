@@ -44,6 +44,14 @@ export const convertToDatabaseSubscription = (
     startedAt: subscription.startedAt?.toISOString() ?? null,
     endedAt: subscription.endedAt?.toISOString() ?? null,
     metadata: subscription.metadata,
+    discountId: subscription.discountId,
+    canceledAt: subscription.canceledAt?.toISOString() ?? null,
+    endsAt: subscription.endsAt?.toISOString() ?? null,
+    recurringIntervalCount: subscription.recurringIntervalCount,
+    trialStart: subscription.trialStart?.toISOString() ?? null,
+    trialEnd: subscription.trialEnd?.toISOString() ?? null,
+    seats: subscription.seats ?? null,
+    customFieldData: subscription.customFieldData,
   };
 };
 
@@ -61,6 +69,9 @@ export const convertToDatabaseProduct = (
     modifiedAt: product.modifiedAt?.toISOString() ?? null,
     recurringInterval: product.recurringInterval,
     metadata: product.metadata,
+    trialInterval: product.trialInterval,
+    trialIntervalCount: product.trialIntervalCount,
+    recurringIntervalCount: product.recurringIntervalCount,
     prices: product.prices.map((price) => ({
       id: price.id,
       productId: price.productId,

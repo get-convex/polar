@@ -1,13 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const vRecurringInterval = v.union(
-  v.literal("day"),
-  v.literal("week"),
-  v.literal("month"),
-  v.literal("year"),
-  v.null(),
-);
+const vRecurringInterval = v.union(v.string(), v.null());
 
 export default defineSchema(
   {
@@ -67,6 +61,9 @@ export default defineSchema(
           publicUrl: v.string(),
         }),
       ),
+      trialInterval: v.optional(v.union(v.string(), v.null())),
+      trialIntervalCount: v.optional(v.union(v.number(), v.null())),
+      recurringIntervalCount: v.optional(v.union(v.number(), v.null())),
     })
       .index("id", ["id"])
       .index("isArchived", ["isArchived"]),
@@ -90,6 +87,14 @@ export default defineSchema(
       metadata: v.record(v.string(), v.any()),
       customerCancellationReason: v.optional(v.union(v.string(), v.null())),
       customerCancellationComment: v.optional(v.union(v.string(), v.null())),
+      discountId: v.optional(v.union(v.string(), v.null())),
+      canceledAt: v.optional(v.union(v.string(), v.null())),
+      endsAt: v.optional(v.union(v.string(), v.null())),
+      recurringIntervalCount: v.optional(v.number()),
+      trialStart: v.optional(v.union(v.string(), v.null())),
+      trialEnd: v.optional(v.union(v.string(), v.null())),
+      seats: v.optional(v.union(v.number(), v.null())),
+      customFieldData: v.optional(v.record(v.string(), v.any())),
     })
       .index("id", ["id"])
       .index("customerId", ["customerId"])

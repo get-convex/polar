@@ -69,10 +69,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "day" | "week" | "month" | "year" | null;
+              recurringInterval?: string | null;
               type?: string;
             }>;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
+            recurringIntervalCount?: number | null;
+            trialInterval?: string | null;
+            trialIntervalCount?: number | null;
           };
         },
         any,
@@ -85,23 +88,31 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           subscription: {
             amount: number | null;
             cancelAtPeriodEnd: boolean;
+            canceledAt?: string | null;
             checkoutId: string | null;
             createdAt: string;
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customFieldData?: Record<string, any>;
             customerCancellationComment?: string | null;
             customerCancellationReason?: string | null;
             customerId: string;
+            discountId?: string | null;
             endedAt: string | null;
+            endsAt?: string | null;
             id: string;
             metadata: Record<string, any>;
             modifiedAt: string | null;
             priceId?: string;
             productId: string;
-            recurringInterval: "day" | "week" | "month" | "year" | null;
+            recurringInterval: string | null;
+            recurringIntervalCount?: number;
+            seats?: number | null;
             startedAt: string | null;
             status: string;
+            trialEnd?: string | null;
+            trialStart?: string | null;
           };
         },
         any,
@@ -114,15 +125,19 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         {
           amount: number | null;
           cancelAtPeriodEnd: boolean;
+          canceledAt?: string | null;
           checkoutId: string | null;
           createdAt: string;
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customFieldData?: Record<string, any>;
           customerCancellationComment?: string | null;
           customerCancellationReason?: string | null;
           customerId: string;
+          discountId?: string | null;
           endedAt: string | null;
+          endsAt?: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
@@ -168,15 +183,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "day" | "week" | "month" | "year" | null;
+              recurringInterval?: string | null;
               type?: string;
             }>;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
+            recurringIntervalCount?: number | null;
+            trialInterval?: string | null;
+            trialIntervalCount?: number | null;
           };
           productId: string;
-          recurringInterval: "day" | "week" | "month" | "year" | null;
+          recurringInterval: string | null;
+          recurringIntervalCount?: number;
+          seats?: number | null;
           startedAt: string | null;
           status: string;
+          trialEnd?: string | null;
+          trialStart?: string | null;
         } | null,
         Name
       >;
@@ -232,10 +254,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
             type?: string;
           }>;
-          recurringInterval?: "day" | "week" | "month" | "year" | null;
+          recurringInterval?: string | null;
+          recurringIntervalCount?: number | null;
+          trialInterval?: string | null;
+          trialIntervalCount?: number | null;
         } | null,
         Name
       >;
@@ -246,23 +271,31 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         {
           amount: number | null;
           cancelAtPeriodEnd: boolean;
+          canceledAt?: string | null;
           checkoutId: string | null;
           createdAt: string;
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customFieldData?: Record<string, any>;
           customerCancellationComment?: string | null;
           customerCancellationReason?: string | null;
           customerId: string;
+          discountId?: string | null;
           endedAt: string | null;
+          endsAt?: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
           priceId?: string;
           productId: string;
-          recurringInterval: "day" | "week" | "month" | "year" | null;
+          recurringInterval: string | null;
+          recurringIntervalCount?: number;
+          seats?: number | null;
           startedAt: string | null;
           status: string;
+          trialEnd?: string | null;
+          trialStart?: string | null;
         } | null,
         Name
       >;
@@ -280,23 +313,31 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Array<{
           amount: number | null;
           cancelAtPeriodEnd: boolean;
+          canceledAt?: string | null;
           checkoutId: string | null;
           createdAt: string;
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customFieldData?: Record<string, any>;
           customerCancellationComment?: string | null;
           customerCancellationReason?: string | null;
           customerId: string;
+          discountId?: string | null;
           endedAt: string | null;
+          endsAt?: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
           priceId?: string;
           productId: string;
-          recurringInterval: "day" | "week" | "month" | "year" | null;
+          recurringInterval: string | null;
+          recurringIntervalCount?: number;
+          seats?: number | null;
           startedAt: string | null;
           status: string;
+          trialEnd?: string | null;
+          trialStart?: string | null;
         }>,
         Name
       >;
@@ -346,10 +387,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceAmount?: number;
             priceCurrency?: string;
             productId: string;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
             type?: string;
           }>;
-          recurringInterval?: "day" | "week" | "month" | "year" | null;
+          recurringInterval?: string | null;
+          recurringIntervalCount?: number | null;
+          trialInterval?: string | null;
+          trialIntervalCount?: number | null;
         }>,
         Name
       >;
@@ -360,15 +404,19 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Array<{
           amount: number | null;
           cancelAtPeriodEnd: boolean;
+          canceledAt?: string | null;
           checkoutId: string | null;
           createdAt: string;
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customFieldData?: Record<string, any>;
           customerCancellationComment?: string | null;
           customerCancellationReason?: string | null;
           customerId: string;
+          discountId?: string | null;
           endedAt: string | null;
+          endsAt?: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
@@ -414,15 +462,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "day" | "week" | "month" | "year" | null;
+              recurringInterval?: string | null;
               type?: string;
             }>;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
+            recurringIntervalCount?: number | null;
+            trialInterval?: string | null;
+            trialIntervalCount?: number | null;
           } | null;
           productId: string;
-          recurringInterval: "day" | "week" | "month" | "year" | null;
+          recurringInterval: string | null;
+          recurringIntervalCount?: number;
+          seats?: number | null;
           startedAt: string | null;
           status: string;
+          trialEnd?: string | null;
+          trialStart?: string | null;
         }>,
         Name
       >;
@@ -478,10 +533,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "day" | "week" | "month" | "year" | null;
+              recurringInterval?: string | null;
               type?: string;
             }>;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
+            recurringIntervalCount?: number | null;
+            trialInterval?: string | null;
+            trialIntervalCount?: number | null;
           };
         },
         any,
@@ -533,10 +591,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceAmount?: number;
               priceCurrency?: string;
               productId: string;
-              recurringInterval?: "day" | "week" | "month" | "year" | null;
+              recurringInterval?: string | null;
               type?: string;
             }>;
-            recurringInterval?: "day" | "week" | "month" | "year" | null;
+            recurringInterval?: string | null;
+            recurringIntervalCount?: number | null;
+            trialInterval?: string | null;
+            trialIntervalCount?: number | null;
           }>;
         },
         any,
@@ -549,33 +610,34 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           subscription: {
             amount: number | null;
             cancelAtPeriodEnd: boolean;
+            canceledAt?: string | null;
             checkoutId: string | null;
             createdAt: string;
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customFieldData?: Record<string, any>;
             customerCancellationComment?: string | null;
             customerCancellationReason?: string | null;
             customerId: string;
+            discountId?: string | null;
             endedAt: string | null;
+            endsAt?: string | null;
             id: string;
             metadata: Record<string, any>;
             modifiedAt: string | null;
             priceId?: string;
             productId: string;
-            recurringInterval: "day" | "week" | "month" | "year" | null;
+            recurringInterval: string | null;
+            recurringIntervalCount?: number;
+            seats?: number | null;
             startedAt: string | null;
             status: string;
+            trialEnd?: string | null;
+            trialStart?: string | null;
           };
         },
         any,
-        Name
-      >;
-      upsertCustomer: FunctionReference<
-        "mutation",
-        "internal",
-        { id: string; metadata?: Record<string, any>; userId: string },
-        string,
         Name
       >;
     };
