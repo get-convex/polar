@@ -55,6 +55,7 @@ function createTestProduct(
     metadata: {},
     prices: [],
     medias: [],
+    benefits: [],
     ...overrides,
   };
 }
