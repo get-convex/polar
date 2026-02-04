@@ -20,10 +20,10 @@ export const getUserInfo = query({
 
 export const polar = new Polar(components.polar, {
   products: {
-    premiumMonthly: "5fde8344-5fca-4d0b-adeb-2052cddfd9ed",
-    premiumYearly: "9bc5ed5f-2065-40a4-bd1f-e012e448d82f",
-    premiumPlusMonthly: "db548a6f-ff8c-4969-8f02-5f7301a36e7c",
-    premiumPlusYearly: "9ff9976e-459e-4ebc-8cde-b2ced74f8822",
+    premiumMonthly: "c3eb886b-9247-4638-9395-156110a75ae0",
+    premiumYearly: "ae2f32ca-59b3-4d17-a1ac-97d01f044f17",
+    premiumPlusMonthly: "11776cc9-1fac-4dc2-a7f9-943f76deb64b",
+    premiumPlusYearly: "77443a89-2694-4edf-a26c-9df6f6d529ee",
   },
   getUserInfo: async (ctx) => {
     const user: { _id: Id<"users">; email: string } = await ctx.runQuery(
@@ -86,6 +86,8 @@ const currentUser = async (ctx: QueryCtx) => {
     isFree: !isPremium && !isPremiumPlus,
     isPremium,
     isPremiumPlus,
+    isTrialing: subscription?.status === "trialing",
+    trialEnd: subscription?.trialEnd ?? null,
     subscription,
     maxTodos: isPremiumPlus
       ? undefined

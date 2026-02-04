@@ -257,7 +257,7 @@ export class Polar<
     if (!subscription) {
       throw new Error("Subscription not found");
     }
-    if (subscription.status !== "active") {
+    if (subscription.status !== "active" && subscription.status !== "trialing") {
       throw new Error("Subscription is not active");
     }
     const updatedSubscription = await subscriptionsUpdate(this.polar, {
