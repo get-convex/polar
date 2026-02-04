@@ -315,15 +315,7 @@ export class Polar<
           origin: v.string(),
           successUrl: v.string(),
           subscriptionId: v.optional(v.string()),
-          trialInterval: v.optional(
-            v.union(
-              v.literal("day"),
-              v.literal("week"),
-              v.literal("month"),
-              v.literal("year"),
-              v.null()
-            )
-          ),
+          trialInterval: v.optional(v.union(v.string(), v.null())),
           trialIntervalCount: v.optional(v.union(v.number(), v.null())),
         },
         returns: v.object({
@@ -338,7 +330,7 @@ export class Polar<
             subscriptionId: args.subscriptionId,
             origin: args.origin,
             successUrl: args.successUrl,
-            trialInterval: args.trialInterval,
+            trialInterval: args.trialInterval as "day" | "week" | "month" | "year" | null | undefined,
             trialIntervalCount: args.trialIntervalCount,
           });
           return { url };
