@@ -72,29 +72,77 @@ export const convertToDatabaseProduct = (
     trialInterval: product.trialInterval,
     trialIntervalCount: product.trialIntervalCount,
     recurringIntervalCount: product.recurringIntervalCount,
-    prices: product.prices.map((price) => ({
-      id: price.id,
-      productId: price.productId,
-      amountType: price.amountType,
-      isArchived: price.isArchived,
-      createdAt: price.createdAt.toISOString(),
-      modifiedAt: price.modifiedAt?.toISOString() ?? null,
-      recurringInterval:
-        price.type === "recurring"
-          ? price.recurringInterval ?? undefined
-          : undefined,
-      priceAmount: price.amountType === "fixed" ? price.priceAmount : undefined,
-      priceCurrency:
-        price.amountType === "fixed" || price.amountType === "custom"
-          ? price.priceCurrency
-          : undefined,
-      minimumAmount:
-        price.amountType === "custom" ? price.minimumAmount : undefined,
-      maximumAmount:
-        price.amountType === "custom" ? price.maximumAmount : undefined,
-      presetAmount:
-        price.amountType === "custom" ? price.presetAmount : undefined,
-      type: price.type,
+    prices: product.prices.map((price) => {
+      const basePrice = {
+        id: price.id,
+        productId: price.productId,
+        amountType: price.amountType,
+        isArchived: price.isArchived,
+        createdAt: price.createdAt.toISOString(),
+        modifiedAt: price.modifiedAt?.toISOString() ?? null,
+        recurringInterval: product.recurringInterval,
+        type: product.isRecurring ? "recurring" : "one_time",
+        source: price.source,
+      };
+
+      if (price.amountType === "fixed") {
+        return {
+          ...basePrice,
+          priceAmount: price.priceAmount,
+          priceCurrency: price.priceCurrency,
+        };
+      }
+
+      if (price.amountType === "custom") {
+        return {
+          ...basePrice,
+          priceCurrency: price.priceCurrency,
+          minimumAmount: price.minimumAmount,
+          maximumAmount: price.maximumAmount,
+          presetAmount: price.presetAmount,
+        };
+      }
+
+      if (price.amountType === "free") {
+        return basePrice;
+      }
+
+      if (price.amountType === "seat_based") {
+        return {
+          ...basePrice,
+          priceCurrency: price.priceCurrency,
+          seatTiers: price.seatTiers?.tiers.map((tier) => ({
+            minSeats: tier.minSeats,
+            maxSeats: tier.maxSeats ?? null,
+            pricePerSeat: tier.pricePerSeat,
+          })),
+        };
+      }
+
+      if (price.amountType === "metered_unit") {
+        return {
+          ...basePrice,
+          priceCurrency: price.priceCurrency,
+          unitAmount: price.unitAmount,
+          capAmount: price.capAmount,
+          meterId: price.meterId,
+          meter: price.meter,
+        };
+      }
+
+      return basePrice;
+    }),
+    benefits: product.benefits?.map((benefit) => ({
+      id: benefit.id,
+      createdAt: benefit.createdAt.toISOString(),
+      modifiedAt: benefit.modifiedAt?.toISOString() ?? null,
+      type: benefit.type,
+      description: benefit.description,
+      selectable: benefit.selectable,
+      deletable: benefit.deletable,
+      organizationId: benefit.organizationId,
+      metadata: benefit.metadata,
+      properties: benefit.properties,
     })),
     medias: product.medias.map((media) => ({
       id: media.id,

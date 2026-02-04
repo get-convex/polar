@@ -35,10 +35,45 @@ export default defineSchema(
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
           recurringInterval: v.optional(vRecurringInterval),
+          source: v.optional(v.string()),
           maximumAmount: v.optional(v.union(v.number(), v.null())),
           minimumAmount: v.optional(v.union(v.number(), v.null())),
           presetAmount: v.optional(v.union(v.number(), v.null())),
+          seatTiers: v.optional(
+            v.array(
+              v.object({
+                minSeats: v.number(),
+                maxSeats: v.union(v.number(), v.null()),
+                pricePerSeat: v.number(),
+              }),
+            ),
+          ),
+          unitAmount: v.optional(v.string()),
+          capAmount: v.optional(v.union(v.number(), v.null())),
+          meterId: v.optional(v.string()),
+          meter: v.optional(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+            }),
+          ),
         }),
+      ),
+      benefits: v.optional(
+        v.array(
+          v.object({
+            id: v.string(),
+            createdAt: v.string(),
+            modifiedAt: v.union(v.string(), v.null()),
+            type: v.string(),
+            description: v.string(),
+            selectable: v.boolean(),
+            deletable: v.boolean(),
+            organizationId: v.string(),
+            metadata: v.optional(v.record(v.string(), v.any())),
+            properties: v.optional(v.any()),
+          }),
+        ),
       ),
       medias: v.array(
         v.object({

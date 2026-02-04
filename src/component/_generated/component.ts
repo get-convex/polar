@@ -29,6 +29,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
+            benefits?: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -59,10 +71,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -70,7 +85,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: string | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
+              source?: string;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: string | null;
             recurringIntervalCount?: number | null;
@@ -143,6 +165,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
+            benefits?: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -173,10 +207,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -184,7 +221,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: string | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
+              source?: string;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: string | null;
             recurringIntervalCount?: number | null;
@@ -214,6 +258,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { id: string },
         {
+          benefits?: Array<{
+            createdAt: string;
+            deletable: boolean;
+            description: string;
+            id: string;
+            metadata?: Record<string, any>;
+            modifiedAt: string | null;
+            organizationId: string;
+            properties?: any;
+            selectable: boolean;
+            type: string;
+          }>;
           createdAt: string;
           description: string | null;
           id: string;
@@ -244,10 +300,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           organizationId: string;
           prices: Array<{
             amountType?: string;
+            capAmount?: number | null;
             createdAt: string;
             id: string;
             isArchived: boolean;
             maximumAmount?: number | null;
+            meter?: { id: string; name: string };
+            meterId?: string;
             minimumAmount?: number | null;
             modifiedAt: string | null;
             presetAmount?: number | null;
@@ -255,7 +314,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceCurrency?: string;
             productId: string;
             recurringInterval?: string | null;
+            seatTiers?: Array<{
+              maxSeats: number | null;
+              minSeats: number;
+              pricePerSeat: number;
+            }>;
+            source?: string;
             type?: string;
+            unitAmount?: string;
           }>;
           recurringInterval?: string | null;
           recurringIntervalCount?: number | null;
@@ -346,6 +412,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { includeArchived?: boolean },
         Array<{
+          benefits?: Array<{
+            createdAt: string;
+            deletable: boolean;
+            description: string;
+            id: string;
+            metadata?: Record<string, any>;
+            modifiedAt: string | null;
+            organizationId: string;
+            properties?: any;
+            selectable: boolean;
+            type: string;
+          }>;
           createdAt: string;
           description: string | null;
           id: string;
@@ -377,10 +455,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           priceAmount?: number;
           prices: Array<{
             amountType?: string;
+            capAmount?: number | null;
             createdAt: string;
             id: string;
             isArchived: boolean;
             maximumAmount?: number | null;
+            meter?: { id: string; name: string };
+            meterId?: string;
             minimumAmount?: number | null;
             modifiedAt: string | null;
             presetAmount?: number | null;
@@ -388,7 +469,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             priceCurrency?: string;
             productId: string;
             recurringInterval?: string | null;
+            seatTiers?: Array<{
+              maxSeats: number | null;
+              minSeats: number;
+              pricePerSeat: number;
+            }>;
+            source?: string;
             type?: string;
+            unitAmount?: string;
           }>;
           recurringInterval?: string | null;
           recurringIntervalCount?: number | null;
@@ -422,6 +510,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           modifiedAt: string | null;
           priceId?: string;
           product: {
+            benefits?: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -452,10 +552,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -463,7 +566,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: string | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
+              source?: string;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: string | null;
             recurringIntervalCount?: number | null;
@@ -493,6 +603,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           product: {
+            benefits?: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -523,10 +645,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -534,7 +659,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: string | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
+              source?: string;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: string | null;
             recurringIntervalCount?: number | null;
@@ -551,6 +683,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         {
           polarAccessToken: string;
           products: Array<{
+            benefits?: Array<{
+              createdAt: string;
+              deletable: boolean;
+              description: string;
+              id: string;
+              metadata?: Record<string, any>;
+              modifiedAt: string | null;
+              organizationId: string;
+              properties?: any;
+              selectable: boolean;
+              type: string;
+            }>;
             createdAt: string;
             description: string | null;
             id: string;
@@ -581,10 +725,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             organizationId: string;
             prices: Array<{
               amountType?: string;
+              capAmount?: number | null;
               createdAt: string;
               id: string;
               isArchived: boolean;
               maximumAmount?: number | null;
+              meter?: { id: string; name: string };
+              meterId?: string;
               minimumAmount?: number | null;
               modifiedAt: string | null;
               presetAmount?: number | null;
@@ -592,7 +739,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               priceCurrency?: string;
               productId: string;
               recurringInterval?: string | null;
+              seatTiers?: Array<{
+                maxSeats: number | null;
+                minSeats: number;
+                pricePerSeat: number;
+              }>;
+              source?: string;
               type?: string;
+              unitAmount?: string;
             }>;
             recurringInterval?: string | null;
             recurringIntervalCount?: number | null;
