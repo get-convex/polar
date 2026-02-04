@@ -69,7 +69,7 @@ export const CheckoutLink = ({
       trialInterval,
       trialIntervalCount,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId, embed, generateCheckoutLink]);
+  }, [productIds, subscriptionId, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
 
   return (
     <a

@@ -98,6 +98,13 @@ export const getCurrentSubscription = query({
     if (!subscription) {
       return null;
     }
+    if (
+      subscription.status === "trialing" &&
+      subscription.trialEnd &&
+      subscription.trialEnd <= new Date().toISOString()
+    ) {
+      return null;
+    }
     const product = await ctx.db
       .query("products")
       .withIndex("id", (q) => q.eq("id", subscription.productId))
