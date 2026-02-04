@@ -358,6 +358,184 @@ describe("updateProduct mutation", () => {
   });
 });
 
+describe("product price types", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("stores and retrieves fixed price", async () => {
+    const product = createTestProduct({
+      prices: [
+        {
+          id: "price_fixed",
+          productId: "prod_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          isArchived: false,
+          amountType: "fixed",
+          type: "recurring",
+          recurringInterval: "month",
+          source: "catalog",
+          priceAmount: 1000,
+          priceCurrency: "usd",
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices).toHaveLength(1);
+    expect(result?.prices[0].amountType).toBe("fixed");
+    expect(result?.prices[0].priceAmount).toBe(1000);
+    expect(result?.prices[0].priceCurrency).toBe("usd");
+    expect(result?.prices[0].source).toBe("catalog");
+  });
+
+  it("stores and retrieves custom price", async () => {
+    const product = createTestProduct({
+      prices: [
+        {
+          id: "price_custom",
+          productId: "prod_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          isArchived: false,
+          amountType: "custom",
+          type: "one_time",
+          priceCurrency: "usd",
+          minimumAmount: 500,
+          maximumAmount: 10000,
+          presetAmount: 2000,
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices).toHaveLength(1);
+    expect(result?.prices[0].amountType).toBe("custom");
+    expect(result?.prices[0].priceCurrency).toBe("usd");
+    expect(result?.prices[0].minimumAmount).toBe(500);
+    expect(result?.prices[0].maximumAmount).toBe(10000);
+    expect(result?.prices[0].presetAmount).toBe(2000);
+  });
+
+  it("stores and retrieves free price", async () => {
+    const product = createTestProduct({
+      prices: [
+        {
+          id: "price_free",
+          productId: "prod_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          isArchived: false,
+          amountType: "free",
+          type: "recurring",
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices).toHaveLength(1);
+    expect(result?.prices[0].amountType).toBe("free");
+  });
+
+  it("stores and retrieves seat-based price", async () => {
+    const product = createTestProduct({
+      prices: [
+        {
+          id: "price_seat",
+          productId: "prod_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          isArchived: false,
+          amountType: "seat_based",
+          type: "recurring",
+          priceCurrency: "usd",
+          seatTiers: [
+            { minSeats: 1, maxSeats: 5, pricePerSeat: 1000 },
+            { minSeats: 6, maxSeats: null, pricePerSeat: 800 },
+          ],
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices).toHaveLength(1);
+    expect(result?.prices[0].amountType).toBe("seat_based");
+    expect(result?.prices[0].seatTiers).toHaveLength(2);
+    expect(result?.prices[0].seatTiers?.[0].minSeats).toBe(1);
+    expect(result?.prices[0].seatTiers?.[0].maxSeats).toBe(5);
+    expect(result?.prices[0].seatTiers?.[0].pricePerSeat).toBe(1000);
+    expect(result?.prices[0].seatTiers?.[1].maxSeats).toBeNull();
+  });
+
+  it("stores and retrieves metered unit price", async () => {
+    const product = createTestProduct({
+      prices: [
+        {
+          id: "price_metered",
+          productId: "prod_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          isArchived: false,
+          amountType: "metered_unit",
+          type: "recurring",
+          priceCurrency: "usd",
+          unitAmount: "0.01",
+          capAmount: 5000,
+          meterId: "meter_123",
+          meter: { id: "meter_123", name: "API Calls" },
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices).toHaveLength(1);
+    expect(result?.prices[0].amountType).toBe("metered_unit");
+    expect(result?.prices[0].unitAmount).toBe("0.01");
+    expect(result?.prices[0].capAmount).toBe(5000);
+    expect(result?.prices[0].meterId).toBe("meter_123");
+    expect(result?.prices[0].meter).toEqual({ id: "meter_123", name: "API Calls" });
+  });
+
+  it("stores and retrieves product with benefits", async () => {
+    const product = createTestProduct({
+      benefits: [
+        {
+          id: "benefit_123",
+          createdAt: "2025-01-10T08:00:00.000Z",
+          modifiedAt: null,
+          type: "custom",
+          description: "Priority support",
+          selectable: true,
+          deletable: false,
+          organizationId: "org_456",
+        },
+      ],
+    });
+
+    await t.mutation(api.lib.createProduct, { product });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.benefits).toHaveLength(1);
+    expect(result?.benefits?.[0].id).toBe("benefit_123");
+    expect(result?.benefits?.[0].description).toBe("Priority support");
+    expect(result?.benefits?.[0].selectable).toBe(true);
+    expect(result?.benefits?.[0].deletable).toBe(false);
+  });
+});
+
 describe("insertCustomer mutation", () => {
   let t: TestConvex<typeof schema>;
 

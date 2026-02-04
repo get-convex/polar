@@ -35,9 +35,7 @@ export default defineSchema(
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
           recurringInterval: v.optional(vRecurringInterval),
-          source: v.optional(
-            v.union(v.literal("catalog"), v.literal("ad_hoc")),
-          ),
+          source: v.optional(v.string()),
           maximumAmount: v.optional(v.union(v.number(), v.null())),
           minimumAmount: v.optional(v.union(v.number(), v.null())),
           presetAmount: v.optional(v.union(v.number(), v.null())),

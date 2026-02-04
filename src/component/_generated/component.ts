@@ -90,7 +90,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 minSeats: number;
                 pricePerSeat: number;
               }>;
-              source?: "catalog" | "ad_hoc";
+              source?: string;
               type?: string;
               unitAmount?: string;
             }>;
@@ -226,7 +226,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 minSeats: number;
                 pricePerSeat: number;
               }>;
-              source?: "catalog" | "ad_hoc";
+              source?: string;
               type?: string;
               unitAmount?: string;
             }>;
@@ -319,7 +319,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               minSeats: number;
               pricePerSeat: number;
             }>;
-            source?: "catalog" | "ad_hoc";
+            source?: string;
             type?: string;
             unitAmount?: string;
           }>;
@@ -474,7 +474,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               minSeats: number;
               pricePerSeat: number;
             }>;
-            source?: "catalog" | "ad_hoc";
+            source?: string;
             type?: string;
             unitAmount?: string;
           }>;
@@ -571,7 +571,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 minSeats: number;
                 pricePerSeat: number;
               }>;
-              source?: "catalog" | "ad_hoc";
+              source?: string;
               type?: string;
               unitAmount?: string;
             }>;
@@ -664,7 +664,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 minSeats: number;
                 pricePerSeat: number;
               }>;
-              source?: "catalog" | "ad_hoc";
+              source?: string;
               type?: string;
               unitAmount?: string;
             }>;
@@ -744,7 +744,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 minSeats: number;
                 pricePerSeat: number;
               }>;
-              source?: "catalog" | "ad_hoc";
+              source?: string;
               type?: string;
               unitAmount?: string;
             }>;
