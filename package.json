@@ -70,7 +70,7 @@
   },
   "peerDependencies": {
     "@polar-sh/checkout": ">=0.1.10",
-    "@polar-sh/sdk": ">=0.32.11",
+    "@polar-sh/sdk": ">=0.35.4",
     "convex": "^1.29.0",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"

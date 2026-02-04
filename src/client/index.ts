@@ -105,6 +105,8 @@ export class Polar<
       origin,
       successUrl,
       subscriptionId,
+      trialInterval,
+      trialIntervalCount,
     }: {
       productIds: string[];
       userId: string;
@@ -112,7 +114,9 @@ export class Polar<
       origin: string;
       successUrl: string;
       subscriptionId?: string;
-    },
+      trialInterval?: "day" | "week" | "month" | "year" | null;
+      trialIntervalCount?: number | null;
+    }
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
@@ -146,6 +150,8 @@ export class Polar<
       subscriptionId,
       embedOrigin: origin,
       successUrl,
+      trialInterval,
+      trialIntervalCount,
       ...(productIds.length === 1
         ? { products: productIds }
         : { products: productIds }),
@@ -309,6 +315,16 @@ export class Polar<
           origin: v.string(),
           successUrl: v.string(),
           subscriptionId: v.optional(v.string()),
+          trialInterval: v.optional(
+            v.union(
+              v.literal("day"),
+              v.literal("week"),
+              v.literal("month"),
+              v.literal("year"),
+              v.null()
+            )
+          ),
+          trialIntervalCount: v.optional(v.union(v.number(), v.null())),
         },
         returns: v.object({
           url: v.string(),
@@ -322,6 +338,8 @@ export class Polar<
             subscriptionId: args.subscriptionId,
             origin: args.origin,
             successUrl: args.successUrl,
+            trialInterval: args.trialInterval,
+            trialIntervalCount: args.trialIntervalCount,
           });
           return { url };
         },
