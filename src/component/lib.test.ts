@@ -5,6 +5,8 @@ import type { TestConvex } from "convex-test";
 import type { Infer } from "convex/values";
 import schema from "./schema.js";
 import { api } from "./_generated/api.js";
+import { convertToDatabaseProduct } from "./util.js";
+import type { Product } from "@polar-sh/sdk/models/components/product.js";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -69,6 +71,30 @@ function createTestCustomer(
     userId: "user_456",
     ...overrides,
   };
+}
+
+// Helper to create SDK-shaped Product objects (uses Date objects, nested structures)
+function createSdkProduct(overrides: Partial<Product> = {}): Product {
+  return {
+    id: "prod_123",
+    organizationId: "org_456",
+    name: "Test Product",
+    description: "A test product",
+    isRecurring: true,
+    isArchived: false,
+    createdAt: new Date("2025-01-10T08:00:00.000Z"),
+    modifiedAt: new Date("2025-01-12T09:00:00.000Z"),
+    recurringInterval: "month",
+    recurringIntervalCount: 1,
+    trialInterval: null,
+    trialIntervalCount: null,
+    metadata: {},
+    prices: [],
+    benefits: [],
+    medias: [],
+    attachedCustomFields: [],
+    ...overrides,
+  } as Product;
 }
 
 describe("createSubscription mutation", () => {
@@ -358,33 +384,34 @@ describe("updateProduct mutation", () => {
   });
 });
 
-describe("product price types", () => {
+describe("product price types (SDK → converter → DB round-trip)", () => {
   let t: TestConvex<typeof schema>;
 
   beforeEach(() => {
     t = convexTest(schema, modules);
   });
 
-  it("stores and retrieves fixed price", async () => {
-    const product = createTestProduct({
+  it("converts and stores fixed price from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
       prices: [
         {
           id: "price_fixed",
           productId: "prod_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
-          isArchived: false,
+          source: "catalog",
           amountType: "fixed",
+          isArchived: false,
           type: "recurring",
           recurringInterval: "month",
-          source: "catalog",
-          priceAmount: 1000,
           priceCurrency: "usd",
+          priceAmount: 1000,
         },
-      ],
+      ] as Product["prices"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.prices).toHaveLength(1);
@@ -392,28 +419,34 @@ describe("product price types", () => {
     expect(result?.prices[0].priceAmount).toBe(1000);
     expect(result?.prices[0].priceCurrency).toBe("usd");
     expect(result?.prices[0].source).toBe("catalog");
+    expect(result?.prices[0].createdAt).toBe("2025-01-10T08:00:00.000Z");
   });
 
-  it("stores and retrieves custom price", async () => {
-    const product = createTestProduct({
+  it("converts and stores custom price from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: false,
+      recurringInterval: null,
       prices: [
         {
           id: "price_custom",
           productId: "prod_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
-          isArchived: false,
+          source: "catalog",
           amountType: "custom",
+          isArchived: false,
           type: "one_time",
+          recurringInterval: null,
           priceCurrency: "usd",
           minimumAmount: 500,
           maximumAmount: 10000,
           presetAmount: 2000,
         },
-      ],
+      ] as Product["prices"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.prices).toHaveLength(1);
@@ -424,49 +457,59 @@ describe("product price types", () => {
     expect(result?.prices[0].presetAmount).toBe(2000);
   });
 
-  it("stores and retrieves free price", async () => {
-    const product = createTestProduct({
+  it("converts and stores free price from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
       prices: [
         {
           id: "price_free",
           productId: "prod_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
-          isArchived: false,
+          source: "catalog",
           amountType: "free",
+          isArchived: false,
           type: "recurring",
+          recurringInterval: "month",
         },
-      ],
+      ] as Product["prices"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.prices).toHaveLength(1);
     expect(result?.prices[0].amountType).toBe("free");
   });
 
-  it("stores and retrieves seat-based price", async () => {
-    const product = createTestProduct({
+  it("converts and stores seat-based price from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
       prices: [
         {
           id: "price_seat",
           productId: "prod_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
-          isArchived: false,
+          source: "catalog",
           amountType: "seat_based",
+          isArchived: false,
           type: "recurring",
+          recurringInterval: "month",
           priceCurrency: "usd",
-          seatTiers: [
-            { minSeats: 1, maxSeats: 5, pricePerSeat: 1000 },
-            { minSeats: 6, maxSeats: null, pricePerSeat: 800 },
-          ],
+          seatTiers: {
+            tiers: [
+              { minSeats: 1, maxSeats: 5, pricePerSeat: 1000 },
+              { minSeats: 6, maxSeats: null, pricePerSeat: 800 },
+            ],
+            minimumSeats: 1,
+            maximumSeats: null,
+          },
         },
-      ],
+      ] as Product["prices"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.prices).toHaveLength(1);
@@ -478,27 +521,30 @@ describe("product price types", () => {
     expect(result?.prices[0].seatTiers?.[1].maxSeats).toBeNull();
   });
 
-  it("stores and retrieves metered unit price", async () => {
-    const product = createTestProduct({
+  it("converts and stores metered unit price from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
       prices: [
         {
           id: "price_metered",
           productId: "prod_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
-          isArchived: false,
+          source: "catalog",
           amountType: "metered_unit",
+          isArchived: false,
           type: "recurring",
+          recurringInterval: "month",
           priceCurrency: "usd",
           unitAmount: "0.01",
           capAmount: 5000,
           meterId: "meter_123",
           meter: { id: "meter_123", name: "API Calls" },
         },
-      ],
+      ] as Product["prices"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.prices).toHaveLength(1);
@@ -509,23 +555,26 @@ describe("product price types", () => {
     expect(result?.prices[0].meter).toEqual({ id: "meter_123", name: "API Calls" });
   });
 
-  it("stores and retrieves product with benefits", async () => {
-    const product = createTestProduct({
+  it("converts and stores benefits from SDK format", async () => {
+    const sdkProduct = createSdkProduct({
       benefits: [
         {
           id: "benefit_123",
-          createdAt: "2025-01-10T08:00:00.000Z",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
           modifiedAt: null,
           type: "custom",
           description: "Priority support",
           selectable: true,
           deletable: false,
           organizationId: "org_456",
+          metadata: {},
+          properties: { note: null },
         },
-      ],
+      ] as unknown as Product["benefits"],
     });
 
-    await t.mutation(api.lib.createProduct, { product });
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
     const result = await t.query(api.lib.getProduct, { id: "prod_123" });
 
     expect(result?.benefits).toHaveLength(1);
@@ -533,6 +582,7 @@ describe("product price types", () => {
     expect(result?.benefits?.[0].description).toBe("Priority support");
     expect(result?.benefits?.[0].selectable).toBe(true);
     expect(result?.benefits?.[0].deletable).toBe(false);
+    expect(result?.benefits?.[0].createdAt).toBe("2025-01-10T08:00:00.000Z");
   });
 });
 
