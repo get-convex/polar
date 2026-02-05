@@ -419,6 +419,7 @@ Props:
 - `className`: (Optional) CSS class name
 - `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a
   free pricing.
+- `metadata`: (Optional) Metadata for additional information to the checkout
 
 #### CustomerPortalLink
 
