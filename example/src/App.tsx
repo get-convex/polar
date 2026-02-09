@@ -424,7 +424,7 @@ export default function TodoList() {
           </p>
           {allProducts && allProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allProducts.map((product: any) => (
+              {allProducts.map((product: any, index: number) => (
                 <div
                   key={product._id}
                   className="p-4 border border-gray-200 dark:border-gray-800 rounded-lg space-y-3"
@@ -482,9 +482,10 @@ export default function TodoList() {
                         }}
                         productIds={[product.id]}
                         lazy
+                        embed={index % 2 === 0}
                         className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
-                        Subscribe to {product.name}
+                        Subscribe to {product.name} ({index % 2 === 0 ? "modal" : "redirect"})
                       </CheckoutLink>
                     </div>
                   )}
