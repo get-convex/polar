@@ -20,10 +20,10 @@ export const getUserInfo = query({
 
 export const polar = new Polar(components.polar, {
   products: {
-    premiumMonthly: "c3eb886b-9247-4638-9395-156110a75ae0",
-    premiumYearly: "ae2f32ca-59b3-4d17-a1ac-97d01f044f17",
-    premiumPlusMonthly: "11776cc9-1fac-4dc2-a7f9-943f76deb64b",
-    premiumPlusYearly: "77443a89-2694-4edf-a26c-9df6f6d529ee",
+    premiumMonthly: "0a6bca9a-d5e3-4159-88e6-d10ff7f3ad71",
+    premiumYearly: "81345a34-5880-4e84-ae8a-4db1f7a21d77",
+    premiumPlusMonthly: "8e8c2c8b-537b-4012-8a5a-9ec21a780d01",
+    premiumPlusYearly: "06a88a12-f2b3-4134-9469-c5eb50e6459b",
   },
   getUserInfo: async (ctx) => {
     const user: { _id: Id<"users">; email: string } = await ctx.runQuery(

@@ -229,7 +229,7 @@ export default function TodoList() {
           </ul>
         </div>
 
-        {/* Simple Billing UI */}
+        {/* Current Subscription */}
         <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-light text-gray-800 dark:text-gray-100">
@@ -248,204 +248,180 @@ export default function TodoList() {
             )}
           </div>
 
-          <div className="space-y-4">
-            {/* Current Plan */}
-            <div>
-              <h3 className="text-lg font-medium mb-2">Current Plan:</h3>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                  {user?.subscription?.product.name || "Free"}
-                </span>
-                {user?.isTrialing && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                    Trial
-                    {user.trialEnd && (
-                      <> &middot; ends {new Date(user.trialEnd).toLocaleDateString()}</>
-                    )}
-                  </span>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+              {user?.subscription?.product.name || "Free"}
+            </span>
+            {user?.isTrialing && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                Trial
+                {user.trialEnd && (
+                  <> &middot; ends {new Date(user.trialEnd).toLocaleDateString()}</>
                 )}
-                {user?.subscription?.amount && (
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    ${user.subscription.amount / 100}/
-                    {user.subscription.recurringInterval}
-                  </span>
-                )}
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  •{" "}
-                  {user?.isPremiumPlus
-                    ? "Unlimited todos"
-                    : user?.isPremium
-                      ? "Up to 6 todos"
-                      : "Up to 3 todos"}
-                </span>
-              </div>
+              </span>
+            )}
+            {user?.subscription?.amount && (
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                ${user.subscription.amount / 100}/
+                {user.subscription.recurringInterval}
+              </span>
+            )}
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              •{" "}
+              {user?.isPremiumPlus
+                ? "Unlimited todos"
+                : user?.isPremium
+                  ? "Up to 6 todos"
+                  : "Up to 3 todos"}
+            </span>
+          </div>
+
+          {user?.subscription && (
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+              <Button
+                variant="ghost"
+                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                onClick={handleCancelSubscription}
+              >
+                Cancel Subscription
+              </Button>
             </div>
+          )}
+        </div>
 
-            {/* Available Plans */}
-            {premiumMonthly && !user?.isTrialing && (
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  {user?.isFree ? "Available Plans:" : "Change Plan:"}
-                </h3>
-                <div className="space-y-2">
-                  {/* Premium Monthly */}
-                  {premiumMonthly && (
-                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">Premium</h4>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              $
-                              {(premiumMonthly.prices[0].priceAmount ?? 0) /
-                                100}
-                              /month
-                            </span>
-                            {premiumYearly && (
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                or $
-                                {(premiumYearly.prices[0].priceAmount ?? 0) /
-                                  100}
-                                /year
-                              </span>
-                            )}
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              • Up to 6 todos
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {user?.subscription?.productId !== premiumMonthly.id &&
-                          user?.subscription?.productId !== premiumYearly?.id &&
-                          (user?.isFree ? (
-                            <div className="flex items-center gap-3">
-                              <CheckoutLink
-                                polarApi={{
-                                  generateCheckoutLink:
-                                    api.example.generateCheckoutLink,
-                                }}
-                                productIds={[premiumMonthly.id]}
-                                trialInterval="day"
-                                trialIntervalCount={7}
-                                className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                              >
-                                Start 7-day free trial
-                              </CheckoutLink>
-                              <CheckoutLink
-                                polarApi={{
-                                  generateCheckoutLink:
-                                    api.example.generateCheckoutLink,
-                                }}
-                                productIds={[
-                                  premiumMonthly.id,
-                                  premiumYearly?.id,
-                                ].filter((id): id is string => id !== undefined)}
-                                className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                embed={false}
-                              >
-                                Upgrade to Premium (redirect)
-                              </CheckoutLink>
-                            </div>
-                          ) : (
-                            <Button
-                              variant="link"
-                              className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
-                              onClick={() => handlePlanChange(premiumMonthly.id)}
-                            >
-                              {getButtonText(premiumMonthly.id)} to Premium
-                            </Button>
-                          ))}
-                      </div>
+        {/* Configured Products */}
+        {premiumMonthly && !user?.isTrialing && (
+          <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
+            <h2 className="text-2xl font-light mb-2 text-gray-800 dark:text-gray-100">
+              Configured Products
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Uses <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">getConfiguredProducts</code> — products are mapped by key with hardcoded Polar product IDs.
+            </p>
+            <div className="space-y-2">
+              {/* Premium */}
+              {premiumMonthly && (
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Premium</h4>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        ${(premiumMonthly.prices[0].priceAmount ?? 0) / 100}/month
+                      </span>
+                      {premiumYearly && (
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          or ${(premiumYearly.prices[0].priceAmount ?? 0) / 100}/year
+                        </span>
+                      )}
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        • Up to 6 todos
+                      </span>
                     </div>
-                  )}
-
-                  {/* Premium Plus Monthly */}
-                  {premiumPlusMonthly && (
-                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">Premium Plus</h4>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              $
-                              {(premiumPlusMonthly.prices[0].priceAmount ?? 0) /
-                                100}
-                              /month
-                            </span>
-                            {premiumPlusYearly && (
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                or $
-                                {(premiumPlusYearly.prices[0].priceAmount ??
-                                  0) / 100}
-                                /year
-                              </span>
-                            )}
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              • Unlimited todos
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {user?.subscription?.productId !==
-                        premiumPlusMonthly.id &&
-                        user?.subscription?.productId !==
-                          premiumPlusYearly?.id &&
-                        (user?.isFree ? (
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {user?.subscription?.productId !== premiumMonthly.id &&
+                      user?.subscription?.productId !== premiumYearly?.id &&
+                      (user?.isFree ? (
+                        <div className="flex items-center gap-3">
+                          <CheckoutLink
+                            polarApi={{
+                              generateCheckoutLink:
+                                api.example.generateCheckoutLink,
+                            }}
+                            productIds={[premiumMonthly.id]}
+                            trialInterval="day"
+                            trialIntervalCount={7}
+                            className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                          >
+                            Start 7-day free trial
+                          </CheckoutLink>
                           <CheckoutLink
                             polarApi={{
                               generateCheckoutLink:
                                 api.example.generateCheckoutLink,
                             }}
                             productIds={[
-                              premiumPlusMonthly.id,
-                              premiumPlusYearly?.id,
+                              premiumMonthly.id,
+                              premiumYearly?.id,
                             ].filter((id): id is string => id !== undefined)}
                             className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                            embed={false}
                           >
-                            Upgrade to Premium Plus (modal)
+                            Upgrade to Premium (redirect)
                           </CheckoutLink>
-                        ) : (
-                          <Button
-                            variant="link"
-                            className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
-                            onClick={() =>
-                              handlePlanChange(premiumPlusMonthly.id)
-                            }
-                          >
-                            {getButtonText(premiumPlusMonthly.id)} to Premium
-                            Plus
-                          </Button>
-                        ))}
-                    </div>
-                  )}
+                        </div>
+                      ) : (
+                        <Button
+                          variant="link"
+                          className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
+                          onClick={() => handlePlanChange(premiumMonthly.id)}
+                        >
+                          {getButtonText(premiumMonthly.id)} to Premium
+                        </Button>
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Cancel Subscription */}
-            {user?.subscription && (
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
-                <Button
-                  variant="ghost"
-                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                  onClick={handleCancelSubscription}
-                >
-                  Cancel Subscription
-                </Button>
-              </div>
-            )}
+              {/* Premium Plus */}
+              {premiumPlusMonthly && (
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Premium Plus</h4>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        ${(premiumPlusMonthly.prices[0].priceAmount ?? 0) / 100}/month
+                      </span>
+                      {premiumPlusYearly && (
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          or ${(premiumPlusYearly.prices[0].priceAmount ?? 0) / 100}/year
+                        </span>
+                      )}
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        • Unlimited todos
+                      </span>
+                    </div>
+                  </div>
+                  {user?.subscription?.productId !== premiumPlusMonthly.id &&
+                    user?.subscription?.productId !== premiumPlusYearly?.id &&
+                    (user?.isFree ? (
+                      <CheckoutLink
+                        polarApi={{
+                          generateCheckoutLink:
+                            api.example.generateCheckoutLink,
+                        }}
+                        productIds={[
+                          premiumPlusMonthly.id,
+                          premiumPlusYearly?.id,
+                        ].filter((id): id is string => id !== undefined)}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        Upgrade to Premium Plus (modal)
+                      </CheckoutLink>
+                    ) : (
+                      <Button
+                        variant="link"
+                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
+                        onClick={() =>
+                          handlePlanChange(premiumPlusMonthly.id)
+                        }
+                      >
+                        {getButtonText(premiumPlusMonthly.id)} to Premium Plus
+                      </Button>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Products Showcase */}
         <div className="mt-8 p-6 bg-white dark:bg-gray-950 border border-transparent dark:border-gray-900 rounded-lg shadow-lg dark:shadow-gray-800/30">
           <h2 className="text-2xl font-light mb-2 text-gray-800 dark:text-gray-100">
-            Products Showcase
+            All Products
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            All synced products from Polar, demonstrating different price types
-            and benefits.
+            Uses <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">listAllProducts</code> — dynamically lists all synced products from Polar, demonstrating different price types and benefits.
           </p>
           {allProducts && allProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -495,6 +471,22 @@ export default function TodoList() {
                         </li>
                       ))}
                     </ul>
+                  )}
+
+                  {/* Checkout */}
+                  {user?.subscription?.productId !== product.id && (
+                    <div className="pt-2">
+                      <CheckoutLink
+                        polarApi={{
+                          generateCheckoutLink:
+                            api.example.generateCheckoutLink,
+                        }}
+                        productIds={[product.id]}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        Subscribe to {product.name}
+                      </CheckoutLink>
+                    </div>
                   )}
                 </div>
               ))}
