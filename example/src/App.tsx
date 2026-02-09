@@ -87,7 +87,6 @@ export default function TodoList() {
   const [newTodo, setNewTodo] = useState("");
 
   const todosLength = todos?.length ?? 0;
-  console.log("user", user);
   const isAtMaxTodos = user?.maxTodos && todosLength >= user.maxTodos;
 
   const {
