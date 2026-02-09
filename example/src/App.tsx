@@ -84,6 +84,7 @@ export default function TodoList() {
   );
   const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
   const changeSubscription = useAction(api.example.changeCurrentSubscription);
+  const generateCheckoutLink = useAction(api.example.generateCheckoutLink);
   const [newTodo, setNewTodo] = useState("");
 
   const todosLength = todos?.length ?? 0;
@@ -472,19 +473,23 @@ export default function TodoList() {
                     </ul>
                   )}
 
-                  {/* Checkout */}
+                  {/* Checkout — generated on click to avoid rate limits from eager fetching */}
                   {user?.subscription?.productId !== product.id && (
                     <div className="pt-2">
-                      <CheckoutLink
-                        polarApi={{
-                          generateCheckoutLink:
-                            api.example.generateCheckoutLink,
+                      <Button
+                        variant="link"
+                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 p-0 h-auto"
+                        onClick={async () => {
+                          const { url } = await generateCheckoutLink({
+                            productIds: [product.id],
+                            origin: window.location.origin,
+                            successUrl: window.location.href,
+                          });
+                          window.open(url, "_blank");
                         }}
-                        productIds={[product.id]}
-                        className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
                         Subscribe to {product.name}
-                      </CheckoutLink>
+                      </Button>
                     </div>
                   )}
                 </div>
