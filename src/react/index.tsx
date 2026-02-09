@@ -1,5 +1,5 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useEffect, useState, type PropsWithChildren } from "react";
+import { useEffect, useState, type PropsWithChildren, type MouseEvent } from "react";
 import { useAction } from "convex/react";
 import type { PolarComponentApi } from "../client/index.js";
 export const CustomerPortalLink = ({
@@ -42,6 +42,7 @@ export const CheckoutLink = ({
   subscriptionId,
   theme = "dark",
   embed = true,
+  lazy = false,
   trialInterval,
   trialIntervalCount,
 }: PropsWithChildren<{
@@ -53,11 +54,13 @@ export const CheckoutLink = ({
   className?: string;
   theme?: "dark" | "light";
   embed?: boolean;
+  lazy?: boolean;
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
   const [checkoutLink, setCheckoutLink] = useState<string>();
 
   useEffect(() => {
+    if (lazy) return;
     if (embed) {
       PolarEmbedCheckout.init();
     }
@@ -69,14 +72,34 @@ export const CheckoutLink = ({
       trialInterval,
       trialIntervalCount,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
+  }, [lazy, productIds, subscriptionId, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
+
+  const handleClick = lazy
+    ? async (e: MouseEvent) => {
+        e.preventDefault();
+        const { url } = await generateCheckoutLink({
+          productIds,
+          subscriptionId,
+          origin: window.location.origin,
+          successUrl: window.location.href,
+          trialInterval,
+          trialIntervalCount,
+        });
+        if (embed) {
+          await PolarEmbedCheckout.create(url, { theme });
+        } else {
+          window.open(url, "_blank");
+        }
+      }
+    : undefined;
 
   return (
     <a
       className={className}
       href={checkoutLink}
+      onClick={handleClick}
       data-polar-checkout-theme={theme}
-      {...(embed ? { "data-polar-checkout": true } : {})}
+      {...(!lazy && embed ? { "data-polar-checkout": true } : {})}
     >
       {children}
     </a>
