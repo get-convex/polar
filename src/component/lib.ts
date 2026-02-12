@@ -170,6 +170,47 @@ export const listUserSubscriptions = query({
   },
 });
 
+// Returns all subscriptions for a user, including ended and expired trials.
+export const listAllUserSubscriptions = query({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.array(
+    v.object({
+      ...schema.tables.subscriptions.validator.fields,
+      product: v.union(schema.tables.products.validator, v.null()),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return [];
+    }
+    const subscriptions = await asyncMap(
+      ctx.db
+        .query("subscriptions")
+        .withIndex("customerId", (q) => q.eq("customerId", customer.id))
+        .collect(),
+      async (subscription) => {
+        const product = subscription.productId
+          ? (await ctx.db
+              .query("products")
+              .withIndex("id", (q) => q.eq("id", subscription.productId))
+              .unique()) || null
+          : null;
+        return {
+          ...omitSystemFields(subscription),
+          product: omitSystemFields(product),
+        };
+      },
+    );
+    return subscriptions;
+  },
+});
+
 export const listProducts = query({
   args: {
     includeArchived: v.optional(v.boolean()),

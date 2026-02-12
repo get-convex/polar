@@ -221,6 +221,14 @@ export class Polar<
       product,
     };
   }
+  listAllUserSubscriptions(
+    ctx: RunQueryCtx,
+    { userId }: { userId: string },
+  ) {
+    return ctx.runQuery(this.component.lib.listAllUserSubscriptions, {
+      userId,
+    });
+  }
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
@@ -307,6 +315,19 @@ export class Polar<
         args: {},
         handler: async (ctx) => {
           return await this.listProducts(ctx);
+        },
+      }),
+      listAllSubscriptions: queryGeneric({
+        args: {},
+        returns: v.array(
+          v.object({
+            ...schema.tables.subscriptions.validator.fields,
+            product: v.union(schema.tables.products.validator, v.null()),
+          }),
+        ),
+        handler: async (ctx) => {
+          const { userId } = await this.config.getUserInfo(ctx);
+          return await this.listAllUserSubscriptions(ctx, { userId });
         },
       }),
       generateCheckoutLink: actionGeneric({
