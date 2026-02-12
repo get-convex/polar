@@ -26,15 +26,7 @@ export default defineSchema(
       description: v.union(v.string(), v.null()),
       recurringInterval: v.optional(vRecurringInterval),
       isRecurring: v.boolean(),
-      trialInterval: v.optional(
-        v.union(
-          v.literal("day"),
-          v.literal("week"),
-          v.literal("month"),
-          v.literal("year"),
-          v.null()
-        )
-      ),
+      trialInterval: v.optional(v.union(v.string(), v.null())),
       trialIntervalCount: v.optional(v.union(v.number(), v.null())),
       isArchived: v.boolean(),
       organizationId: v.string(),
