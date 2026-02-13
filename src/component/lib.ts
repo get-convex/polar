@@ -69,7 +69,7 @@ export const getProduct = query({
   },
 });
 
-// For apps that have 0 or 1 active subscription per user.
+/** For apps that have 0 or 1 active subscription per user. Excludes expired trials. */
 export const getCurrentSubscription = query({
   args: {
     userId: v.string(),
@@ -119,6 +119,7 @@ export const getCurrentSubscription = query({
   },
 });
 
+/** List active subscriptions for a user, excluding ended and expired trials. */
 export const listUserSubscriptions = query({
   args: {
     userId: v.string(),
@@ -137,6 +138,7 @@ export const listUserSubscriptions = query({
     if (!customer) {
       return [];
     }
+    const now = new Date().toISOString();
     const subscriptions = await asyncMap(
       ctx.db
         .query("subscriptions")
@@ -144,11 +146,10 @@ export const listUserSubscriptions = query({
         .collect(),
       async (subscription) => {
         if (
-          (subscription.endedAt &&
-            subscription.endedAt <= new Date().toISOString()) ||
+          (subscription.endedAt && subscription.endedAt <= now) ||
           (subscription.status === "trialing" &&
             subscription.trialEnd &&
-            subscription.trialEnd <= new Date().toISOString())
+            subscription.trialEnd <= now)
         ) {
           return;
         }
@@ -170,7 +171,7 @@ export const listUserSubscriptions = query({
   },
 });
 
-// Returns all subscriptions for a user, including ended and expired trials.
+/** Returns all subscriptions for a user, including ended and expired trials. */
 export const listAllUserSubscriptions = query({
   args: {
     userId: v.string(),

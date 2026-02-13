@@ -426,7 +426,7 @@ export default function TodoList() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {allProducts.map((product: any, index: number) => (
                 <div
-                  key={product._id}
+                  key={product.id}
                   className="p-4 border border-gray-200 dark:border-gray-800 rounded-lg space-y-3"
                 >
                   <div className="flex items-center gap-2 flex-wrap">

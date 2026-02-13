@@ -34,6 +34,7 @@ export const CustomerPortalLink = ({
   );
 };
 
+/** Renders a checkout link. Supports embedded or redirect checkout, with optional lazy loading and trial configuration. */
 export const CheckoutLink = ({
   polarApi,
   productIds,
@@ -96,7 +97,7 @@ export const CheckoutLink = ({
   return (
     <a
       className={className}
-      href={checkoutLink}
+      href={checkoutLink ?? (lazy ? "#" : undefined)}
       onClick={handleClick}
       data-polar-checkout-theme={theme}
       {...(!lazy && embed ? { "data-polar-checkout": true } : {})}

@@ -96,6 +96,7 @@ export class Polar<
       server: this.server,
     });
   }
+  /** Create a Polar checkout session, optionally with a free trial period. */
   async createCheckoutSession(
     ctx: RunMutationCtx,
     {
@@ -221,6 +222,7 @@ export class Polar<
       product,
     };
   }
+  /** Return all subscriptions for a user, including ended and expired trials. */
   listAllUserSubscriptions(
     ctx: RunQueryCtx,
     { userId }: { userId: string },
@@ -256,6 +258,7 @@ export class Polar<
     }
     return updatedSubscription.value;
   }
+  /** Cancel an active or trialing subscription, optionally revoking immediately. */
   async cancelSubscription(
     ctx: RunActionCtx,
     { revokeImmediately }: { revokeImmediately?: boolean } = {},
@@ -317,6 +320,7 @@ export class Polar<
           return await this.listProducts(ctx);
         },
       }),
+      /** Query all subscriptions for the current user, including ended and expired trials. */
       listAllSubscriptions: queryGeneric({
         args: {},
         returns: v.array(
@@ -330,6 +334,7 @@ export class Polar<
           return await this.listAllUserSubscriptions(ctx, { userId });
         },
       }),
+      /** Generate a Polar checkout URL, with optional trial period configuration. */
       generateCheckoutLink: actionGeneric({
         args: {
           productIds: v.array(v.string()),
