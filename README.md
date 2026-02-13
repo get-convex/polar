@@ -164,13 +164,10 @@ polar.registerRoutes(http, {
 Create a product in the Polar dashboard for each pricing plan that you want to
 offer. The product data will be synced to your Convex app automatically.
 
-**Note:** You can have one price per plan, so a plan with monthly and yearly
-pricing requires two products in Polar.
-
-**Note:** The Convex Polar component is currently built to support recurring
-subscriptions, and may not work as expected with one-time payments. Please
-[open an issue](https://github.com/convex-dev/polar/issues) or
-[reach out on Discord](https://discord.gg/convex) if you run into any issues.
+The component supports all Polar price types: fixed, free, custom
+(pay-what-you-want), seat-based, and metered. Products can also include
+benefits and free trial periods configured in the Polar dashboard or at
+checkout time.
 
 Products created prior to using this component need to be synced with Convex
 using the `syncProducts` function.
@@ -223,6 +220,7 @@ export const {
   cancelCurrentSubscription,
   getConfiguredProducts,
   listAllProducts,
+  listAllSubscriptions,
   generateCheckoutLink,
   generateCustomerPortalUrl,
 } = polar.api();
@@ -230,7 +228,7 @@ export const {
 
 ### Display products and prices
 
-Use the exported `getConfiguredProducts` or `listAllProducts`function to display
+Use the exported `getConfiguredProducts` or `listAllProducts` function to display
 your products and their prices:
 
 #### `getConfiguredProducts`
@@ -309,10 +307,18 @@ Each product includes:
 
 - `id`: The Polar product ID
 - `name`: The product name
-- `prices`: Array of prices with:
-  - `priceAmount`: Price in cents
-  - `priceCurrency`: Currency code (e.g., "USD")
-  - `recurringInterval`: "month" or "year"
+- `description`: Product description
+- `isRecurring`: Whether the product is a subscription
+- `recurringInterval`: Billing interval (e.g., "month", "year")
+- `trialInterval`: Trial period interval (if configured)
+- `trialIntervalCount`: Number of trial intervals (if configured)
+- `benefits`: Array of product benefits (description, type, etc.)
+- `prices`: Array of prices, each with an `amountType` that determines available fields:
+  - **fixed**: `priceAmount` (in cents), `priceCurrency`
+  - **free**: No amount fields
+  - **custom**: `minimumAmount`, `maximumAmount`, `presetAmount`, `priceCurrency`
+  - **seat_based**: `seatTiers` (array of `{ minSeats, maxSeats, pricePerSeat }`), `priceCurrency`
+  - **metered_unit**: `unitAmount`, `capAmount`, `meterId`, `meter` (`{ id, name }`), `priceCurrency`
 
 ### Add subscription UI components
 
@@ -332,6 +338,26 @@ import { api } from "../convex/_generated/api";
   embed={false}
 >
   Upgrade to Premium
+</CheckoutLink>
+
+// With a free trial
+<CheckoutLink
+  polarApi={api.example}
+  productIds={[products.premiumMonthly.id]}
+  trialInterval="day"
+  trialIntervalCount={7}
+>
+  Start 7-day free trial
+</CheckoutLink>
+
+// Lazy mode: generates checkout URL on click instead of on mount.
+// Useful when rendering many checkout links to avoid rate limits.
+<CheckoutLink
+  polarApi={api.example}
+  productIds={[products.premiumMonthly.id]}
+  lazy
+>
+  Subscribe
 </CheckoutLink>
 
 // For managing existing subscriptions
@@ -357,7 +383,7 @@ changing their subscription this way!
 const changeSubscription = useAction(api.example.changeCurrentSubscription);
 await changeSubscription({ productId: "new_product_id" });
 
-// Cancel subscription
+// Cancel subscription (works for both active and trialing subscriptions)
 const cancelSubscription = useAction(api.example.cancelCurrentSubscription);
 await cancelSubscription({ revokeImmediately: true });
 ```
@@ -415,7 +441,15 @@ Props:
 - `polarApi`: Object containing `generateCheckoutLink` function
 - `productIds`: Array of product IDs to show in the checkout
 - `children`: React children (button content)
-- `embed`: (Optional) Whether to embed the checkout link. Defaults to `true`.
+- `embed`: (Optional) Whether to embed the checkout. Defaults to `true`.
+- `lazy`: (Optional) Defer checkout URL generation until click. Useful when
+  rendering many links. Defaults to `false`.
+- `theme`: (Optional) Embedded checkout theme: `"dark"` or `"light"`. Defaults
+  to `"dark"`.
+- `trialInterval`: (Optional) Trial period interval: `"day"`, `"week"`,
+  `"month"`, or `"year"`.
+- `trialIntervalCount`: (Optional) Number of trial intervals (e.g., `7` for 7
+  days).
 - `className`: (Optional) CSS class name
 - `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a
   free pricing.
@@ -440,7 +474,7 @@ await changeSubscription({ productId: "new_product_id" });
 
 #### cancelCurrentSubscription
 
-Cancel an existing subscription:
+Cancel an active or trialing subscription:
 
 ```ts
 await cancelSubscription({ revokeImmediately: true });
@@ -448,7 +482,8 @@ await cancelSubscription({ revokeImmediately: true });
 
 #### getCurrentSubscription
 
-Get the current user's subscription details:
+Get the current user's active subscription. Returns `null` if no active
+subscription exists. Expired trials are excluded.
 
 ```ts
 const subscription = await polar.getCurrentSubscription(ctx, { userId });
@@ -456,14 +491,40 @@ const subscription = await polar.getCurrentSubscription(ctx, { userId });
 
 #### listUserSubscriptions
 
-For apps that support multiple active subscriptions per user, get all
-subscriptions for a user:
+For apps that support multiple active subscriptions per user. Returns active
+subscriptions, excluding ended subscriptions and expired trials.
 
 ```ts
 const subscriptions = await polar.listUserSubscriptions(ctx, { userId });
 ```
 
-#### getProducts
+#### listAllUserSubscriptions
+
+Returns all subscriptions for a user, including ended and expired trials. Useful
+for displaying subscription history or distinguishing between "never subscribed"
+and "trial expired".
+
+```ts
+const allSubscriptions = await polar.listAllUserSubscriptions(ctx, { userId });
+```
+
+#### getProduct
+
+Get a single product by its Polar product ID:
+
+```ts
+const product = await polar.getProduct(ctx, { productId });
+```
+
+#### getCustomerByUserId
+
+Get the Polar customer record for a user:
+
+```ts
+const customer = await polar.getCustomerByUserId(ctx, userId);
+```
+
+#### listProducts
 
 List all available products and their prices:
 
