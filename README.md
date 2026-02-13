@@ -464,6 +464,11 @@ Props:
 
 ### API Functions
 
+The functions below are class methods on the `Polar` instance, used in your
+Convex backend code. The corresponding React-facing names (exported via
+`polar.api()`) are shown in the [initialization section](#initialize-the-polar-client)
+above.
+
 #### changeCurrentSubscription
 
 Change an existing subscription to a new plan:

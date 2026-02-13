@@ -59,6 +59,7 @@ export const CheckoutLink = ({
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
   const [checkoutLink, setCheckoutLink] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (lazy) return;
@@ -78,18 +79,24 @@ export const CheckoutLink = ({
   const handleClick = lazy
     ? async (e: MouseEvent) => {
         e.preventDefault();
-        const { url } = await generateCheckoutLink({
-          productIds,
-          subscriptionId,
-          origin: window.location.origin,
-          successUrl: window.location.href,
-          trialInterval,
-          trialIntervalCount,
-        });
-        if (embed) {
-          await PolarEmbedCheckout.create(url, { theme });
-        } else {
-          window.open(url, "_blank");
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+          const { url } = await generateCheckoutLink({
+            productIds,
+            subscriptionId,
+            origin: window.location.origin,
+            successUrl: window.location.href,
+            trialInterval,
+            trialIntervalCount,
+          });
+          if (embed) {
+            await PolarEmbedCheckout.create(url, { theme });
+          } else {
+            window.open(url, "_blank");
+          }
+        } finally {
+          setIsLoading(false);
         }
       }
     : undefined;
