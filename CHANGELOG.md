@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1
+
+- feat: add typesafe webhook event handlers with full type inference for all 30+
+  Polar webhook events
+- fix: prevent potential auth token leakage in SDK error logging
+- fix: handle "customer already exists" error when users recreate their account
+
 ## 0.8.0
 
 - feat: add trial subscription support with lazy checkout mode
