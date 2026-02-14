@@ -1,13 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const vRecurringInterval = v.union(
-  v.literal("day"),
-  v.literal("week"),
-  v.literal("month"),
-  v.literal("year"),
-  v.null(),
-);
+const vRecurringInterval = v.union(v.string(), v.null());
 
 export default defineSchema(
   {
@@ -41,10 +35,45 @@ export default defineSchema(
           priceAmount: v.optional(v.number()),
           type: v.optional(v.string()),
           recurringInterval: v.optional(vRecurringInterval),
+          source: v.optional(v.string()),
           maximumAmount: v.optional(v.union(v.number(), v.null())),
           minimumAmount: v.optional(v.union(v.number(), v.null())),
           presetAmount: v.optional(v.union(v.number(), v.null())),
+          seatTiers: v.optional(
+            v.array(
+              v.object({
+                minSeats: v.number(),
+                maxSeats: v.union(v.number(), v.null()),
+                pricePerSeat: v.number(),
+              }),
+            ),
+          ),
+          unitAmount: v.optional(v.string()),
+          capAmount: v.optional(v.union(v.number(), v.null())),
+          meterId: v.optional(v.string()),
+          meter: v.optional(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+            }),
+          ),
         }),
+      ),
+      benefits: v.optional(
+        v.array(
+          v.object({
+            id: v.string(),
+            createdAt: v.string(),
+            modifiedAt: v.union(v.string(), v.null()),
+            type: v.string(),
+            description: v.string(),
+            selectable: v.boolean(),
+            deletable: v.boolean(),
+            organizationId: v.string(),
+            metadata: v.optional(v.record(v.string(), v.any())),
+            properties: v.optional(v.any()),
+          }),
+        ),
       ),
       medias: v.array(
         v.object({
@@ -67,6 +96,9 @@ export default defineSchema(
           publicUrl: v.string(),
         }),
       ),
+      trialInterval: v.optional(v.union(v.string(), v.null())),
+      trialIntervalCount: v.optional(v.union(v.number(), v.null())),
+      recurringIntervalCount: v.optional(v.union(v.number(), v.null())),
     })
       .index("id", ["id"])
       .index("isArchived", ["isArchived"]),
@@ -90,6 +122,14 @@ export default defineSchema(
       metadata: v.record(v.string(), v.any()),
       customerCancellationReason: v.optional(v.union(v.string(), v.null())),
       customerCancellationComment: v.optional(v.union(v.string(), v.null())),
+      discountId: v.optional(v.union(v.string(), v.null())),
+      canceledAt: v.optional(v.union(v.string(), v.null())),
+      endsAt: v.optional(v.union(v.string(), v.null())),
+      recurringIntervalCount: v.optional(v.number()),
+      trialStart: v.optional(v.union(v.string(), v.null())),
+      trialEnd: v.optional(v.union(v.string(), v.null())),
+      seats: v.optional(v.union(v.number(), v.null())),
+      customFieldData: v.optional(v.record(v.string(), v.any())),
     })
       .index("id", ["id"])
       .index("customerId", ["customerId"])

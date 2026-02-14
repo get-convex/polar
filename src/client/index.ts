@@ -96,6 +96,7 @@ export class Polar<
       server: this.server,
     });
   }
+  /** Create a Polar checkout session, optionally with a free trial period. */
   async createCheckoutSession(
     ctx: RunMutationCtx,
     {
@@ -106,6 +107,8 @@ export class Polar<
       successUrl,
       subscriptionId,
       metadata,
+      trialInterval,
+      trialIntervalCount,
     }: {
       productIds: string[];
       userId: string;
@@ -114,7 +117,9 @@ export class Polar<
       successUrl: string;
       subscriptionId?: string;
       metadata?: Record<string, string>;
-    },
+      trialInterval?: "day" | "week" | "month" | "year" | null;
+      trialIntervalCount?: number | null;
+    }
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
@@ -149,6 +154,8 @@ export class Polar<
       embedOrigin: origin,
       successUrl,
       metadata,
+      trialInterval,
+      trialIntervalCount,
       ...(productIds.length === 1
         ? { products: productIds }
         : { products: productIds }),
@@ -218,6 +225,15 @@ export class Polar<
       product,
     };
   }
+  /** Return all subscriptions for a user, including ended and expired trials. */
+  listAllUserSubscriptions(
+    ctx: RunQueryCtx,
+    { userId }: { userId: string },
+  ) {
+    return ctx.runQuery(this.component.lib.listAllUserSubscriptions, {
+      userId,
+    });
+  }
   getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
@@ -245,6 +261,7 @@ export class Polar<
     }
     return updatedSubscription.value;
   }
+  /** Cancel an active or trialing subscription, optionally revoking immediately. */
   async cancelSubscription(
     ctx: RunActionCtx,
     { revokeImmediately }: { revokeImmediately?: boolean } = {},
@@ -254,7 +271,7 @@ export class Polar<
     if (!subscription) {
       throw new Error("Subscription not found");
     }
-    if (subscription.status !== "active") {
+    if (subscription.status !== "active" && subscription.status !== "trialing") {
       throw new Error("Subscription is not active");
     }
     const updatedSubscription = await subscriptionsUpdate(this.polar, {
@@ -306,6 +323,21 @@ export class Polar<
           return await this.listProducts(ctx);
         },
       }),
+      /** Query all subscriptions for the current user, including ended and expired trials. */
+      listAllSubscriptions: queryGeneric({
+        args: {},
+        returns: v.array(
+          v.object({
+            ...schema.tables.subscriptions.validator.fields,
+            product: v.union(schema.tables.products.validator, v.null()),
+          }),
+        ),
+        handler: async (ctx) => {
+          const { userId } = await this.config.getUserInfo(ctx);
+          return await this.listAllUserSubscriptions(ctx, { userId });
+        },
+      }),
+      /** Generate a Polar checkout URL, with optional trial period configuration. */
       generateCheckoutLink: actionGeneric({
         args: {
           productIds: v.array(v.string()),
@@ -313,6 +345,8 @@ export class Polar<
           successUrl: v.string(),
           subscriptionId: v.optional(v.string()),
           metadata: v.optional(v.record(v.string(), v.string())),
+          trialInterval: v.optional(v.union(v.string(), v.null())),
+          trialIntervalCount: v.optional(v.union(v.number(), v.null())),
         },
         returns: v.object({
           url: v.string(),
@@ -327,6 +361,8 @@ export class Polar<
             origin: args.origin,
             successUrl: args.successUrl,
             metadata: args.metadata,
+            trialInterval: args.trialInterval as "day" | "week" | "month" | "year" | null | undefined,
+            trialIntervalCount: args.trialIntervalCount,
           });
           return { url };
         },
