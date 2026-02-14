@@ -225,10 +225,10 @@ describe("Input Validation Functions", () => {
       );
     });
 
-    test("should reject metadata with non-string keys", () => {
+    test("should ignore symbol keys and pass validation", () => {
       // Note: Non-string keys (like Symbols) are automatically excluded
-      // when iterating with Object.entries(), so this test validates that
-      // objects with only symbol properties pass validation
+      // when iterating with Object.entries(), so objects with only symbol
+      // properties pass validation without issues
       const objWithSymbolKey = { [Symbol("key")]: "value" };
       expect(() => validateMetadata(objWithSymbolKey)).not.toThrow();
     });
@@ -245,6 +245,19 @@ describe("Input Validation Functions", () => {
         validateMetadata({ key: () => {} })
       ).toThrow(
         'Metadata value for key "key" is not JSON-serializable'
+      );
+    });
+
+    test("should reject metadata with nested non-serializable values", () => {
+      // JSON.stringify will fail on functions in nested objects
+      // This ensures deep validation catches non-serializable values
+      const nestedWithFn = {
+        nested: {
+          fn: () => {},
+        },
+      };
+      expect(() => validateMetadata(nestedWithFn)).toThrow(
+        'Metadata value for key "nested" is not JSON-serializable'
       );
     });
 

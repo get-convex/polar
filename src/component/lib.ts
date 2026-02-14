@@ -232,6 +232,10 @@ export const createSubscription = mutation({
     subscription: schema.tables.subscriptions.validator,
   },
   handler: async (ctx, args) => {
+    validateSubscriptionId(args.subscription.id);
+    if (args.subscription.metadata) {
+      validateMetadata(args.subscription.metadata);
+    }
     const existingSubscription = await ctx.db
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
@@ -251,6 +255,10 @@ export const updateSubscription = mutation({
     subscription: schema.tables.subscriptions.validator,
   },
   handler: async (ctx, args) => {
+    validateSubscriptionId(args.subscription.id);
+    if (args.subscription.metadata) {
+      validateMetadata(args.subscription.metadata);
+    }
     const existingSubscription = await ctx.db
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.subscription.id))
@@ -270,6 +278,10 @@ export const createProduct = mutation({
     product: schema.tables.products.validator,
   },
   handler: async (ctx, args) => {
+    validateProductId(args.product.id);
+    if (args.product.metadata) {
+      validateMetadata(args.product.metadata);
+    }
     const existingProduct = await ctx.db
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.product.id))
@@ -289,6 +301,10 @@ export const updateProduct = mutation({
     product: schema.tables.products.validator,
   },
   handler: async (ctx, args) => {
+    validateProductId(args.product.id);
+    if (args.product.metadata) {
+      validateMetadata(args.product.metadata);
+    }
     const existingProduct = await ctx.db
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.product.id))
@@ -309,6 +325,7 @@ export const listCustomerSubscriptions = query({
   },
   returns: v.array(schema.tables.subscriptions.validator),
   handler: async (ctx, args) => {
+    validateCustomerId(args.customerId);
     const subscriptions = await ctx.db
       .query("subscriptions")
       .withIndex("customerId", (q) => q.eq("customerId", args.customerId))

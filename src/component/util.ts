@@ -109,43 +109,43 @@ export const convertToDatabaseProduct = (
 // ============= Input Validation Functions =============
 
 /**
+ * Shared helper for validating string IDs with consistent rules
+ * @internal
+ */
+function validateStringId(value: unknown, label: string): asserts value is string {
+  if (typeof value !== "string") {
+    throw new Error(`${label} must be a string`);
+  }
+  if (value.trim().length === 0) {
+    throw new Error(`${label} cannot be empty`);
+  }
+  if (value.length > 256) {
+    throw new Error(`${label} is too long (max 256 characters)`);
+  }
+}
+
+/**
  * Validates a user ID string
  * @param userId - The user ID to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validateUserId(userId: unknown): asserts userId is string {
-  if (typeof userId !== "string") {
-    throw new Error("User ID must be a string");
-  }
-  if (userId.trim().length === 0) {
-    throw new Error("User ID cannot be empty");
-  }
-  if (userId.length > 256) {
-    throw new Error("User ID is too long (max 256 characters)");
-  }
+  validateStringId(userId, "User ID");
 }
 
 /**
  * Validates a product ID string
  * @param productId - The product ID to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validateProductId(productId: unknown): asserts productId is string {
-  if (typeof productId !== "string") {
-    throw new Error("Product ID must be a string");
-  }
-  if (productId.trim().length === 0) {
-    throw new Error("Product ID cannot be empty");
-  }
-  if (productId.length > 256) {
-    throw new Error("Product ID is too long (max 256 characters)");
-  }
+  validateStringId(productId, "Product ID");
 }
 
 /**
  * Validates an array of product IDs
  * @param productIds - The array of product IDs to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validateProductIds(productIds: unknown): asserts productIds is string[] {
   if (!Array.isArray(productIds)) {
@@ -173,41 +173,25 @@ export function validateProductIds(productIds: unknown): asserts productIds is s
 /**
  * Validates a subscription ID string
  * @param subscriptionId - The subscription ID to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validateSubscriptionId(subscriptionId: unknown): asserts subscriptionId is string {
-  if (typeof subscriptionId !== "string") {
-    throw new Error("Subscription ID must be a string");
-  }
-  if (subscriptionId.trim().length === 0) {
-    throw new Error("Subscription ID cannot be empty");
-  }
-  if (subscriptionId.length > 256) {
-    throw new Error("Subscription ID is too long (max 256 characters)");
-  }
+  validateStringId(subscriptionId, "Subscription ID");
 }
 
 /**
  * Validates a customer ID string
  * @param customerId - The customer ID to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validateCustomerId(customerId: unknown): asserts customerId is string {
-  if (typeof customerId !== "string") {
-    throw new Error("Customer ID must be a string");
-  }
-  if (customerId.trim().length === 0) {
-    throw new Error("Customer ID cannot be empty");
-  }
-  if (customerId.length > 256) {
-    throw new Error("Customer ID is too long (max 256 characters)");
-  }
+  validateStringId(customerId, "Customer ID");
 }
 
 /**
  * Validates a Polar organization token
  * @param token - The Polar organization token to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid
  */
 export function validatePolarToken(token: unknown): asserts token is string {
   if (typeof token !== "string") {
@@ -223,8 +207,9 @@ export function validatePolarToken(token: unknown): asserts token is string {
 
 /**
  * Validates metadata object (should be a record with string keys and JSON-serializable values)
+ * Performs deep validation to ensure nested values are JSON-serializable
  * @param metadata - The metadata object to validate
- * @returns true if valid, throws an error otherwise
+ * @throws {Error} if the input is invalid or contains non-serializable values
  */
 export function validateMetadata(metadata: unknown): asserts metadata is Record<string, unknown> {
   if (typeof metadata !== "object" || metadata === null) {
@@ -242,21 +227,51 @@ export function validateMetadata(metadata: unknown): asserts metadata is Record<
   }
 
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof key !== "string") {
-      throw new Error("Metadata keys must be strings");
-    }
     if (key.length > 256) {
       throw new Error(`Metadata key "${key}" is too long (max 256 characters)`);
     }
-    if (
-      typeof value !== "string" &&
-      typeof value !== "number" &&
-      typeof value !== "boolean" &&
-      value !== null &&
-      typeof value !== "object"
-    ) {
-      throw new Error(`Metadata value for key "${key}" is not JSON-serializable`);
-    }
+    
+    // Use a helper to check deep JSON serializability
+    validateJsonSerializable(value, key);
   }
+}
+
+/**
+ * Helper to recursively validate JSON serializability
+ * @internal
+ */
+function validateJsonSerializable(value: unknown, keyPath: string): void {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    value === null
+  ) {
+    return; // These types are always serializable
+  }
+
+  if (typeof value === "object") {
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        validateJsonSerializable(item, `${keyPath}[${index}]`);
+      });
+    } else {
+      // Check for non-serializable object (functions, symbols, undefined, etc.)
+      for (const [nestedKey, nestedValue] of Object.entries(value)) {
+        if (typeof nestedValue === "function" || typeof nestedValue === "symbol") {
+          throw new Error(
+            `Metadata value for key "${keyPath}" is not JSON-serializable`
+          );
+        }
+        if (typeof nestedValue === "object") {
+          validateJsonSerializable(nestedValue, `${keyPath}.${nestedKey}`);
+        }
+      }
+    }
+    return;
+  }
+
+  // typeof value is "function" or "symbol" or "undefined"
+  throw new Error(`Metadata value for key "${keyPath}" is not JSON-serializable`);
 }
 
