@@ -145,9 +145,8 @@ export class Polar<
           userId,
         },
       });
-      if (!customer.value) {
-        console.error(customer);
-        throw new Error("Customer not created");
+      if (!customer.ok) {
+        throw customer.error;
       }
       return customer.value;
     };
@@ -171,9 +170,8 @@ export class Polar<
         ? { products: productIds }
         : { products: productIds }),
     });
-    if (!checkout.value) {
-      console.error(checkout);
-      throw new Error("Checkout not created");
+    if (!checkout.ok) {
+      throw checkout.error;
     }
     return checkout.value;
   }
@@ -193,9 +191,8 @@ export class Polar<
     const session = await customerSessionsCreate(this.polar, {
       customerId: customer.id,
     });
-    if (!session.value) {
-      console.error(session);
-      throw new Error("Customer session not created");
+    if (!session.ok) {
+      throw session.error;
     }
 
     return { url: session.value.customerPortalUrl };
@@ -266,9 +263,8 @@ export class Polar<
         productId,
       },
     });
-    if (!updatedSubscription.value) {
-      console.error(updatedSubscription);
-      throw new Error("Subscription not updated");
+    if (!updatedSubscription.ok) {
+      throw updatedSubscription.error;
     }
     return updatedSubscription.value;
   }
@@ -291,9 +287,8 @@ export class Polar<
         ? { revoke: true }
         : { cancelAtPeriodEnd: true },
     });
-    if (!updatedSubscription.value) {
-      console.error(updatedSubscription);
-      throw new Error("Subscription not updated");
+    if (!updatedSubscription.ok) {
+      throw updatedSubscription.error;
     }
     return updatedSubscription.value;
   }
