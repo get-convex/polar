@@ -49,6 +49,17 @@ export type PolarComponentApi = ApiFromModules<{
   checkout: ReturnType<Polar["api"]>;
 }>["checkout"];
 
+/** Discriminated union of all Polar webhook event payloads. */
+export type PolarWebhookEvent = ReturnType<typeof validateEvent>;
+
+/** Typesafe event handler map — keys are event type strings, values are typed handlers. */
+export type WebhookEventHandlers = {
+  [K in PolarWebhookEvent["type"]]?: (
+    ctx: RunMutationCtx,
+    event: Extract<PolarWebhookEvent, { type: K }>
+  ) => Promise<void>;
+};
+
 export class Polar<
   DataModel extends GenericDataModel = GenericDataModel,
   Products extends Record<string, string> = Record<string, string>,
@@ -390,30 +401,52 @@ export class Polar<
     http: HttpRouter,
     {
       path = "/polar/events",
+      events,
       onSubscriptionCreated,
       onSubscriptionUpdated,
       onProductCreated,
       onProductUpdated,
     }: {
       path?: string;
+      /** Typesafe event handlers for any Polar webhook event. */
+      events?: WebhookEventHandlers;
+      /** @deprecated Use `events` with `"subscription.created"` key instead. */
       onSubscriptionCreated?: (
         ctx: RunMutationCtx,
         event: WebhookSubscriptionCreatedPayload,
       ) => Promise<void>;
+      /** @deprecated Use `events` with `"subscription.updated"` key instead. */
       onSubscriptionUpdated?: (
         ctx: RunMutationCtx,
         event: WebhookSubscriptionUpdatedPayload,
       ) => Promise<void>;
+      /** @deprecated Use `events` with `"product.created"` key instead. */
       onProductCreated?: (
         ctx: RunMutationCtx,
         event: WebhookProductCreatedPayload,
       ) => Promise<void>;
+      /** @deprecated Use `events` with `"product.updated"` key instead. */
       onProductUpdated?: (
         ctx: RunMutationCtx,
         event: WebhookProductUpdatedPayload,
       ) => Promise<void>;
     } = {},
   ) {
+    // Merge deprecated callbacks into events map (events wins on conflict)
+    const mergedEvents: WebhookEventHandlers = { ...events };
+    if (onSubscriptionCreated && !mergedEvents["subscription.created"]) {
+      mergedEvents["subscription.created"] = onSubscriptionCreated;
+    }
+    if (onSubscriptionUpdated && !mergedEvents["subscription.updated"]) {
+      mergedEvents["subscription.updated"] = onSubscriptionUpdated;
+    }
+    if (onProductCreated && !mergedEvents["product.created"]) {
+      mergedEvents["product.created"] = onProductCreated;
+    }
+    if (onProductUpdated && !mergedEvents["product.updated"]) {
+      mergedEvents["product.updated"] = onProductUpdated;
+    }
+
     http.route({
       path,
       method: "POST",
@@ -425,36 +458,43 @@ export class Polar<
         const headers = Object.fromEntries(request.headers.entries());
         try {
           const event = validateEvent(body, headers, this.webhookSecret);
+
+          // Built-in handling: persist subscriptions and products
           switch (event.type) {
             case "subscription.created": {
               await ctx.runMutation(this.component.lib.createSubscription, {
                 subscription: convertToDatabaseSubscription(event.data),
               });
-              await onSubscriptionCreated?.(ctx, event);
               break;
             }
             case "subscription.updated": {
               await ctx.runMutation(this.component.lib.updateSubscription, {
                 subscription: convertToDatabaseSubscription(event.data),
               });
-              await onSubscriptionUpdated?.(ctx, event);
               break;
             }
             case "product.created": {
               await ctx.runMutation(this.component.lib.createProduct, {
                 product: convertToDatabaseProduct(event.data),
               });
-              await onProductCreated?.(ctx, event);
               break;
             }
             case "product.updated": {
               await ctx.runMutation(this.component.lib.updateProduct, {
                 product: convertToDatabaseProduct(event.data),
               });
-              await onProductUpdated?.(ctx, event);
               break;
             }
           }
+
+          // User event handling
+          const handler = mergedEvents[event.type] as
+            | ((ctx: RunMutationCtx, event: PolarWebhookEvent) => Promise<void>)
+            | undefined;
+          if (handler) {
+            await handler(ctx, event);
+          }
+
           return new Response("Accepted", { status: 202 });
         } catch (error) {
           if (error instanceof WebhookVerificationError) {
