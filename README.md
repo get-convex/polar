@@ -182,7 +182,7 @@ import { Polar } from "@convex-dev/polar";
 import { api, components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 
-export const polar = new Polar(components.polar, {
+export const polar = new Polar<DataModel>(components.polar, {
   // Required: provide a function the component can use to get the current user's ID and
   // email - this will be used for retrieving the correct subscription data for the
   // current user. The function should return an object with `userId` and `email`
