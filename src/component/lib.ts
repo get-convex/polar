@@ -6,7 +6,14 @@ import { action, mutation, query } from "./_generated/server.js";
 import schema from "./schema.js";
 import { asyncMap } from "convex-helpers";
 import { api } from "./_generated/api.js";
-import { convertToDatabaseProduct } from "./util.js";
+import {
+  convertToDatabaseProduct,
+  validateUserId,
+  validateProductId,
+  validateSubscriptionId,
+  validateCustomerId,
+  validateMetadata,
+} from "./util.js";
 
 export const getCustomerByUserId = query({
   args: {
@@ -14,6 +21,7 @@ export const getCustomerByUserId = query({
   },
   returns: v.union(schema.tables.customers.validator, v.null()),
   handler: async (ctx, args) => {
+    validateUserId(args.userId);
     const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
@@ -26,6 +34,11 @@ export const insertCustomer = mutation({
   args: schema.tables.customers.validator,
   returns: v.id("customers"),
   handler: async (ctx, args) => {
+    validateUserId(args.userId);
+    validateCustomerId(args.id);
+    if (args.metadata) {
+      validateMetadata(args.metadata);
+    }
     const existingCustomer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
@@ -45,6 +58,11 @@ export const upsertCustomer = mutation({
   args: schema.tables.customers.validator,
   returns: v.string(),
   handler: async (ctx, args) => {
+    validateUserId(args.userId);
+    validateCustomerId(args.id);
+    if (args.metadata) {
+      validateMetadata(args.metadata);
+    }
     const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
@@ -71,6 +89,7 @@ export const getSubscription = query({
   },
   returns: v.union(schema.tables.subscriptions.validator, v.null()),
   handler: async (ctx, args) => {
+    validateSubscriptionId(args.id);
     const subscription = await ctx.db
       .query("subscriptions")
       .withIndex("id", (q) => q.eq("id", args.id))
@@ -85,6 +104,7 @@ export const getProduct = query({
   },
   returns: v.union(schema.tables.products.validator, v.null()),
   handler: async (ctx, args) => {
+    validateProductId(args.id);
     const product = await ctx.db
       .query("products")
       .withIndex("id", (q) => q.eq("id", args.id))
@@ -106,6 +126,7 @@ export const getCurrentSubscription = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
+    validateUserId(args.userId);
     const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
@@ -147,6 +168,7 @@ export const listUserSubscriptions = query({
     }),
   ),
   handler: async (ctx, args) => {
+    validateUserId(args.userId);
     const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))

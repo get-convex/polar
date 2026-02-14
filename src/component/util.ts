@@ -105,3 +105,158 @@ export const convertToDatabaseProduct = (
     })),
   };
 };
+
+// ============= Input Validation Functions =============
+
+/**
+ * Validates a user ID string
+ * @param userId - The user ID to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateUserId(userId: unknown): asserts userId is string {
+  if (typeof userId !== "string") {
+    throw new Error("User ID must be a string");
+  }
+  if (userId.trim().length === 0) {
+    throw new Error("User ID cannot be empty");
+  }
+  if (userId.length > 256) {
+    throw new Error("User ID is too long (max 256 characters)");
+  }
+}
+
+/**
+ * Validates a product ID string
+ * @param productId - The product ID to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateProductId(productId: unknown): asserts productId is string {
+  if (typeof productId !== "string") {
+    throw new Error("Product ID must be a string");
+  }
+  if (productId.trim().length === 0) {
+    throw new Error("Product ID cannot be empty");
+  }
+  if (productId.length > 256) {
+    throw new Error("Product ID is too long (max 256 characters)");
+  }
+}
+
+/**
+ * Validates an array of product IDs
+ * @param productIds - The array of product IDs to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateProductIds(productIds: unknown): asserts productIds is string[] {
+  if (!Array.isArray(productIds)) {
+    throw new Error("Product IDs must be an array");
+  }
+  if (productIds.length === 0) {
+    throw new Error("Product IDs array cannot be empty");
+  }
+  if (productIds.length > 100) {
+    throw new Error("Too many product IDs (max 100)");
+  }
+  productIds.forEach((id, index) => {
+    if (typeof id !== "string") {
+      throw new Error(`Product ID at index ${index} must be a string`);
+    }
+    if (id.trim().length === 0) {
+      throw new Error(`Product ID at index ${index} cannot be empty`);
+    }
+    if (id.length > 256) {
+      throw new Error(`Product ID at index ${index} is too long (max 256 characters)`);
+    }
+  });
+}
+
+/**
+ * Validates a subscription ID string
+ * @param subscriptionId - The subscription ID to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateSubscriptionId(subscriptionId: unknown): asserts subscriptionId is string {
+  if (typeof subscriptionId !== "string") {
+    throw new Error("Subscription ID must be a string");
+  }
+  if (subscriptionId.trim().length === 0) {
+    throw new Error("Subscription ID cannot be empty");
+  }
+  if (subscriptionId.length > 256) {
+    throw new Error("Subscription ID is too long (max 256 characters)");
+  }
+}
+
+/**
+ * Validates a customer ID string
+ * @param customerId - The customer ID to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateCustomerId(customerId: unknown): asserts customerId is string {
+  if (typeof customerId !== "string") {
+    throw new Error("Customer ID must be a string");
+  }
+  if (customerId.trim().length === 0) {
+    throw new Error("Customer ID cannot be empty");
+  }
+  if (customerId.length > 256) {
+    throw new Error("Customer ID is too long (max 256 characters)");
+  }
+}
+
+/**
+ * Validates a Polar organization token
+ * @param token - The Polar organization token to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validatePolarToken(token: unknown): asserts token is string {
+  if (typeof token !== "string") {
+    throw new Error("Polar token must be a string");
+  }
+  if (token.trim().length === 0) {
+    throw new Error("Polar token cannot be empty");
+  }
+  if (token.length < 10) {
+    throw new Error("Polar token seems invalid (too short)");
+  }
+}
+
+/**
+ * Validates metadata object (should be a record with string keys and JSON-serializable values)
+ * @param metadata - The metadata object to validate
+ * @returns true if valid, throws an error otherwise
+ */
+export function validateMetadata(metadata: unknown): asserts metadata is Record<string, unknown> {
+  if (typeof metadata !== "object" || metadata === null) {
+    throw new Error("Metadata must be an object");
+  }
+  if (Array.isArray(metadata)) {
+    throw new Error("Metadata must be an object, not an array");
+  }
+  
+  const obj = metadata as Record<string, unknown>;
+  const keys = Object.keys(obj);
+  
+  if (keys.length > 1000) {
+    throw new Error("Metadata has too many properties (max 1000)");
+  }
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof key !== "string") {
+      throw new Error("Metadata keys must be strings");
+    }
+    if (key.length > 256) {
+      throw new Error(`Metadata key "${key}" is too long (max 256 characters)`);
+    }
+    if (
+      typeof value !== "string" &&
+      typeof value !== "number" &&
+      typeof value !== "boolean" &&
+      value !== null &&
+      typeof value !== "object"
+    ) {
+      throw new Error(`Metadata value for key "${key}" is not JSON-serializable`);
+    }
+  }
+}
+
