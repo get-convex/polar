@@ -6,26 +6,25 @@ const http = httpRouter();
 polar.registerRoutes(http, {
   // Optional custom path, default is "/polar/events"
   path: "/polar/events",
-  // Optional callback for when a subscription is updated
-  onSubscriptionUpdated: async (ctx, event) => {
-    console.log("Subscription updated", event);
-    if (event.data.customerCancellationReason) {
-      console.log(
-        "Customer cancellation reason",
-        event.data.customerCancellationReason
-      );
-      console.log(
-        "Customer cancellation comment",
-        event.data.customerCancellationComment
-      );
-    }
-    // This callback is run in an Action, so you could pipe this customer
-    // cancellation reason to another service, for example.
+  // Typesafe event handlers for any Polar webhook event.
+  events: {
+    "subscription.updated": async (ctx, event) => {
+      console.log("Subscription updated", event);
+      if (event.data.customerCancellationReason) {
+        console.log(
+          "Customer cancellation reason",
+          event.data.customerCancellationReason
+        );
+        console.log(
+          "Customer cancellation comment",
+          event.data.customerCancellationComment
+        );
+      }
+    },
+    "order.created": async (ctx, event) => {
+      console.log("Order created", event.data.id);
+    },
   },
-  // Other available callbacks:
-  onSubscriptionCreated: undefined,
-  onProductCreated: undefined,
-  onProductUpdated: undefined,
 });
 
 export default http;

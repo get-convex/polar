@@ -127,30 +127,25 @@ polar.registerRoutes(http as any);
 export default http;
 ```
 
-You can also provide callbacks for webhook events:
+You can also provide typesafe handlers for any Polar webhook event via the
+`events` option. Handlers receive the fully typed event payload based on the
+event key:
 
 ```ts
 polar.registerRoutes(http, {
   // Optional custom path, default is "/polar/events"
   path: "/polar/events",
-  // Optional callbacks for webhook events
-  onSubscriptionUpdated: async (ctx, event) => {
-    // Handle subscription updates, like cancellations.
-    // Note that a cancelled subscription will not be deleted from the database,
-    // so this information remains available without a hook, eg., via
-    // `getCurrentSubscription()`.
-    if (event.data.customerCancellationReason) {
-      console.log("Customer cancelled:", event.data.customerCancellationReason);
-    }
-  },
-  onSubscriptionCreated: async (ctx, event) => {
-    // Handle new subscriptions
-  },
-  onProductCreated: async (ctx, event) => {
-    // Handle new products
-  },
-  onProductUpdated: async (ctx, event) => {
-    // Handle product updates
+  events: {
+    "subscription.updated": async (ctx, event) => {
+      // event.data is typed as Subscription
+      if (event.data.customerCancellationReason) {
+        console.log("Customer cancelled:", event.data.customerCancellationReason);
+      }
+    },
+    "order.created": async (ctx, event) => {
+      // event.data is typed as Order
+      console.log("New order:", event.data.id);
+    },
   },
 });
 ```
@@ -546,8 +541,19 @@ Register webhook handlers for the Polar component:
 polar.registerRoutes(http, {
   // Optional: customize the webhook endpoint path (defaults to "/polar/events")
   path: "/custom/webhook/path",
+  // Optional: typesafe handlers for any Polar webhook event
+  events: {
+    "order.created": async (ctx, event) => {
+      // event.data is typed as Order
+    },
+  },
 });
 ```
+
+The `events` option accepts handlers for any of the 30+ Polar webhook event
+types with full TypeScript inference on the event payload. Built-in handling
+(persisting subscriptions and products) always runs automatically regardless
+of which events you handle.
 
 The webhook handler uses the `webhookSecret` from the Polar client configuration
 or the `POLAR_WEBHOOK_SECRET` environment variable.
