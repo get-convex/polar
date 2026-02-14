@@ -716,6 +716,51 @@ describe("getCurrentSubscription query", () => {
     expect(result?.product.id).toBe("prod_789");
     expect(result?.product.name).toBe("Test Product");
   });
+
+  it("returns null when trial has expired", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2025-01-08T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.getCurrentSubscription, {
+      userId: "user_456",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("returns subscription when trial is still active", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2099-01-01T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.getCurrentSubscription, {
+      userId: "user_456",
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe("trialing");
+  });
 });
 
 describe("listUserSubscriptions query", () => {
@@ -782,6 +827,51 @@ describe("listUserSubscriptions query", () => {
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("sub_123");
     expect(result[0].product?.id).toBe("prod_789");
+  });
+
+  it("excludes expired trials", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2025-01-08T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.listUserSubscriptions, {
+      userId: "user_456",
+    });
+
+    expect(result).toHaveLength(0);
+  });
+
+  it("includes active trials", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2099-01-01T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.listUserSubscriptions, {
+      userId: "user_456",
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("trialing");
   });
 
   it("returns multiple subscriptions", async () => {
@@ -905,5 +995,111 @@ describe("listCustomerSubscriptions query", () => {
 
     expect(result).toHaveLength(2);
     expect(result.map((s) => s.id).sort()).toEqual(["sub_1", "sub_2"]);
+  });
+});
+
+describe("listAllUserSubscriptions query", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("returns empty array when no customer exists", async () => {
+    const result = await t.query(api.lib.listAllUserSubscriptions, {
+      userId: "user_nonexistent",
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it("includes ended subscriptions", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: "2020-01-01T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.listAllUserSubscriptions, {
+      userId: "user_456",
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].endedAt).toBe("2020-01-01T00:00:00.000Z");
+  });
+
+  it("includes expired trials", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2025-01-08T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.listAllUserSubscriptions, {
+      userId: "user_456",
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("trialing");
+  });
+
+  it("returns all subscriptions regardless of status", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createProduct, {
+      product: createTestProduct({ id: "prod_789" }),
+    });
+    // Active subscription
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_active",
+        customerId: "cust_123",
+        endedAt: null,
+        status: "active",
+      }),
+    });
+    // Ended subscription
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_ended",
+        customerId: "cust_123",
+        endedAt: "2020-01-01T00:00:00.000Z",
+        status: "canceled",
+      }),
+    });
+    // Expired trial
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_expired_trial",
+        customerId: "cust_123",
+        endedAt: null,
+        status: "trialing",
+        trialStart: "2025-01-01T00:00:00.000Z",
+        trialEnd: "2025-01-08T00:00:00.000Z",
+      }),
+    });
+
+    const result = await t.query(api.lib.listAllUserSubscriptions, {
+      userId: "user_456",
+    });
+
+    expect(result).toHaveLength(3);
+    expect(result.map((s) => s.id).sort()).toEqual([
+      "sub_active",
+      "sub_ended",
+      "sub_expired_trial",
+    ]);
   });
 });

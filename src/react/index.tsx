@@ -1,5 +1,5 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useEffect, useState, type PropsWithChildren } from "react";
+import { useEffect, useState, type PropsWithChildren, type MouseEvent } from "react";
 import { useAction } from "convex/react";
 import type { PolarComponentApi } from "../client/index.js";
 export const CustomerPortalLink = ({
@@ -34,6 +34,7 @@ export const CustomerPortalLink = ({
   );
 };
 
+/** Renders a checkout link. Supports embedded or redirect checkout, with optional lazy loading and trial configuration. */
 export const CheckoutLink = ({
   polarApi,
   productIds,
@@ -42,18 +43,26 @@ export const CheckoutLink = ({
   subscriptionId,
   theme = "dark",
   embed = true,
+  lazy = false,
+  trialInterval,
+  trialIntervalCount,
 }: PropsWithChildren<{
   polarApi: Pick<PolarComponentApi, "generateCheckoutLink">;
   productIds: string[];
   subscriptionId?: string;
+  trialInterval?: "day" | "week" | "month" | "year" | null;
+  trialIntervalCount?: number | null;
   className?: string;
   theme?: "dark" | "light";
   embed?: boolean;
+  lazy?: boolean;
 }>) => {
   const generateCheckoutLink = useAction(polarApi.generateCheckoutLink);
   const [checkoutLink, setCheckoutLink] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (lazy) return;
     if (embed) {
       PolarEmbedCheckout.init();
     }
@@ -62,15 +71,43 @@ export const CheckoutLink = ({
       subscriptionId,
       origin: window.location.origin,
       successUrl: window.location.href,
+      trialInterval,
+      trialIntervalCount,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [productIds, subscriptionId, embed, generateCheckoutLink]);
+  }, [lazy, productIds, subscriptionId, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
+
+  const handleClick = lazy
+    ? async (e: MouseEvent) => {
+        e.preventDefault();
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+          const { url } = await generateCheckoutLink({
+            productIds,
+            subscriptionId,
+            origin: window.location.origin,
+            successUrl: window.location.href,
+            trialInterval,
+            trialIntervalCount,
+          });
+          if (embed) {
+            await PolarEmbedCheckout.create(url, { theme });
+          } else {
+            window.open(url, "_blank");
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    : undefined;
 
   return (
     <a
       className={className}
-      href={checkoutLink}
+      href={checkoutLink ?? (lazy ? "#" : undefined)}
+      onClick={handleClick}
       data-polar-checkout-theme={theme}
-      {...(embed ? { "data-polar-checkout": true } : {})}
+      {...(!lazy && embed ? { "data-polar-checkout": true } : {})}
     >
       {children}
     </a>
