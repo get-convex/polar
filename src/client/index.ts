@@ -1,6 +1,7 @@
 import "./polyfill.js";
 import { PolarCore } from "@polar-sh/sdk/core.js";
 import { customersCreate } from "@polar-sh/sdk/funcs/customersCreate.js";
+import { customersList } from "@polar-sh/sdk/funcs/customersList.js";
 import { checkoutsCreate } from "@polar-sh/sdk/funcs/checkoutsCreate.js";
 import { customerSessionsCreate } from "@polar-sh/sdk/funcs/customerSessionsCreate.js";
 import { subscriptionsUpdate } from "@polar-sh/sdk/funcs/subscriptionsUpdate.js";
@@ -138,20 +139,28 @@ export class Polar<
         userId,
       },
     );
-    const createCustomer = async () => {
+    const getOrCreateCustomer = async () => {
+      // Check if a customer with this email already exists in Polar
+      const existing = await customersList(this.polar, { email, limit: 1 });
+      if (!existing.ok) {
+        throw existing.error;
+      }
+      const existingCustomer = existing.value.result.items[0];
+      if (existingCustomer) {
+        return existingCustomer;
+      }
       const customer = await customersCreate(this.polar, {
         email,
         metadata: {
           userId,
         },
       });
-      if (!customer.value) {
-        console.error(customer);
-        throw new Error("Customer not created");
+      if (!customer.ok) {
+        throw customer.error;
       }
       return customer.value;
     };
-    const customerId = dbCustomer?.id || (await createCustomer()).id;
+    const customerId = dbCustomer?.id || (await getOrCreateCustomer()).id;
     if (!dbCustomer) {
       await ctx.runMutation(this.component.lib.insertCustomer, {
         id: customerId,
@@ -171,9 +180,8 @@ export class Polar<
         ? { products: productIds }
         : { products: productIds }),
     });
-    if (!checkout.value) {
-      console.error(checkout);
-      throw new Error("Checkout not created");
+    if (!checkout.ok) {
+      throw checkout.error;
     }
     return checkout.value;
   }
@@ -193,9 +201,8 @@ export class Polar<
     const session = await customerSessionsCreate(this.polar, {
       customerId: customer.id,
     });
-    if (!session.value) {
-      console.error(session);
-      throw new Error("Customer session not created");
+    if (!session.ok) {
+      throw session.error;
     }
 
     return { url: session.value.customerPortalUrl };
@@ -266,9 +273,8 @@ export class Polar<
         productId,
       },
     });
-    if (!updatedSubscription.value) {
-      console.error(updatedSubscription);
-      throw new Error("Subscription not updated");
+    if (!updatedSubscription.ok) {
+      throw updatedSubscription.error;
     }
     return updatedSubscription.value;
   }
@@ -291,9 +297,8 @@ export class Polar<
         ? { revoke: true }
         : { cancelAtPeriodEnd: true },
     });
-    if (!updatedSubscription.value) {
-      console.error(updatedSubscription);
-      throw new Error("Subscription not updated");
+    if (!updatedSubscription.ok) {
+      throw updatedSubscription.error;
     }
     return updatedSubscription.value;
   }
