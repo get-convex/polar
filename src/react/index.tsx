@@ -41,6 +41,7 @@ export const CheckoutLink = ({
   children,
   className,
   subscriptionId,
+  metadata,
   theme = "dark",
   embed = true,
   lazy = false,
@@ -50,6 +51,7 @@ export const CheckoutLink = ({
   polarApi: Pick<PolarComponentApi, "generateCheckoutLink">;
   productIds: string[];
   subscriptionId?: string;
+  metadata?: Record<string, string>;
   trialInterval?: "day" | "week" | "month" | "year" | null;
   trialIntervalCount?: number | null;
   className?: string;
@@ -69,12 +71,13 @@ export const CheckoutLink = ({
     void generateCheckoutLink({
       productIds,
       subscriptionId,
+      metadata,
       origin: window.location.origin,
       successUrl: window.location.href,
       trialInterval,
       trialIntervalCount,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [lazy, productIds, subscriptionId, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
+  }, [lazy, productIds, subscriptionId, metadata, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
 
   const handleClick = lazy
     ? async (e: MouseEvent) => {
@@ -85,6 +88,7 @@ export const CheckoutLink = ({
           const { url } = await generateCheckoutLink({
             productIds,
             subscriptionId,
+            metadata,
             origin: window.location.origin,
             successUrl: window.location.href,
             trialInterval,

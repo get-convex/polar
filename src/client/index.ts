@@ -106,6 +106,7 @@ export class Polar<
       origin,
       successUrl,
       subscriptionId,
+      metadata,
       trialInterval,
       trialIntervalCount,
     }: {
@@ -115,6 +116,7 @@ export class Polar<
       origin: string;
       successUrl: string;
       subscriptionId?: string;
+      metadata?: Record<string, string>;
       trialInterval?: "day" | "week" | "month" | "year" | null;
       trialIntervalCount?: number | null;
     }
@@ -151,6 +153,7 @@ export class Polar<
       subscriptionId,
       embedOrigin: origin,
       successUrl,
+      metadata,
       trialInterval,
       trialIntervalCount,
       ...(productIds.length === 1
@@ -341,6 +344,7 @@ export class Polar<
           origin: v.string(),
           successUrl: v.string(),
           subscriptionId: v.optional(v.string()),
+          metadata: v.optional(v.record(v.string(), v.string())),
           trialInterval: v.optional(v.union(v.string(), v.null())),
           trialIntervalCount: v.optional(v.union(v.number(), v.null())),
         },
@@ -356,6 +360,7 @@ export class Polar<
             subscriptionId: args.subscriptionId,
             origin: args.origin,
             successUrl: args.successUrl,
+            metadata: args.metadata,
             trialInterval: args.trialInterval as "day" | "week" | "month" | "year" | null | undefined,
             trialIntervalCount: args.trialIntervalCount,
           });
