@@ -570,3 +570,47 @@ export const syncProducts = action({
   },
 });
 ```
+
+## Troubleshooting
+
+### Products not syncing from existing Polar account
+
+If you're connecting this component to an existing Polar account with products already created, those products won't automatically appear in your Convex database. The webhook-based sync only catches new products created after setup.
+
+To sync existing products, create and run a one-time action:
+
+```ts
+// convex/polar.ts
+import { action } from "./_generated/server";
+import { polar } from "./example";
+
+export const syncExistingProducts = action({
+  args: {},
+  handler: async (ctx) => {
+    await polar.syncProducts(ctx);
+  },
+});
+```
+
+Then run it once from your Convex dashboard or via `npx convex run polar:syncExistingProducts`.
+
+### Webhook events not being received
+
+Double-check your webhook URL in the Polar dashboard. It should be your Convex deployment URL (not localhost) plus `/polar/events`. For example: `https://happy-animal-123.convex.site/polar/events`
+
+Make sure you've:
+- Deployed your changes with `npx convex dev` or `npx convex deploy`
+- Registered the webhook handler in `convex/http.ts`
+- Set `POLAR_WEBHOOK_SECRET` in your Convex environment
+
+You can test webhook delivery in the Polar dashboard to see if events are reaching your endpoint.
+
+### TypeScript errors with component imports
+
+If you're seeing TypeScript errors after installing the component, try running:
+
+```sh
+npx convex dev
+```
+
+This generates the necessary type definitions in your `convex/_generated` folder. The component types won't be available until Convex processes the component installation.
