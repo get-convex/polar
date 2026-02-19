@@ -363,13 +363,14 @@ export class Polar<
           metadata: v.optional(v.record(v.string(), v.string())),
           trialInterval: v.optional(v.union(v.string(), v.null())),
           trialIntervalCount: v.optional(v.union(v.number(), v.null())),
+          locale: v.optional(v.string()),
         },
         returns: v.object({
           url: v.string(),
         }),
         handler: async (ctx, args) => {
           const { userId, email } = await this.config.getUserInfo(ctx);
-          const { url } = await this.createCheckoutSession(ctx, {
+          const { url: baseUrl } = await this.createCheckoutSession(ctx, {
             productIds: args.productIds,
             userId,
             email,
@@ -380,6 +381,13 @@ export class Polar<
             trialInterval: args.trialInterval as "day" | "week" | "month" | "year" | null | undefined,
             trialIntervalCount: args.trialIntervalCount,
           });
+          let url = baseUrl;
+          if (args.locale) {
+            // Append locale as query param, preserving existing params
+            const u = new URL(url);
+            u.searchParams.set("locale", args.locale);
+            url = u.toString();
+          }
           return { url };
         },
       }),
