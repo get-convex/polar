@@ -7,7 +7,7 @@
     "email": "support@convex.dev",
     "url": "https://github.com/get-convex/polar/issues"
   },
-  "version": "0.8.1",
+  "version": "0.8.2",
   "license": "Apache-2.0",
   "keywords": [
     "convex",
@@ -70,7 +70,7 @@
   },
   "peerDependencies": {
     "@polar-sh/checkout": ">=0.1.10",
-    "@polar-sh/sdk": ">=0.35.4",
+    "@polar-sh/sdk": ">=0.45.0",
     "convex": "^1.29.0",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"
