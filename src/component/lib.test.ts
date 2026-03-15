@@ -5,8 +5,9 @@ import type { TestConvex } from "convex-test";
 import type { Infer } from "convex/values";
 import schema from "./schema.js";
 import { api } from "./_generated/api.js";
-import { convertToDatabaseProduct } from "./util.js";
+import { convertToDatabaseProduct, convertToDatabaseSubscription } from "./util.js";
 import type { Product } from "@polar-sh/sdk/models/components/product.js";
+import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -435,8 +436,6 @@ describe("product price types (SDK → converter → DB round-trip)", () => {
           source: "catalog",
           amountType: "custom",
           isArchived: false,
-          type: "one_time",
-          recurringInterval: null,
           priceCurrency: "usd",
           minimumAmount: 500,
           maximumAmount: 10000,
@@ -493,8 +492,6 @@ describe("product price types (SDK → converter → DB round-trip)", () => {
           source: "catalog",
           amountType: "seat_based",
           isArchived: false,
-          type: "recurring",
-          recurringInterval: "month",
           priceCurrency: "usd",
           seatTiers: {
             tiers: [
@@ -532,8 +529,6 @@ describe("product price types (SDK → converter → DB round-trip)", () => {
           source: "catalog",
           amountType: "metered_unit",
           isArchived: false,
-          type: "recurring",
-          recurringInterval: "month",
           priceCurrency: "usd",
           unitAmount: "0.01",
           capAmount: 5000,
@@ -583,6 +578,500 @@ describe("product price types (SDK → converter → DB round-trip)", () => {
     expect(result?.benefits?.[0].selectable).toBe(true);
     expect(result?.benefits?.[0].deletable).toBe(false);
     expect(result?.benefits?.[0].createdAt).toBe("2025-01-10T08:00:00.000Z");
+  });
+});
+
+// Helper to build a minimal SDK Subscription with Date objects, cast to the full type
+function createSdkSubscription(
+  overrides: Partial<Record<string, unknown>> = {},
+): Subscription {
+  return {
+    id: "sub_sdk_123",
+    customerId: "cust_456",
+    productId: "prod_789",
+    checkoutId: "checkout_abc",
+    createdAt: new Date("2025-01-15T10:00:00.000Z"),
+    modifiedAt: new Date("2025-01-16T12:00:00.000Z"),
+    amount: 1000,
+    currency: "usd",
+    recurringInterval: "month",
+    recurringIntervalCount: 1,
+    status: "active",
+    currentPeriodStart: new Date("2025-01-15T10:00:00.000Z"),
+    currentPeriodEnd: new Date("2025-02-15T10:00:00.000Z"),
+    trialStart: null,
+    trialEnd: null,
+    cancelAtPeriodEnd: false,
+    canceledAt: null,
+    startedAt: new Date("2025-01-15T10:00:00.000Z"),
+    endsAt: null,
+    endedAt: null,
+    discountId: null,
+    seats: null,
+    customerCancellationReason: null,
+    customerCancellationComment: null,
+    metadata: {},
+    customFieldData: undefined,
+    ...overrides,
+  } as unknown as Subscription;
+}
+
+describe("SDK 0.45.0 — new-style prices (type/recurringInterval derived from product)", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("new-style ProductPriceFixed on recurring yearly product derives type:recurring and recurringInterval:year from product", async () => {
+    // SDK 0.45.0: ProductPriceFixed no longer carries type/recurringInterval.
+    // The converter must derive both from the product fields.
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "year",
+      recurringIntervalCount: 1,
+      prices: [
+        {
+          id: "price_fixed_yr",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "fixed",
+          isArchived: false,
+          priceCurrency: "usd",
+          priceAmount: 9900,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("fixed");
+    expect(result?.prices[0].priceAmount).toBe(9900);
+    expect(result?.prices[0].type).toBe("recurring");
+    expect(result?.prices[0].recurringInterval).toBe("year");
+  });
+
+  it("new-style ProductPriceFixed on one-time product derives type:one_time and null recurringInterval", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: false,
+      recurringInterval: null,
+      prices: [
+        {
+          id: "price_fixed_ot",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "fixed",
+          isArchived: false,
+          priceCurrency: "eur",
+          priceAmount: 4999,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].type).toBe("one_time");
+    expect(result?.prices[0].recurringInterval).toBeNull();
+    expect(result?.prices[0].priceCurrency).toBe("eur");
+    expect(result?.prices[0].priceAmount).toBe(4999);
+  });
+
+  it("new-style ProductPriceFree on recurring product (no type/recurringInterval on price object)", async () => {
+    // SDK 0.45.0: ProductPriceFree no longer has type/recurringInterval.
+    // The existing free test uses the legacy form; this tests the new form.
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_free_new",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "free",
+          isArchived: false,
+          priceCurrency: "usd",
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("free");
+    expect(result?.prices[0].type).toBe("recurring");
+    expect(result?.prices[0].recurringInterval).toBe("month");
+  });
+
+  it("new-style ProductPriceCustom with null maximumAmount and null presetAmount", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: false,
+      recurringInterval: null,
+      prices: [
+        {
+          id: "price_custom_null",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "custom",
+          isArchived: false,
+          priceCurrency: "usd",
+          minimumAmount: 0,
+          maximumAmount: null,
+          presetAmount: null,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("custom");
+    expect(result?.prices[0].type).toBe("one_time");
+    expect(result?.prices[0].recurringInterval).toBeNull();
+    expect(result?.prices[0].minimumAmount).toBe(0);
+    expect(result?.prices[0].maximumAmount).toBeNull();
+    expect(result?.prices[0].presetAmount).toBeNull();
+  });
+});
+
+describe("SDK 0.45.0 — legacy recurring prices (LegacyRecurringProductPrice, backwards compat)", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("LegacyRecurringProductPriceFixed with type/recurringInterval/legacy:true round-trips correctly", async () => {
+    // Legacy recurring prices (pre-0.45 format) have type, recurringInterval,
+    // and legacy:true on the price object itself. These still appear in API
+    // responses for older products and must continue to work.
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_legacy_fixed",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "fixed",
+          isArchived: false,
+          type: "recurring",
+          recurringInterval: "month",
+          priceCurrency: "usd",
+          priceAmount: 1500,
+          legacy: true,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("fixed");
+    expect(result?.prices[0].priceAmount).toBe(1500);
+    expect(result?.prices[0].type).toBe("recurring");
+    expect(result?.prices[0].recurringInterval).toBe("month");
+  });
+
+  it("LegacyRecurringProductPriceCustom with type/recurringInterval/legacy:true round-trips correctly", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_legacy_custom",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "custom",
+          isArchived: false,
+          type: "recurring",
+          recurringInterval: "month",
+          priceCurrency: "usd",
+          minimumAmount: 500,
+          maximumAmount: 10000,
+          presetAmount: 1000,
+          legacy: true,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("custom");
+    expect(result?.prices[0].type).toBe("recurring");
+    expect(result?.prices[0].recurringInterval).toBe("month");
+    expect(result?.prices[0].minimumAmount).toBe(500);
+    expect(result?.prices[0].maximumAmount).toBe(10000);
+    expect(result?.prices[0].presetAmount).toBe(1000);
+  });
+
+  it("LegacyRecurringProductPriceFree with type/recurringInterval/legacy:true round-trips correctly", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_legacy_free",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "free",
+          isArchived: false,
+          type: "recurring",
+          recurringInterval: "month",
+          priceCurrency: "usd",
+          legacy: true,
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("free");
+    expect(result?.prices[0].type).toBe("recurring");
+    expect(result?.prices[0].recurringInterval).toBe("month");
+  });
+});
+
+describe("SDK 0.45.0 — ProductPriceSeatTiersOutput with minimumSeats/maximumSeats", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("seat-based price with 3-tier ProductPriceSeatTiersOutput stores all tiers", async () => {
+    // SDK 0.45.0: ProductPriceSeatBased.seatTiers is now ProductPriceSeatTiersOutput
+    // which adds minimumSeats/maximumSeats at the top level. The converter only
+    // stores the tiers array; the derived min/max fields are intentionally dropped.
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_seat_3tier",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "seat_based",
+          isArchived: false,
+          priceCurrency: "usd",
+          seatTiers: {
+            tiers: [
+              { minSeats: 3, maxSeats: 10, pricePerSeat: 2000 },
+              { minSeats: 11, maxSeats: 50, pricePerSeat: 1500 },
+              { minSeats: 51, maxSeats: null, pricePerSeat: 1000 },
+            ],
+            minimumSeats: 3,
+            maximumSeats: null,
+          },
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].seatTiers).toHaveLength(3);
+    expect(result?.prices[0].seatTiers?.[0]).toEqual({ minSeats: 3, maxSeats: 10, pricePerSeat: 2000 });
+    expect(result?.prices[0].seatTiers?.[1]).toEqual({ minSeats: 11, maxSeats: 50, pricePerSeat: 1500 });
+    expect(result?.prices[0].seatTiers?.[2]).toEqual({ minSeats: 51, maxSeats: null, pricePerSeat: 1000 });
+  });
+
+  it("seat-based price with bounded maximumSeats stores the capped tier correctly", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_seat_bounded",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "seat_based",
+          isArchived: false,
+          priceCurrency: "usd",
+          seatTiers: {
+            tiers: [{ minSeats: 1, maxSeats: 25, pricePerSeat: 1200 }],
+            minimumSeats: 1,
+            maximumSeats: 25,
+          },
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].seatTiers).toHaveLength(1);
+    expect(result?.prices[0].seatTiers?.[0].minSeats).toBe(1);
+    expect(result?.prices[0].seatTiers?.[0].maxSeats).toBe(25);
+    expect(result?.prices[0].seatTiers?.[0].pricePerSeat).toBe(1200);
+  });
+
+  it("metered_unit price with null capAmount (unbounded usage) stores capAmount as null", async () => {
+    const sdkProduct = createSdkProduct({
+      isRecurring: true,
+      recurringInterval: "month",
+      prices: [
+        {
+          id: "price_metered_unbounded",
+          productId: "prod_123",
+          createdAt: new Date("2025-01-10T08:00:00.000Z"),
+          modifiedAt: null,
+          source: "catalog",
+          amountType: "metered_unit",
+          isArchived: false,
+          priceCurrency: "usd",
+          unitAmount: "0.001",
+          capAmount: null,
+          meterId: "meter_456",
+          meter: { id: "meter_456", name: "Events" },
+        },
+      ] as Product["prices"],
+    });
+
+    const dbProduct = convertToDatabaseProduct(sdkProduct);
+    await t.mutation(api.lib.createProduct, { product: dbProduct });
+    const result = await t.query(api.lib.getProduct, { id: "prod_123" });
+
+    expect(result?.prices[0].amountType).toBe("metered_unit");
+    expect(result?.prices[0].unitAmount).toBe("0.001");
+    expect(result?.prices[0].capAmount).toBeNull();
+    expect(result?.prices[0].meterId).toBe("meter_456");
+  });
+});
+
+describe("SDK 0.45.0 — convertToDatabaseSubscription date conversion", () => {
+  it("converts all Date objects to ISO strings", () => {
+    const sdk = createSdkSubscription({
+      createdAt: new Date("2025-03-01T00:00:00.000Z"),
+      modifiedAt: new Date("2025-03-02T00:00:00.000Z"),
+      currentPeriodStart: new Date("2025-03-01T00:00:00.000Z"),
+      currentPeriodEnd: new Date("2025-04-01T00:00:00.000Z"),
+      startedAt: new Date("2025-03-01T00:00:00.000Z"),
+      canceledAt: new Date("2025-03-15T00:00:00.000Z"),
+      endsAt: new Date("2025-04-01T00:00:00.000Z"),
+      trialStart: new Date("2025-03-01T00:00:00.000Z"),
+      trialEnd: new Date("2025-03-08T00:00:00.000Z"),
+    });
+
+    const result = convertToDatabaseSubscription(sdk);
+
+    expect(result.createdAt).toBe("2025-03-01T00:00:00.000Z");
+    expect(result.modifiedAt).toBe("2025-03-02T00:00:00.000Z");
+    expect(result.currentPeriodStart).toBe("2025-03-01T00:00:00.000Z");
+    expect(result.currentPeriodEnd).toBe("2025-04-01T00:00:00.000Z");
+    expect(result.startedAt).toBe("2025-03-01T00:00:00.000Z");
+    expect(result.canceledAt).toBe("2025-03-15T00:00:00.000Z");
+    expect(result.endsAt).toBe("2025-04-01T00:00:00.000Z");
+    expect(result.trialStart).toBe("2025-03-01T00:00:00.000Z");
+    expect(result.trialEnd).toBe("2025-03-08T00:00:00.000Z");
+  });
+
+  it("handles null optional date fields", () => {
+    const sdk = createSdkSubscription({
+      modifiedAt: null,
+      currentPeriodEnd: null,
+      trialStart: null,
+      trialEnd: null,
+      canceledAt: null,
+      startedAt: null,
+      endsAt: null,
+      endedAt: null,
+    });
+
+    const result = convertToDatabaseSubscription(sdk);
+
+    expect(result.modifiedAt).toBeNull();
+    expect(result.currentPeriodEnd).toBeNull();
+    expect(result.trialStart).toBeNull();
+    expect(result.trialEnd).toBeNull();
+    expect(result.canceledAt).toBeNull();
+    expect(result.startedAt).toBeNull();
+    expect(result.endsAt).toBeNull();
+    expect(result.endedAt).toBeNull();
+  });
+
+  it("stores recurringIntervalCount on the subscription", () => {
+    const sdk = createSdkSubscription({ recurringIntervalCount: 3 });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.recurringIntervalCount).toBe(3);
+  });
+
+  it("stores endedAt date when subscription has ended", () => {
+    const sdk = createSdkSubscription({
+      endedAt: new Date("2025-05-01T00:00:00.000Z"),
+      status: "canceled",
+    });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.endedAt).toBe("2025-05-01T00:00:00.000Z");
+    expect(result.status).toBe("canceled");
+  });
+
+  it("stores seat count for seat-based subscriptions", () => {
+    const sdk = createSdkSubscription({ seats: 5 });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.seats).toBe(5);
+  });
+
+  it("stores null seats for non-seat subscriptions", () => {
+    const sdk = createSdkSubscription({ seats: null });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.seats).toBeNull();
+  });
+
+  it("stores customerCancellationReason and comment", () => {
+    const sdk = createSdkSubscription({
+      customerCancellationReason: "too_expensive",
+      customerCancellationComment: "pricing was too high",
+    });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.customerCancellationReason).toBe("too_expensive");
+    expect(result.customerCancellationComment).toBe("pricing was too high");
+  });
+
+  it("stores customFieldData with mixed value types", () => {
+    const sdk = createSdkSubscription({
+      customFieldData: {
+        plan_tier: "enterprise",
+        seat_count: 10,
+        is_trial: false,
+      },
+    });
+    const result = convertToDatabaseSubscription(sdk);
+    expect(result.customFieldData).toEqual({
+      plan_tier: "enterprise",
+      seat_count: 10,
+      is_trial: false,
+    });
   });
 });
 
