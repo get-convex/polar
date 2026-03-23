@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0
+
+- feat: update SDK to version 0.45.0 and add support for new subscription types
+  (#50) @candidosales
+- feat: Add locale option for generateCheckoutLink method (#47) @candidosales
+
 ## 0.8.1
 
 - feat: add typesafe webhook event handlers with full type inference for all 30+
