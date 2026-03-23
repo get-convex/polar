@@ -62,10 +62,10 @@ You'll need a Convex App to use the component. Follow any of the
 
 ## Installation
 
-Install the component package and the required Polar SDK peer dependencies:
+Install the component package:
 
 ```ts
-npm install @convex-dev/polar @polar-sh/sdk @polar-sh/checkout
+npm install @convex-dev/polar
 ```
 
 Create a `convex.config.ts` file in your app's `convex/` folder and install the
