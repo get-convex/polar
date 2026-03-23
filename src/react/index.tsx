@@ -47,6 +47,7 @@ export const CheckoutLink = ({
   lazy = false,
   trialInterval,
   trialIntervalCount,
+  locale,
 }: PropsWithChildren<{
   polarApi: Pick<PolarComponentApi, "generateCheckoutLink">;
   productIds: string[];
@@ -54,6 +55,7 @@ export const CheckoutLink = ({
   metadata?: Record<string, string>;
   trialInterval?: "day" | "week" | "month" | "year" | null;
   trialIntervalCount?: number | null;
+  locale?: string;
   className?: string;
   theme?: "dark" | "light";
   embed?: boolean;
@@ -76,8 +78,9 @@ export const CheckoutLink = ({
       successUrl: window.location.href,
       trialInterval,
       trialIntervalCount,
+      locale,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [lazy, productIds, subscriptionId, metadata, embed, generateCheckoutLink, trialInterval, trialIntervalCount]);
+  }, [lazy, productIds, subscriptionId, metadata, embed, generateCheckoutLink, trialInterval, trialIntervalCount, locale]);
 
   const handleClick = lazy
     ? async (e: MouseEvent) => {
@@ -93,6 +96,7 @@ export const CheckoutLink = ({
             successUrl: window.location.href,
             trialInterval,
             trialIntervalCount,
+            locale,
           });
           if (embed) {
             await PolarEmbedCheckout.create(url, { theme });
