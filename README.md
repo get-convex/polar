@@ -449,6 +449,7 @@ Props:
 - `subscriptionId`: (Optional) ID of a subscription to upgrade. It must be on a
   free pricing.
 - `metadata`: (Optional) Metadata for additional information to the checkout
+- `locale`: (Optional) Locale for the checkout page (e.g., `"fr"`, `"de"`)
 
 #### CustomerPortalLink
 
