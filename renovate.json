@@ -3,6 +3,7 @@
   "extends": ["config:best-practices"],
   "schedule": ["* 0-4 * * 1"],
   "timezone": "America/Los_Angeles",
+  "minimumReleaseAge": "30 days",
   "prConcurrentLimit": 1,
   "packageRules": [
     {
