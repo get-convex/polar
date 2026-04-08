@@ -1,14 +1,21 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useEffect, useState, type PropsWithChildren, type MouseEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type PropsWithChildren,
+  type MouseEvent,
+} from "react";
 import { useAction } from "convex/react";
 import type { PolarComponentApi } from "../client/index.js";
 export const CustomerPortalLink = ({
   polarApi,
   children,
   className,
+  returnUrl,
 }: PropsWithChildren<{
   polarApi: Pick<PolarComponentApi, "generateCustomerPortalUrl">;
   className?: string;
+  returnUrl?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
     polarApi.generateCustomerPortalUrl,
@@ -16,12 +23,14 @@ export const CustomerPortalLink = ({
   const [portalUrl, setPortalUrl] = useState<string>();
 
   useEffect(() => {
-    void generateCustomerPortalUrl({}).then((result) => {
+    void generateCustomerPortalUrl({
+      returnUrl: returnUrl ?? window.location.href,
+    }).then((result) => {
       if (result) {
         setPortalUrl(result.url);
       }
     });
-  }, [generateCustomerPortalUrl]);
+  }, [generateCustomerPortalUrl, returnUrl]);
 
   if (!portalUrl) {
     return null;
@@ -80,7 +89,17 @@ export const CheckoutLink = ({
       trialIntervalCount,
       locale,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [lazy, productIds, subscriptionId, metadata, embed, generateCheckoutLink, trialInterval, trialIntervalCount, locale]);
+  }, [
+    lazy,
+    productIds,
+    subscriptionId,
+    metadata,
+    embed,
+    generateCheckoutLink,
+    trialInterval,
+    trialIntervalCount,
+    locale,
+  ]);
 
   const handleClick = lazy
     ? async (e: MouseEvent) => {

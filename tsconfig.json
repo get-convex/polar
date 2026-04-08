@@ -3,7 +3,6 @@
     "allowJs": true,
     "checkJs": true,
     "strict": true,
-
     "target": "ESNext",
     "lib": ["ES2021", "dom", "DOM.Iterable"],
     "jsx": "react-jsx",
@@ -14,7 +13,6 @@
     // But when building we use Bundler & ESNext for ESM
     "module": "Node16",
     "moduleResolution": "NodeNext",
-
     "composite": true,
     "isolatedModules": true,
     "declaration": true,
@@ -23,7 +21,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["./src/**/*"]
 }

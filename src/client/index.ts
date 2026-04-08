@@ -187,7 +187,7 @@ export class Polar<
   }
   async createCustomerPortalSession(
     ctx: GenericActionCtx<DataModel>,
-    { userId }: { userId: string },
+    { userId, returnUrl }: { userId: string, returnUrl?: string | undefined },
   ) {
     const customer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
@@ -200,6 +200,7 @@ export class Polar<
 
     const session = await customerSessionsCreate(this.polar, {
       customerId: customer.id,
+      returnUrl,
     });
     if (!session.ok) {
       throw session.error;
@@ -392,12 +393,15 @@ export class Polar<
         },
       }),
       generateCustomerPortalUrl: actionGeneric({
-        args: {},
+        args: {
+          returnUrl: v.optional(v.string())
+        },
         returns: v.object({ url: v.string() }),
-        handler: async (ctx) => {
+        handler: async (ctx, args) => {
           const { userId } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCustomerPortalSession(ctx, {
             userId,
+            returnUrl: args.returnUrl
           });
           return { url };
         },
