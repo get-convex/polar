@@ -99,6 +99,7 @@ const currentUser = async (ctx: QueryCtx) => {
 
 // Query that returns our pseudo user.
 export const getCurrentUser = query({
+  args: {},
   handler: async (ctx) => {
     return currentUser(ctx);
   },
@@ -106,13 +107,14 @@ export const getCurrentUser = query({
 
 export const authorizeTodo = async (ctx: QueryCtx, todoId: Id<"todos">) => {
   const user = await currentUser(ctx);
-  const todo = await ctx.db.get(todoId);
+  const todo = await ctx.db.get("todos", todoId);
   if (!todo || todo.userId !== user._id) {
     throw new Error("Todo not found");
   }
 };
 
 export const listTodos = query({
+  args: {},
   handler: async (ctx) => {
     const user = await currentUser(ctx);
     return ctx.db
@@ -159,7 +161,7 @@ export const updateTodoText = mutation({
   },
   handler: async (ctx, args) => {
     await authorizeTodo(ctx, args.todoId);
-    await ctx.db.patch(args.todoId, { text: args.text });
+    await ctx.db.patch("todos", args.todoId, { text: args.text });
   },
 });
 
@@ -170,7 +172,7 @@ export const completeTodo = mutation({
   },
   handler: async (ctx, args) => {
     await authorizeTodo(ctx, args.todoId);
-    await ctx.db.patch(args.todoId, { completed: args.completed });
+    await ctx.db.patch("todos", args.todoId, { completed: args.completed });
   },
 });
 
@@ -180,6 +182,6 @@ export const deleteTodo = mutation({
   },
   handler: async (ctx, args) => {
     await authorizeTodo(ctx, args.todoId);
-    await ctx.db.delete(args.todoId);
+    await ctx.db.delete("todos", args.todoId);
   },
 });

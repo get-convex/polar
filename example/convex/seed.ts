@@ -23,6 +23,7 @@ export const TEAM_PLAN_NAME = "Team Plan";
 export const API_PLAN_NAME = "API Plan";
 
 export const insertFakeUser = internalMutation({
+  args: {},
   handler: async (ctx) => {
     const existingUser = await ctx.db.query("users").first();
     if (existingUser) {
@@ -227,6 +228,7 @@ const seed = internalAction({
 
 // Utility action to archive all products so we can re-seed
 export const archiveAll = internalAction({
+  args: {},
   handler: async () => {
     const iter = await productsList(polar, { isArchived: false, limit: 50 });
     for await (const page of iter) {
