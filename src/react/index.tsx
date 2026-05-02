@@ -1,10 +1,5 @@
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import {
-  useEffect,
-  useState,
-  type PropsWithChildren,
-  type MouseEvent,
-} from "react";
+import { useEffect, useState, type PropsWithChildren, type MouseEvent } from "react";
 import { useAction } from "convex/react";
 import type { PolarComponentApi } from "../client/index.js";
 export const CustomerPortalLink = ({
@@ -23,9 +18,7 @@ export const CustomerPortalLink = ({
   const [portalUrl, setPortalUrl] = useState<string>();
 
   useEffect(() => {
-    void generateCustomerPortalUrl({
-      returnUrl: returnUrl ?? window.location.href,
-    }).then((result) => {
+    void generateCustomerPortalUrl({ returnUrl }).then((result) => {
       if (result) {
         setPortalUrl(result.url);
       }
@@ -89,17 +82,7 @@ export const CheckoutLink = ({
       trialIntervalCount,
       locale,
     }).then(({ url }) => setCheckoutLink(url));
-  }, [
-    lazy,
-    productIds,
-    subscriptionId,
-    metadata,
-    embed,
-    generateCheckoutLink,
-    trialInterval,
-    trialIntervalCount,
-    locale,
-  ]);
+  }, [lazy, productIds, subscriptionId, metadata, embed, generateCheckoutLink, trialInterval, trialIntervalCount, locale]);
 
   const handleClick = lazy
     ? async (e: MouseEvent) => {

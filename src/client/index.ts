@@ -187,7 +187,7 @@ export class Polar<
   }
   async createCustomerPortalSession(
     ctx: GenericActionCtx<DataModel>,
-    { userId, returnUrl }: { userId: string, returnUrl?: string | undefined },
+    { userId, returnUrl }: { userId: string; returnUrl?: string },
   ) {
     const customer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
