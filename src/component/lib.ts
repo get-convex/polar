@@ -252,7 +252,7 @@ export const createSubscription = mutation({
     if (existingModifiedAt > incomingModifiedAt) {
       return; // stale webhook, skip
     }
-    await ctx.db.patch(existingSubscription._id, args.subscription);
+    await ctx.db.patch("subscriptions", existingSubscription._id, args.subscription);
   },
 });
 
@@ -276,7 +276,7 @@ export const updateSubscription = mutation({
     if (existingModifiedAt > incomingModifiedAt) {
       return; // stale webhook, skip
     }
-    await ctx.db.patch(existingSubscription._id, args.subscription);
+    await ctx.db.patch("subscriptions", existingSubscription._id, args.subscription);
   },
 });
 
@@ -299,7 +299,7 @@ export const createProduct = mutation({
     if (existingModifiedAt > incomingModifiedAt) {
       return; // stale webhook, skip
     }
-    await ctx.db.patch(existingProduct._id, args.product);
+    await ctx.db.patch("products", existingProduct._id, args.product);
   },
 });
 
@@ -323,7 +323,7 @@ export const updateProduct = mutation({
     if (existingModifiedAt > incomingModifiedAt) {
       return; // stale webhook, skip
     }
-    await ctx.db.patch(existingProduct._id, args.product);
+    await ctx.db.patch("products", existingProduct._id, args.product);
   },
 });
 
@@ -383,7 +383,7 @@ export const updateProducts = mutation({
         .withIndex("id", (q) => q.eq("id", product.id))
         .unique();
       if (existingProduct) {
-        await ctx.db.patch(existingProduct._id, product);
+        await ctx.db.patch("products", existingProduct._id, product);
         return;
       }
       await ctx.db.insert("products", product);
