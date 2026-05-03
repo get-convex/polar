@@ -6,9 +6,11 @@ export const CustomerPortalLink = ({
   polarApi,
   children,
   className,
+  returnUrl,
 }: PropsWithChildren<{
   polarApi: Pick<PolarComponentApi, "generateCustomerPortalUrl">;
   className?: string;
+  returnUrl?: string;
 }>) => {
   const generateCustomerPortalUrl = useAction(
     polarApi.generateCustomerPortalUrl,
@@ -16,12 +18,12 @@ export const CustomerPortalLink = ({
   const [portalUrl, setPortalUrl] = useState<string>();
 
   useEffect(() => {
-    void generateCustomerPortalUrl({}).then((result) => {
+    void generateCustomerPortalUrl({ returnUrl }).then((result) => {
       if (result) {
         setPortalUrl(result.url);
       }
     });
-  }, [generateCustomerPortalUrl]);
+  }, [generateCustomerPortalUrl, returnUrl]);
 
   if (!portalUrl) {
     return null;
