@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1
+
+- feat: Add returnUrl parameter to Customer Portal session (#66) @empz
+
 ## 0.9.0
 
 - feat: update SDK to version 0.45.0 and add support for new subscription types
