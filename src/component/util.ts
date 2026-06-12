@@ -9,18 +9,15 @@ import type { Product } from "@polar-sh/sdk/models/components/product.js";
 import type { Infer } from "convex/values";
 import type schema from "./schema.js";
 
-export type RunQueryCtx = {
-  runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
-};
-export type RunMutationCtx = {
-  runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
-  runMutation: GenericMutationCtx<GenericDataModel>["runMutation"];
-};
-export type RunActionCtx = {
-  runQuery: GenericQueryCtx<GenericDataModel>["runQuery"];
-  runMutation: GenericMutationCtx<GenericDataModel>["runMutation"];
-  runAction: GenericActionCtx<GenericDataModel>["runAction"];
-};
+export type QueryCtx = Pick<GenericQueryCtx<GenericDataModel>, "runQuery">;
+export type MutationCtx = Pick<
+  GenericMutationCtx<GenericDataModel>,
+  "runQuery" | "runMutation"
+>;
+export type ActionCtx = Pick<
+  GenericActionCtx<GenericDataModel>,
+  "runQuery" | "runMutation" | "runAction"
+>;
 
 export const convertToDatabaseSubscription = (
   subscription: Subscription,
