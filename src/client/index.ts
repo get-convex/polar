@@ -29,11 +29,11 @@ import { type Infer, v } from "convex/values";
 import { mapValues } from "remeda";
 import schema from "../component/schema.js";
 import {
-  type RunMutationCtx,
-  type RunQueryCtx,
+  type ActionCtx,
+  type MutationCtx,
+  type QueryCtx,
   convertToDatabaseProduct,
   convertToDatabaseSubscription,
-  type RunActionCtx,
 } from "../component/util.js";
 import type { ComponentApi } from "../component/_generated/component.js";
 
@@ -56,8 +56,8 @@ export type PolarWebhookEvent = ReturnType<typeof validateEvent>;
 /** Typesafe event handler map — keys are event type strings, values are typed handlers. */
 export type WebhookEventHandlers = {
   [K in PolarWebhookEvent["type"]]?: (
-    ctx: RunMutationCtx,
-    event: Extract<PolarWebhookEvent, { type: K }>
+    ctx: MutationCtx | ActionCtx,
+    event: Extract<PolarWebhookEvent, { type: K }>,
   ) => Promise<void>;
 };
 
@@ -75,7 +75,7 @@ export class Polar<
     public component: ComponentApi,
     private config: {
       products?: Products;
-      getUserInfo: (ctx: RunQueryCtx) => Promise<{
+      getUserInfo: (ctx: QueryCtx | MutationCtx | ActionCtx) => Promise<{
         userId: string;
         email: string;
       }>;
@@ -99,10 +99,10 @@ export class Polar<
       server: this.server,
     });
   }
-  getCustomerByUserId(ctx: RunQueryCtx, userId: string) {
+  getCustomerByUserId(ctx: QueryCtx | MutationCtx | ActionCtx, userId: string) {
     return ctx.runQuery(this.component.lib.getCustomerByUserId, { userId });
   }
-  async syncProducts(ctx: RunActionCtx) {
+  async syncProducts(ctx: ActionCtx) {
     await ctx.runAction(this.component.lib.syncProducts, {
       polarAccessToken: this.organizationToken,
       server: this.server,
@@ -110,7 +110,7 @@ export class Polar<
   }
   /** Create a Polar checkout session, optionally with a free trial period. */
   async createCheckoutSession(
-    ctx: RunMutationCtx,
+    ctx: MutationCtx | ActionCtx,
     {
       productIds,
       userId,
@@ -131,7 +131,7 @@ export class Polar<
       metadata?: Record<string, string>;
       trialInterval?: "day" | "week" | "month" | "year" | null;
       trialIntervalCount?: number | null;
-    }
+    },
   ): Promise<Checkout> {
     const dbCustomer = await ctx.runQuery(
       this.component.lib.getCustomerByUserId,
@@ -209,7 +209,7 @@ export class Polar<
     return { url: session.value.customerPortalUrl };
   }
   listProducts(
-    ctx: RunQueryCtx,
+    ctx: QueryCtx | MutationCtx | ActionCtx,
     { includeArchived }: { includeArchived?: boolean } = {},
   ) {
     return ctx.runQuery(this.component.lib.listProducts, {
@@ -217,7 +217,7 @@ export class Polar<
     });
   }
   async getCurrentSubscription(
-    ctx: RunQueryCtx,
+    ctx: QueryCtx | MutationCtx | ActionCtx,
     { userId }: { userId: string },
   ) {
     const subscription = await ctx.runQuery(
@@ -246,14 +246,17 @@ export class Polar<
   }
   /** Return all subscriptions for a user, including ended and expired trials. */
   listAllUserSubscriptions(
-    ctx: RunQueryCtx,
+    ctx: QueryCtx | MutationCtx | ActionCtx,
     { userId }: { userId: string },
   ) {
     return ctx.runQuery(this.component.lib.listAllUserSubscriptions, {
       userId,
     });
   }
-  getProduct(ctx: RunQueryCtx, { productId }: { productId: string }) {
+  getProduct(
+    ctx: QueryCtx | MutationCtx | ActionCtx,
+    { productId }: { productId: string },
+  ) {
     return ctx.runQuery(this.component.lib.getProduct, { id: productId });
   }
   async changeSubscription(
@@ -281,7 +284,7 @@ export class Polar<
   }
   /** Cancel an active or trialing subscription, optionally revoking immediately. */
   async cancelSubscription(
-    ctx: RunActionCtx,
+    ctx: ActionCtx,
     { revokeImmediately }: { revokeImmediately?: boolean } = {},
   ) {
     const { userId } = await this.config.getUserInfo(ctx);
@@ -289,7 +292,10 @@ export class Polar<
     if (!subscription) {
       throw new Error("Subscription not found");
     }
-    if (subscription.status !== "active" && subscription.status !== "trialing") {
+    if (
+      subscription.status !== "active" &&
+      subscription.status !== "trialing"
+    ) {
       throw new Error("Subscription is not active");
     }
     const updatedSubscription = await subscriptionsUpdate(this.polar, {
@@ -379,7 +385,13 @@ export class Polar<
             origin: args.origin,
             successUrl: args.successUrl,
             metadata: args.metadata,
-            trialInterval: args.trialInterval as "day" | "week" | "month" | "year" | null | undefined,
+            trialInterval: args.trialInterval as
+              | "day"
+              | "week"
+              | "month"
+              | "year"
+              | null
+              | undefined,
             trialIntervalCount: args.trialIntervalCount,
           });
           let url = baseUrl;
@@ -394,14 +406,14 @@ export class Polar<
       }),
       generateCustomerPortalUrl: actionGeneric({
         args: {
-          returnUrl: v.optional(v.string())
+          returnUrl: v.optional(v.string()),
         },
         returns: v.object({ url: v.string() }),
         handler: async (ctx, args) => {
           const { userId } = await this.config.getUserInfo(ctx);
           const { url } = await this.createCustomerPortalSession(ctx, {
             userId,
-            returnUrl: args.returnUrl
+            returnUrl: args.returnUrl,
           });
           return { url };
         },
@@ -429,22 +441,22 @@ export class Polar<
       events?: WebhookEventHandlers;
       /** @deprecated Use `events` with `"subscription.created"` key instead. */
       onSubscriptionCreated?: (
-        ctx: RunMutationCtx,
+        ctx: MutationCtx | ActionCtx,
         event: WebhookSubscriptionCreatedPayload,
       ) => Promise<void>;
       /** @deprecated Use `events` with `"subscription.updated"` key instead. */
       onSubscriptionUpdated?: (
-        ctx: RunMutationCtx,
+        ctx: MutationCtx | ActionCtx,
         event: WebhookSubscriptionUpdatedPayload,
       ) => Promise<void>;
       /** @deprecated Use `events` with `"product.created"` key instead. */
       onProductCreated?: (
-        ctx: RunMutationCtx,
+        ctx: MutationCtx | ActionCtx,
         event: WebhookProductCreatedPayload,
       ) => Promise<void>;
       /** @deprecated Use `events` with `"product.updated"` key instead. */
       onProductUpdated?: (
-        ctx: RunMutationCtx,
+        ctx: MutationCtx | ActionCtx,
         event: WebhookProductUpdatedPayload,
       ) => Promise<void>;
     } = {},
@@ -506,7 +518,10 @@ export class Polar<
 
           // User event handling
           const handler = mergedEvents[event.type] as
-            | ((ctx: RunMutationCtx, event: PolarWebhookEvent) => Promise<void>)
+            | ((
+                ctx: MutationCtx | ActionCtx,
+                event: PolarWebhookEvent,
+              ) => Promise<void>)
             | undefined;
           if (handler) {
             await handler(ctx, event);
