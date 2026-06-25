@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+
+- Update ctx types for convex@1.41+
+
 ## 0.9.1
 
 - feat: Add returnUrl parameter to Customer Portal session (#66) @empz
