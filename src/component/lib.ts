@@ -41,6 +41,15 @@ export const insertCustomer = mutation({
   },
 });
 
+type DeleteCustomerResult = {
+  status:
+    | "deleted"
+    | "not_found"
+    | "customer_mismatch"
+    | "shared_customer";
+  deletedSubscriptions: number;
+};
+
 /**
  * Delete a customer's local component data after the parent application has
  * handled any required Polar API cleanup. This mutation does not call Polar.
@@ -48,18 +57,41 @@ export const insertCustomer = mutation({
 export const deleteCustomer = mutation({
   args: {
     userId: v.string(),
+    customerId: v.string(),
   },
   returns: v.object({
-    customerId: v.union(v.string(), v.null()),
+    status: v.union(
+      v.literal("deleted"),
+      v.literal("not_found"),
+      v.literal("customer_mismatch"),
+      v.literal("shared_customer"),
+    ),
     deletedSubscriptions: v.number(),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<DeleteCustomerResult> => {
     const customer = await ctx.db
       .query("customers")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
       .unique();
     if (!customer) {
-      return { customerId: null, deletedSubscriptions: 0 };
+      const otherOwners = await ctx.db
+        .query("customers")
+        .withIndex("id", (q) => q.eq("id", args.customerId))
+        .take(1);
+      return {
+        status: otherOwners.length > 0 ? "shared_customer" : "not_found",
+        deletedSubscriptions: 0,
+      };
+    }
+    if (customer.id !== args.customerId) {
+      return { status: "customer_mismatch", deletedSubscriptions: 0 };
+    }
+    const customerMappings = await ctx.db
+      .query("customers")
+      .withIndex("id", (q) => q.eq("id", args.customerId))
+      .collect();
+    if (customerMappings.some((mapping) => mapping.userId !== args.userId)) {
+      return { status: "shared_customer", deletedSubscriptions: 0 };
     }
     const subscriptions = await ctx.db
       .query("subscriptions")
@@ -70,7 +102,7 @@ export const deleteCustomer = mutation({
     }
     await ctx.db.delete("customers", customer._id);
     return {
-      customerId: customer.id,
+      status: "deleted",
       deletedSubscriptions: subscriptions.length,
     };
   },

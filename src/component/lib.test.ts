@@ -1164,10 +1164,11 @@ describe("deleteCustomer mutation", () => {
 
     const result = await t.mutation(api.lib.deleteCustomer, {
       userId: "user_456",
+      customerId: "cust_123",
     });
 
     expect(result).toEqual({
-      customerId: "cust_123",
+      status: "deleted",
       deletedSubscriptions: 2,
     });
     await expect(
@@ -1194,10 +1195,11 @@ describe("deleteCustomer mutation", () => {
 
     const result = await t.mutation(api.lib.deleteCustomer, {
       userId: "user_missing",
+      customerId: "cust_missing",
     });
 
     expect(result).toEqual({
-      customerId: null,
+      status: "not_found",
       deletedSubscriptions: 0,
     });
     await expect(
@@ -1208,6 +1210,47 @@ describe("deleteCustomer mutation", () => {
         customerId: "cust_other",
       }),
     ).resolves.toHaveLength(1);
+  });
+
+  it("refuses a mismatched customer id", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+
+    await expect(
+      t.mutation(api.lib.deleteCustomer, {
+        userId: "user_456",
+        customerId: "cust_wrong",
+      }),
+    ).resolves.toEqual({
+      status: "customer_mismatch",
+      deletedSubscriptions: 0,
+    });
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_456" }),
+    ).resolves.toMatchObject({ id: "cust_123" });
+  });
+
+  it("refuses a customer id mapped to another user", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(
+      api.lib.insertCustomer,
+      createTestCustomer({ userId: "user_re_registered" }),
+    );
+
+    await expect(
+      t.mutation(api.lib.deleteCustomer, {
+        userId: "user_456",
+        customerId: "cust_123",
+      }),
+    ).resolves.toEqual({
+      status: "shared_customer",
+      deletedSubscriptions: 0,
+    });
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_456" }),
+    ).resolves.toMatchObject({ id: "cust_123" });
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_re_registered" }),
+    ).resolves.toMatchObject({ id: "cust_123" });
   });
 });
 

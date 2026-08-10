@@ -143,8 +143,15 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       deleteCustomer: FunctionReference<
         "mutation",
         "internal",
-        { userId: string },
-        { customerId: string | null; deletedSubscriptions: number },
+        { customerId: string; userId: string },
+        {
+          deletedSubscriptions: number;
+          status:
+            | "customer_mismatch"
+            | "deleted"
+            | "not_found"
+            | "shared_customer";
+        },
         Name
       >;
       getCurrentSubscription: FunctionReference<
