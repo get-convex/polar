@@ -41,6 +41,41 @@ export const insertCustomer = mutation({
   },
 });
 
+/**
+ * Delete a customer's local component data after the parent application has
+ * handled any required Polar API cleanup. This mutation does not call Polar.
+ */
+export const deleteCustomer = mutation({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.object({
+    customerId: v.union(v.string(), v.null()),
+    deletedSubscriptions: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const customer = await ctx.db
+      .query("customers")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!customer) {
+      return { customerId: null, deletedSubscriptions: 0 };
+    }
+    const subscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("customerId", (q) => q.eq("customerId", customer.id))
+      .collect();
+    for (const subscription of subscriptions) {
+      await ctx.db.delete("subscriptions", subscription._id);
+    }
+    await ctx.db.delete("customers", customer._id);
+    return {
+      customerId: customer.id,
+      deletedSubscriptions: subscriptions.length,
+    };
+  },
+});
+
 export const getSubscription = query({
   args: {
     id: v.string(),

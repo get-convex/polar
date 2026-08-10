@@ -1138,6 +1138,79 @@ describe("insertCustomer mutation", () => {
   });
 });
 
+describe("deleteCustomer mutation", () => {
+  let t: TestConvex<typeof schema>;
+
+  beforeEach(() => {
+    t = convexTest(schema, modules);
+  });
+
+  it("deletes the customer and every local subscription", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_active",
+        customerId: "cust_123",
+      }),
+    });
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_ended",
+        customerId: "cust_123",
+        status: "canceled",
+        endedAt: "2025-01-16T12:00:00.000Z",
+      }),
+    });
+
+    const result = await t.mutation(api.lib.deleteCustomer, {
+      userId: "user_456",
+    });
+
+    expect(result).toEqual({
+      customerId: "cust_123",
+      deletedSubscriptions: 2,
+    });
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_456" }),
+    ).resolves.toBeNull();
+    await expect(
+      t.query(api.lib.listCustomerSubscriptions, {
+        customerId: "cust_123",
+      }),
+    ).resolves.toEqual([]);
+  });
+
+  it("does not delete another customer's data", async () => {
+    await t.mutation(
+      api.lib.insertCustomer,
+      createTestCustomer({ id: "cust_other", userId: "user_other" }),
+    );
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({
+        id: "sub_other",
+        customerId: "cust_other",
+      }),
+    });
+
+    const result = await t.mutation(api.lib.deleteCustomer, {
+      userId: "user_missing",
+    });
+
+    expect(result).toEqual({
+      customerId: null,
+      deletedSubscriptions: 0,
+    });
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_other" }),
+    ).resolves.toMatchObject({ id: "cust_other" });
+    await expect(
+      t.query(api.lib.listCustomerSubscriptions, {
+        customerId: "cust_other",
+      }),
+    ).resolves.toHaveLength(1);
+  });
+});
+
 describe("getCurrentSubscription query", () => {
   let t: TestConvex<typeof schema>;
 
