@@ -140,6 +140,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         any,
         Name
       >;
+      deleteCustomer: FunctionReference<
+        "mutation",
+        "internal",
+        { userId: string },
+        { customerId: string | null; deletedSubscriptions: number },
+        Name
+      >;
       getCurrentSubscription: FunctionReference<
         "query",
         "internal",
