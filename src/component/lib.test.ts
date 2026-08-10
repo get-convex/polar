@@ -1181,6 +1181,44 @@ describe("deleteCustomer mutation", () => {
     ).resolves.toEqual([]);
   });
 
+  it("blocks late customer and subscription webhooks with a hashed tombstone", async () => {
+    await t.mutation(api.lib.insertCustomer, createTestCustomer());
+    await t.mutation(api.lib.deleteCustomer, {
+      userId: "user_456",
+      customerId: "cust_123",
+    });
+
+    const lateCustomer = await t.mutation(
+      api.lib.insertCustomer,
+      createTestCustomer(),
+    );
+    await t.mutation(api.lib.createSubscription, {
+      subscription: createTestSubscription({ customerId: "cust_123" }),
+    });
+    await t.mutation(api.lib.updateSubscription, {
+      subscription: createTestSubscription({
+        customerId: "cust_123",
+        status: "canceled",
+      }),
+    });
+
+    expect(lateCustomer).toBeNull();
+    await expect(
+      t.query(api.lib.getCustomerByUserId, { userId: "user_456" }),
+    ).resolves.toBeNull();
+    await expect(
+      t.query(api.lib.listCustomerSubscriptions, {
+        customerId: "cust_123",
+      }),
+    ).resolves.toEqual([]);
+    const tombstones = await t.run(async (ctx) =>
+      ctx.db.query("deletedCustomers").collect(),
+    );
+    expect(tombstones).toHaveLength(1);
+    expect(tombstones[0]?.customerHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(tombstones[0])).not.toContain("cust_123");
+  });
+
   it("does not delete another customer's data", async () => {
     await t.mutation(
       api.lib.insertCustomer,

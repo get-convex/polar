@@ -383,7 +383,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "mutation",
         "internal",
         { id: string; metadata?: Record<string, any>; userId: string },
-        string,
+        string | null,
         Name
       >;
       listAllUserSubscriptions: FunctionReference<
