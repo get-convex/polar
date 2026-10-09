@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import { Polar } from "./index.js";
-import { anyApi, type ApiFromModules } from "convex/server";
-import { components, initConvexTest } from "./setup.test.js";
+import { defineSchema } from "convex/server";
+import { defineTestApp } from "convex-test";
+import componentTest from "../test.js";
 
 const polarSdkMocks = vi.hoisted(() => ({
   checkoutsCreate: vi.fn(),
@@ -16,23 +17,25 @@ vi.mock("@polar-sh/sdk/funcs/customersList.js", () => ({
   customersList: polarSdkMocks.customersList,
 }));
 
-const polar = new Polar(components.polar, {
+const app = defineTestApp({
+  schema: defineSchema({}),
+  components: {
+    polar: componentTest,
+  },
+});
+
+const polar = new Polar(app.components.polar, {
   getUserInfo: async () => ({
     userId: "user_123",
     email: "test@example.com",
   }),
 });
 
-const checkoutApi = polar.api();
-export const generateCheckoutLink = checkoutApi.generateCheckoutLink;
-
-const testApi = (
-  anyApi as unknown as ApiFromModules<{
-    "index.test": {
-      generateCheckoutLink: typeof generateCheckoutLink;
-    };
-  }>
-)["index.test"];
+const { api, createTest } = app.defineModules({
+  checkout: {
+    generateCheckoutLink: polar.api().generateCheckoutLink,
+  },
+});
 
 describe("generateCheckoutLink", () => {
   test("appends locale as query param if provided", async () => {
@@ -45,8 +48,8 @@ describe("generateCheckoutLink", () => {
       value: { url: "https://checkout.polar.sh/session?foo=bar" },
     });
 
-    const t = initConvexTest();
-    const result = await t.action(testApi.generateCheckoutLink, {
+    const t = createTest();
+    const result = await t.action(api.checkout.generateCheckoutLink, {
       productIds: ["prod_1"],
       origin: "https://example.com",
       successUrl: "https://example.com/success",
@@ -67,8 +70,8 @@ describe("generateCheckoutLink", () => {
       value: { url: "https://checkout.polar.sh/session?foo=bar" },
     });
 
-    const t = initConvexTest();
-    const result = await t.action(testApi.generateCheckoutLink, {
+    const t = createTest();
+    const result = await t.action(api.checkout.generateCheckoutLink, {
       productIds: ["prod_1"],
       origin: "https://example.com",
       successUrl: "https://example.com/success",
