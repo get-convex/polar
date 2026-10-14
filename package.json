@@ -97,7 +97,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "convex": "1.46.0",
-    "convex-helpers": "0.1.114",
+    "convex-helpers": "0.1.128",
     "convex-test": "0.0.61",
     "eslint": "9.39.4",
     "eslint-plugin-react": "7.37.5",
@@ -126,7 +126,7 @@
   "module": "./dist/client/index.js",
   "dependencies": {
     "buffer": "^6.0.3",
-    "convex-helpers": "^0.1.63",
+    "convex-helpers": "^0.1.128",
     "remeda": "^2.20.2",
     "standardwebhooks": "^1.0.0"
   }
