@@ -1,10 +1,6 @@
 /// <reference types="vite/client" />
 import type { TestConvex } from "convex-test";
-import {
-  componentsGeneric,
-  type GenericSchema,
-  type SchemaDefinition,
-} from "convex/server";
+import type { GenericSchema, SchemaDefinition } from "convex/server";
 import type { ComponentApi } from "./component/_generated/component.js";
 import schema from "./component/schema.js";
 const modules = import.meta.glob("./component/**/*.ts");
@@ -20,7 +16,6 @@ export function register(
   t: TestConvex<SchemaDefinition<GenericSchema, boolean>>,
   name: string = "polar"
 ) {
-  t.registerComponent(name, schema, modules);
-  return componentsGeneric()[name] as unknown as ComponentApi;
+  return t.registerComponent(name, schema, modules) as unknown as ComponentApi;
 }
 export default { register, schema, modules };
